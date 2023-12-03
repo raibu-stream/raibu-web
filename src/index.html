@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/style.css" />
+    <title>Raibu</title>
+  </head>
+  <body id="top">
+    <button id="go-top-btn">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="12" y1="19" x2="12" y2="5"></line>
+        <polyline points="5 12 12 5 19 12"></polyline>
+      </svg>
+    </button>
+    <div class="nav">
+      <div class="logo">
+        <!-- svg logo from img/logo.svg-->
+        <a href="/">ライブ</a>
+      </div>
+      <div class="menu">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="#About">About</a></li>
+          <li><a href="#Team">Team</a></li>
+          <li>
+            <a href="/userinfo"
+              ><button class="primary-btn" id="login-btn">Login</button></a
+            >
+          </li>
+          <!-- <li>
+            <a href="#">
+              <button class="secondary-btn" id="signup-btn">Sign Up</button>
+            </a>
+          </li> -->
+        </ul>
+      </div>
+    </div>
+    <div class="landing-page">
+      <div class="title-container">
+        <h1 class="title">ライブ</h1>
+        <div class="subtitle">
+          <p>ra</p>
+          <p>i</p>
+          <p>bu</p>
+        </div>
+      </div>
+      <div class="background"></div>
+    </div>
+    <div class="pagecontainer">
+      <section id="About" class="block shadow">
+        <h1>ABOUT</h1>
+        <p id="aboutp" class="subdued paragraph">
+          Raibu was born out of the desire to self-host our own simple
+          low-latency streaming server. It is NOT a CDN, as we currently only
+          have 1 server in Germany, so it's not really a network. Eventually it
+          grew into an idea to provide affordable low-latency streaming to more
+          people.
+        </p>
+      </section>
+      <section id="Team" class="block shadow">
+        <h1>The Team</h1>
+        <div class="grid">
+          <div class="card shadow">
+            <img src="img/ellite.jpg" alt="picture" class="pfp" />
+            <div class="card-content">
+              <p class="name">Ellite</p>
+              <p class="function subdued">Founder</p>
+              <p class="function subdued">Lead Developer</p>
+              <a href="https://twitter.com/ellitedev" target="_blank">
+                <button class="social primary-btn">Twitter</button>
+              </a>
+            </div>
+          </div>
+          <div class="card shadow">
+            <img src="img/shaggi.jpg" alt="picture" class="pfp" />
+            <div class="card-content">
+              <p class="name">Shaggi</p>
+              <p class="function subdued">Alpha Tester</p>
+              <a href="https://twitter.com/EmShaggi" target="_blank">
+                <button class="social primary-btn">Twitter</button>
+              </a>
+            </div>
+          </div>
+          <div class="card shadow">
+            <img src="img/ayabunnie.jpg" alt="picture" class="pfp" />
+            <div class="card-content">
+              <p class="name">ayabunnie</p>
+              <p class="function subdued">Alpha Tester</p>
+              <a href="https://twitter.com/ayabunnie" target="_blank">
+                <button class="social primary-btn">Twitter</button>
+              </a>
+            </div>
+          </div>
+          <div class="card shadow">
+            <picture class="pfp">
+              <source
+                srcset="img/babyjack.webp"
+                media="(prefers-reduced-motion: no-preference)"
+              />
+              <img src="img/babyjack.jpg" alt="picture" class="pfp" />
+            </picture>
+            <div class="card-content">
+              <p class="name">BabyJack</p>
+              <p class="function subdued">Alpha Tester</p>
+              <a href="https://twitter.com/BabyJacku" target="_blank">
+                <button class="social primary-btn">Twitter</button>
+              </a>
+            </div>
+          </div>
+          <div class="card shadow">
+            <img src="img/gurg.jpg" alt="picture" class="pfp" />
+            <div class="card-content">
+              <p class="name">gurg</p>
+              <p class="function subdued">Alpha Tester</p>
+              <a href="https://twitter.com/gurgx3" target="_blank">
+                <button class="social primary-btn">Twitter</button>
+              </a>
+            </div>
+          </div>
+          <div class="card shadow">
+            <img src="img/vixie.jpg" alt="picture" class="pfp" />
+            <div class="card-content">
+              <p class="name">Vixie</p>
+              <p class="function subdued">Alpha Tester</p>
+              <a href="https://twitter.com/VixieTSQ" target="_blank">
+                <button class="social primary-btn">Twitter</button>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <footer>
+      <div class="footer-logo">
+        <a href="/">ライブ</a>
+      </div>
+      <div class="footer-menu">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="#About">About</a></li>
+          <li><a href="#Team">Team</a></li>
+        </ul>
+      </div>
+      <div class="footer-social">
+        <ul>
+          <li>
+            <a href="https://twitter.com/raibustream" target="_blank">
+              Twitter/X
+            </a>
+          </li>
+          <li>
+            <a href="https://bsky.app/profile/raibu.stream" target="_blank">
+              Bluesky
+            </a>
+          </li>
+        </ul>
+      </div>
+    </footer>
+    <script src="js/scroll-top.js"></script>
+    <script src="js/animationdisabler.js"></script>
+    <script src="js/background.js"></script>
+  </body>
+</html>
