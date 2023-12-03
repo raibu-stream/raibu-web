@@ -38,11 +38,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: List file permissions
-        run: ls -l
+      - name: Create copy of workspace
+        run: |
+          cp -r . temp_workspace
       - name: Create tarball
         run: |
-          tar --exclude='./.git' -czvvf raibu-web.tar.gz .
+          tar --exclude='./.git' -czvvf raibu-web.tar.gz temp_workspace
       - name: Upload tarball
         uses: actions/upload-artifact@v2
         with:
