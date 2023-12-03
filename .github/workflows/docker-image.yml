@@ -38,6 +38,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: List file permissions
+        run: ls -l
       - name: Create tarball
         run: |
           tar --warning=no-file-changed --exclude='./.git' -czvf raibu-web.tar.gz .
