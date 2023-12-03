@@ -28,3 +28,22 @@ jobs:
         with:
           push: true
           tags: registry.ellite.dev/raibu-web:latest
+      -
+        name: Create tarball
+        run: tar -czf repo.tar.gz .
+      -
+        name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: repo
+          path: repo.tar.gz
+      -
+        name: Test image
+        run: |
+          docker pull registry.ellite.dev/raibu-web:latest
+          if [ $? -eq 0 ]; then
+            echo "Image exists"
+          else
+            echo "Image does not exist"
+            exit 1
+          fi
