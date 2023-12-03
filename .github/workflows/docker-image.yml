@@ -3,7 +3,7 @@ name: Push to registry
 on:
   push:
     branches:
-      - "production"
+      - "main"
 
 jobs:
   docker:
@@ -42,7 +42,7 @@ jobs:
         run: ls -l
       - name: Create tarball
         run: |
-          tar --warning=no-file-changed --ignore-failed-read --exclude='./.git' -czvf raibu-web.tar.gz .
+          tar --warning=no-file-changed --ignore-failed-read --exclude='./.git' -czvvf raibu-web.tar.gz .
       - name: Upload tarball
         uses: actions/upload-artifact@v2
         with:
