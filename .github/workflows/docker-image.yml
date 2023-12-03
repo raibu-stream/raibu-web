@@ -13,13 +13,6 @@ jobs:
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Create tarball
-        run: tar --exclude=.git -czf repo.tar.gz .
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: repo
-          path: repo.tar.gz
       - name: Login to Registry
         uses: docker/login-action@v3
         with:
@@ -40,3 +33,16 @@ jobs:
             echo "Image does not exist"
             exit 1
           fi
+  tarball:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Create tarball
+        run: |
+          tar -czvf raibu-web.tar.gz .
+      - name: Upload tarball
+        uses: actions/upload-artifact@v2
+        with:
+          name: raibu-web
+          path: raibu-web.tar.gz
