@@ -40,10 +40,11 @@ jobs:
         uses: actions/checkout@v2
       - name: Create copy of workspace
         run: |
-          cp -r . temp_workspace
+          mkdir ../temp_workspace
+          cp -r . ../temp_workspace
       - name: Create tarball
         run: |
-          tar --exclude='./.git' -czvvf raibu-web.tar.gz temp_workspace
+          tar --exclude='./.git' -czvvf raibu-web.tar.gz ../temp_workspace
       - name: Upload tarball
         uses: actions/upload-artifact@v2
         with:
