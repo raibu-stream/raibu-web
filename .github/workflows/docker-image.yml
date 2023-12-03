@@ -36,10 +36,6 @@ jobs:
   tarball:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v2
-        with:
-          node-version: "16"
       - name: Checkout
         uses: actions/checkout@v2
       - name: Create copy of workspace
