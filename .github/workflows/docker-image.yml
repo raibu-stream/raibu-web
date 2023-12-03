@@ -9,13 +9,6 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      - name: Create tarball
-        run: tar --exclude=.git -czf repo.tar.gz .
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: repo
-          path: repo.tar.gz
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -40,3 +33,16 @@ jobs:
             echo "Image does not exist"
             exit 1
           fi
+  tarball:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Create tarball
+        run: |
+          tar -czvf raibu-web.tar.gz .
+      - name: Upload tarball
+        uses: actions/upload-artifact@v2
+        with:
+          name: raibu-web
+          path: raibu-web.tar.gz
