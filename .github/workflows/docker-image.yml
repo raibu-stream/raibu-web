@@ -27,17 +27,20 @@ jobs:
         with:
           push: true
           tags: registry.ellite.dev/raibu-web:${{ steps.get_version.outputs.VERSION }}
-      - name: Get previous tag
-        id: previoustag
-        uses: WyriHaximus/github-action-get-previous-tag@v1
-        with:
-          fallback: '0.0.0'
       - name: Check if tag is the latest
         id: check_latest
-        run: |
-          echo ::set-output name=isLatest::$(if [[ "${{ steps.get_version.outputs.VERSION }}" > "${{ steps.previoustag.outputs.tag }}" ]]; then echo 'true'; else echo 'false'; fi)
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const tags = await github.repos.listTags({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            const versions = tags.data.map(tag => tag.name).sort((a, b) => semver.rcompare(a, b));
+            return versions[0] === '${{ steps.get_version.outputs.VERSION }}';
       - name: Build and push latest
-        if: steps.check_latest.outputs.isLatest == 'true'
+        if: steps.check_latest.outputs.result == 'true'
         uses: docker/build-push-action@v5
         with:
           push: true
