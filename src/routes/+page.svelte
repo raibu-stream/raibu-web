@@ -87,7 +87,7 @@
 			<TeamMember
 				imageUrl={vixie}
 				name="Vixie"
-				titles={['Alpha Tester']}
+				titles={['Developer']}
 				twitterUrl="https://twitter.com/VixieTSQ"
 			/>
 		</div>
