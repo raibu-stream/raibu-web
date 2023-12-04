@@ -2,8 +2,8 @@ name: Push to registry
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - "main"
 
 jobs:
   docker:
@@ -19,44 +19,20 @@ jobs:
           registry: http://registry.ellite.dev/
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Get the version
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
       - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          push: true
-          tags: registry.ellite.dev/raibu-web:${{ steps.get_version.outputs.VERSION }}
-      - name: Check if tag is the latest
-        id: check_latest
-        uses: actions/github-script@v3
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            const tags = await github.repos.listTags({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
-            const versions = tags.data.map(tag => tag.name).sort((a, b) => semver.rcompare(a, b));
-            return versions[0] === '${{ steps.get_version.outputs.VERSION }}';
-      - name: Build and push latest
-        if: steps.check_latest.outputs.result == 'true'
         uses: docker/build-push-action@v5
         with:
           push: true
           tags: registry.ellite.dev/raibu-web:latest
       - name: Test image
         run: |
-          docker pull registry.ellite.dev/raibu-web:${{ steps.get_version.outputs.VERSION }}
+          docker pull registry.ellite.dev/raibu-web:latest
           if [ $? -eq 0 ]; then
             echo "Image exists"
           else
             echo "Image does not exist"
             exit 1
           fi
-      - name: Trigger Portainer Webhook
-        run: |
-          curl -X POST https://portainer.ellite.dev/api/stacks/webhooks/5ba12a57-5c0e-4588-b9f6-3a55e4bc567d
   tarball:
     runs-on: ubuntu-latest
     steps:
