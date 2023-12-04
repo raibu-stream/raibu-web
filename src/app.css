@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        @apply !animate-none !transition-none !transform-none !scroll-auto;
+    }
+}
+
+html {
+    @apply scroll-smooth
+}
+
+button {
+    @apply text-sm px-4 py-2 rounded !min-w-[100px] bg-primary-200 text-neutral-800 border border-primary-200 transition-all ease-in-out duration-200 hover:bg-neutral-800 hover:text-primary-200
+}
+
+button:active {
+    @apply scale-90 transition-transform ease-in-out duration-100;
+}
+
+a {
+    @apply no-underline text-neutral-100 hover:text-primary-400 duration-200 transition-colors ease-in-out;
+}

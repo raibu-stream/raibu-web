@@ -4,8 +4,12 @@ FROM nginx
 # Copy the nginx.conf file to the appropriate location
 COPY nginx.conf /etc/nginx/nginx.conf
 
+# Install dependencies and compile project
+run npm install
+run npm run build
+
 # Copy the files from the src folder to the NGINX document root
-COPY src /usr/share/nginx/html
+COPY build /usr/share/nginx/html
 
 # Add a script that will generate the .htpasswd file
 COPY generate-htpasswd.sh /usr/local/bin/

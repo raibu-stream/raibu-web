@@ -1,0 +1,10 @@
+@font-face {
+    font-family: "Cascadia Code";
+    src: url("./CascadiaCode.woff");
+}
+
+@font-face {
+    font-family: "Cascadia Code";
+    src: url("./CascadiaCodeItalic.woff");
+    font-style: italic;
+}
