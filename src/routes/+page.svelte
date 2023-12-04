@@ -21,7 +21,9 @@
 			<li><a href="#About">About</a></li>
 			<li><a href="#Team">Team</a></li>
 			<li>
-				<a href="/userinfo"><button id="login-btn">Login</button></a>
+				<a data-sveltekit-preload-data="off" href="/userinfo"
+					><button id="login-btn">Login</button></a
+				>
 			</li>
 		</ul>
 	</div>
