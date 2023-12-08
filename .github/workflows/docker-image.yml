@@ -2,8 +2,8 @@ name: Push to registry
 
 on:
   push:
-    branches:
-      - "main"
+    tags:
+      - 'v*'
 
 jobs:
   docker:
@@ -23,16 +23,19 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: registry.ellite.dev/raibu-web:latest
+          tags: registry.ellite.dev/raibu-web:${{ github.ref }}
       - name: Test image
         run: |
-          docker pull registry.ellite.dev/raibu-web:latest
+          docker pull registry.ellite.dev/raibu-web:${{ github.ref }}
           if [ $? -eq 0 ]; then
             echo "Image exists"
           else
             echo "Image does not exist"
             exit 1
           fi
+      - name: Send POST request to Portainer
+        run: |
+          curl -X POST https://portainer.ellite.dev/api/stacks/webhooks/5ba12a57-5c0e-4588-b9f6-3a55e4bc567d
   tarball:
     runs-on: ubuntu-latest
     steps:
