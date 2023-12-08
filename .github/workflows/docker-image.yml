@@ -35,7 +35,7 @@ jobs:
           fi
       - name: Send POST request to Portainer
         run: |
-          curl -X POST https://portainer.ellite.dev/api/stacks/webhooks/5ba12a57-5c0e-4588-b9f6-3a55e4bc567d
+          curl -X POST https://portainer.ellite.dev/api/stacks/webhooks/4670c0f8-1ef1-4d9e-8a81-f4c3a1c70c45
 
   tarball:
     runs-on: ubuntu-latest
