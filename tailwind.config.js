@@ -24,6 +24,12 @@ export default {
 					800: '#2d151d',
 					700: '#3e1f28'
 				}
+			},
+			screens: {
+				'section-width': "800px"
+			},
+			spacing: {
+				"18": '4.5rem'
 			}
 		}
 	},

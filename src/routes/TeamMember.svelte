@@ -11,13 +11,13 @@
 	<img src={imageUrl} alt="" class="pfp h-full object-cover aspect-square" />
 	<div class="content p-4 h-full flex flex-col justify-evenly">
 		<div>
-			<p class="name font-bold text-xl">{name}</p>
+			<p class="name font-bold text-xl !leading-tight">{name}</p>
 			{#each titles as title}
 				<p class="font-normal !text-base text-neutral-200 !leading-tight">{title}</p>
 			{/each}
 		</div>
 		<a class="" href={twitterUrl} target="_blank">
-			<button class="social">Twitter</button>
+			<button class="button">Twitter</button>
 		</a>
 	</div>
 </div>
