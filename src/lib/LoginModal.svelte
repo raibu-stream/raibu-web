@@ -48,7 +48,7 @@
 	<Modal title="Log in" closeModal={() => (loginModalOn = false)}>
 		<form on:submit|preventDefault={handleSubmit}>
 			<div class="flex justify-between items-center">
-				<label class="text-lg" for="email">Email</label>
+				<label for="email">Email</label>
 				<small>
 					New to Raibu?
 					<button type="button" on:click={() => (loginModalOn = false)}>
@@ -57,7 +57,7 @@
 				</small>
 			</div>
 			<input class="w-full mt-2 mb-8 input" type="email" required id="email" bind:value={email} />
-			<label class="text-lg" for="password">Password</label>
+			<label for="password">Password</label>
 			<div class="mt-2 mb-12">
 				<PasswordInput bind:password />
 			</div>

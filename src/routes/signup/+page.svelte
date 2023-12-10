@@ -90,9 +90,9 @@
 <div class="flex sm:absolute inset-0 static text-left">
 	<section class="sm:max-w-[450px] w-full py-8 sm:px-16 px-6">
 		<!-- <p class="mt-8">We are not currently accepting sign ups. Come back later!</p> -->
-		<h2 class="text-2xl font-bold mb-6 border-b border-neutral-300">Sign up</h2>
+		<h2 class="text-2xl font-bold mb-6 border-b border-neutral-300 tracking-tight">Sign up</h2>
 		<form on:submit|preventDefault={handleSubmit} novalidate>
-			<label class="text-lg" for="email">Email</label>
+			<label for="email">Email</label>
 			<div class="mt-2 mb-8">
 				<input
 					class="input w-full"
@@ -107,7 +107,7 @@
 					<FormError class="mt-2">{emailError}</FormError>
 				{/if}
 			</div>
-			<label class="text-lg" for="password">Password</label>
+			<label for="password">Password</label>
 			<div class="mt-2 mb-12">
 				<PasswordInput
 					new

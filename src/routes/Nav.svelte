@@ -1,9 +1,9 @@
 <script>
 	import LoginModal from '$lib/LoginModal.svelte';
 	import { slide } from 'svelte/transition';
-	import { browser } from '$app/environment';
 	import { quintOut } from 'svelte/easing';
-	import { goto } from '$app/navigation';
+	import { invalidateAll, goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 
 	export let loggedIn;
@@ -24,11 +24,15 @@
 	const signOut = () => {
 		return fetch('/user/session', {
 			method: 'delete'
-		}).then(() =>
-			goto('/', {
-				invalidateAll: true
-			})
-		);
+		}).then(async () => {
+			if ($page.path === '/') {
+				await invalidateAll();
+			} else {
+				await goto('/', {
+					invalidateAll: true
+				});
+			}
+		});
 	};
 
 	onMount(() => {
@@ -45,8 +49,10 @@
 <nav
 	class="fixed w-full bg-neutral-800 z-20 sm:static sm:w-auto sm:bg-transparent flex items-center gap-4 h-18 px-6 border-neutral-300 border-b"
 >
-	<h1><a href="/" class="sm:text-4xl text-2xl font-bold">ライブ</a></h1>
-	<ul class="sm:flex items-center gap-6 hidden ml-auto">
+	<h1>
+		<a href="/" class="sm:text-4xl text-2xl font-extrabold tracking-tight">ライブ</a>
+	</h1>
+	<ul class="sm:flex items-center gap-6 hidden ml-auto tracking-tight font-medium">
 		<li><a href="/">Home</a></li>
 		<li><a href="/#About">About</a></li>
 		<li><a href="/#Team">Team</a></li>
@@ -60,7 +66,7 @@
 				</button>
 				{#if userDropdownOpen}
 					<ul
-						class="absolute top-full right-0 z-10 mt-2 rounded bg-secondary-800 border border-neutral-300 p-4 text-left text-sm"
+						class="absolute top-full right-0 z-10 mt-2 rounded bg-secondary-800 border border-neutral-300 p-4 text-left text-sm tracking-wide"
 						transition:slide={{ easing: quintOut, duration: 200 }}
 					>
 						<li class="mb-4 whitespace-nowrap">

@@ -16,7 +16,7 @@
 	>
 		<slot />
 	</span>
-	<button on:click={copy} class="button font-semibold">
+	<button on:click={copy} class="button font-medium">
 		{#if showSuccess}
 			copied!
 		{:else}

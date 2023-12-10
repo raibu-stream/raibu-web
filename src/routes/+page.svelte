@@ -11,11 +11,15 @@
 </script>
 
 <header
-	class="bg-neutral-900 text-center flex justify-center h-[40vh] relative overflow-hidden border-neutral-300 border-b w-full mb-6"
+	class="bg-neutral-900 text-center flex justify-center items-center h-[40vh] relative overflow-hidden border-neutral-300 border-b w-full mb-6"
 >
-	<div class="flex flex-col justify-center items-center z-10 px-6 cursor-default">
-		<h2 class="font-bold text-7xl -mb-5">ライブ</h2>
-		<div class="pr-8 pl-6 italic w-full flex justify-between text-xl font-normal text-neutral-200">
+	<div class="flex flex-col justify-center items-center z-10 px-6 cursor-default group">
+		<h2 class="font-extrabold text-7xl -mb-5 group-hover:text-neutral-200 transition-colors">
+			ライブ
+		</h2>
+		<div
+			class="pr-8 pl-6 italic w-full flex justify-between text-xl font-normal text-neutral-200 group-hover:text-neutral-100 transition-colors"
+		>
 			<span>ra</span>
 			<span class="pl-2">i</span>
 			<span>bu</span>
@@ -24,7 +28,7 @@
 	<Background />
 </header>
 <section id="About" class="section">
-	<h3>ABOUT</h3>
+	<h3 class="uppercase">About</h3>
 	<p class="text-neutral-200 text-xl italic mb-4">
 		Raibu was born out of the desire to self-host our own simple low-latency streaming server. It is
 		NOT a CDN, as we currently only have 1 server in Germany, so it's not really a network.

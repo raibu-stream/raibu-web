@@ -40,7 +40,7 @@ a,
 }
 
 .section h3 {
-	@apply text-4xl font-bold mb-6 border-b border-neutral-300;
+	@apply text-4xl font-bold tracking-tight mb-6 border-b border-neutral-300;
 }
 
 .input {
@@ -54,4 +54,8 @@ input.input,
 
 .input input {
 	@apply !outline-none;
+}
+
+label {
+	@apply tracking-wide font-medium
 }

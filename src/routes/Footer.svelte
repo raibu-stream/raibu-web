@@ -1,7 +1,7 @@
 <footer
-	class="flex justify-center items-center min-h-[4.5rem] sm:py-6 py-4 px-6 border-t border-neutral-300 gap-6"
+	class="flex justify-center items-center min-h-[4.5rem] sm:py-6 py-4 px-6 border-t border-neutral-300 gap-6 tracking-tight"
 >
-	<a href="/" class="text-4xl font-bold shrink-0">ライブ</a>
+	<a href="/" class="text-4xl font-extrabold shrink-0">ライブ</a>
 	<ul
 		class="flex items-center justify-center gap-6 flex-wrap gap-y-2 no-underline transition-colors duration-300 ease-in-out"
 	>

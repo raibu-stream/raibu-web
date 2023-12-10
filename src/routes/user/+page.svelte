@@ -7,10 +7,10 @@
 </script>
 
 <div class="my-8">
-	<h2 class="text-2xl font-bold">
+	<h2 class="text-2xl font-bold tracking-tight">
 		<span class="text-primary-200">ellitedev's</span> RTMP private server
 	</h2>
-	<small>Logged in as {data.email}</small>
+	<small class="italic tracking-wide">Logged in as {data.email}</small>
 </div>
 
 <section class="section">
@@ -108,5 +108,8 @@
 	}
 	.value {
 		@apply text-primary-200 rounded bg-secondary-700 px-1 select-all;
+	}
+	code {
+		@apply font-sans;
 	}
 </style>
