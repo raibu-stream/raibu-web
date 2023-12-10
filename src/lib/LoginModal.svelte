@@ -20,7 +20,7 @@
 			body: JSON.stringify({ email, password })
 		}).then(async (res) => {
 			if (res.statusText === 'OK') {
-				goto('/user/session');
+				goto('/user');
 				loginModalOn = false;
 			} else {
 				let data;
