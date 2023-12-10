@@ -13,12 +13,10 @@
 	<span
 		bind:this={value}
 		class="text-primary-200 rounded bg-secondary-700 px-1 select-all break-words overflow-hidden"
-		><slot /></span
 	>
-	<button
-		on:click={copy}
-		class="button text-primary-200 border border-primary-200 rounded bg-secondary-800 px-1 transition-all duration-200 ease-in-out active:scale-95 hover:bg-primary-200 hover:text-secondary-800 font-semibold"
-	>
+		<slot />
+	</span>
+	<button on:click={copy} class="button font-semibold">
 		{#if showSuccess}
 			copied!
 		{:else}

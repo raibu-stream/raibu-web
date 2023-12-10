@@ -10,11 +10,11 @@
 	import shaggi from '$lib/img/shaggi.jpg';
 </script>
 
-<div
+<header
 	class="bg-neutral-900 text-center flex justify-center h-[40vh] relative overflow-hidden border-neutral-300 border-b w-full mb-6"
 >
 	<div class="flex flex-col justify-center items-center z-10 px-6 cursor-default">
-		<h1 class="font-bold text-7xl -mb-5">ライブ</h1>
+		<h2 class="font-bold text-7xl -mb-5">ライブ</h2>
 		<div class="pr-8 pl-6 italic w-full flex justify-between text-xl font-normal text-neutral-200">
 			<span>ra</span>
 			<span class="pl-2">i</span>
@@ -22,9 +22,9 @@
 		</div>
 	</div>
 	<Background />
-</div>
+</header>
 <section id="About" class="section">
-	<h2>ABOUT</h2>
+	<h3>ABOUT</h3>
 	<p class="text-neutral-200 text-xl italic mb-4">
 		Raibu was born out of the desire to self-host our own simple low-latency streaming server. It is
 		NOT a CDN, as we currently only have 1 server in Germany, so it's not really a network.
@@ -32,7 +32,7 @@
 	</p>
 </section>
 <section id="Team" class="section">
-	<h2>The Team</h2>
+	<h3>The Team</h3>
 	<div class="grid gap-6 grid-cols-[repeat(auto-fit,minmax(300px,1fr))]">
 		<TeamMember
 			imageUrl={ellite}

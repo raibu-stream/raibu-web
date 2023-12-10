@@ -1,5 +1,5 @@
-# Use a Node.js image to build the Svelte application
-FROM node:16 AS build
+# Use a Node.js image to build and run the Svelte application
+FROM node:18 AS build-and-run
 
 WORKDIR /app
 
@@ -15,20 +15,14 @@ COPY . .
 # Build the app
 RUN npm run build
 
+# Run the app
+CMD ["node", "./build"]
+
 # Use the official NGINX image as the base
-FROM nginx
+FROM nginx as deploy
 
 # Copy the nginx.conf file to the appropriate location
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copy the built application from the first stage
-COPY --from=build /app/build /usr/share/nginx/html
-
-# Add a script that will generate the .htpasswd file
-COPY generate-htpasswd.sh /usr/local/bin/
-
-# Make the script executable
-RUN chmod +x /usr/local/bin/generate-htpasswd.sh
-
 # Run the script when the container starts
-CMD ["/bin/sh", "-c", "/usr/local/bin/generate-htpasswd.sh && nginx -g 'daemon off;'"]
+ENTRYPOINT ["nginx", "-g", "daemon off;"]

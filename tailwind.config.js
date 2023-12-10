@@ -8,28 +8,32 @@ export default {
 			fontFamily: {
 				sans: ['"Cascadia Code"', ...defaultTheme.fontFamily.sans]
 			},
-			colors: {
-				neutral: {
-					100: '#fcf8f9',
-					200: 'rgba(255, 255, 255, 0.5)',
-					300: 'rgba(255, 255, 255, 0.1)',
-					800: '#16080d',
-					900: 'rgb(8, 1, 2)'
-				},
-				primary: {
-					200: '#f495b5',
-					400: '#af4b6c'
-				},
-				secondary: {
-					800: '#2d151d',
-					700: '#3e1f28'
-				}
-			},
 			screens: {
-				'section-width': "800px"
+				'section-width': '800px'
 			},
 			spacing: {
-				"18": '4.5rem'
+				18: '4.5rem',
+				'section-width': '800px'
+			},
+			backgroundImage: {
+				'raibu-pattern': "url('$lib/img/raibu-pattern.svg')",
+			}
+		},
+		colors: {
+			neutral: {
+				100: '#fcf8f9',
+				200: 'rgba(255, 255, 255, 0.5)',
+				300: 'rgba(255, 255, 255, 0.1)',
+				800: '#16080d',
+				900: 'rgb(8, 1, 2)'
+			},
+			primary: {
+				200: '#f495b5',
+				400: '#af4b6c'
+			},
+			secondary: {
+				800: '#2d151d',
+				700: '#3e1f28'
 			}
 		}
 	},

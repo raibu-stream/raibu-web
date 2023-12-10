@@ -1,15 +1,21 @@
 <script>
 	import CopyMe from './CopyMe.svelte';
 
+	export let data;
+
 	let streamkey = 'foobar';
 </script>
 
-<h1 class="text-2xl my-8 font-bold">
-	<span class="text-primary-200">ellitedev's</span> RTMP private server
-</h1>
+<div class="my-8">
+	<h2 class="text-2xl font-bold">
+		<span class="text-primary-200">ellitedev's</span> RTMP private server
+	</h2>
+	<small>Logged in as {data.email}</small>
+</div>
+
 <section class="section">
 	<small>Server location: <em>Nuremberg - Germany</em></small>
-	<h2 class="mt-1">Pushing To The Server</h2>
+	<h3 class="mt-1">Pushing To The Server</h3>
 	<p class="mb-4">
 		In OBS, Set <span class="value">Stream > Service</span> to <span class="value">Custom...</span>
 	</p>
@@ -41,7 +47,7 @@
 </section>
 
 <section class="section">
-	<h2>Reading From Server</h2>
+	<h3>Reading From Server</h3>
 	<ul class="flex flex-col gap-1 mb-2">
 		<li>
 			<code>
@@ -69,7 +75,7 @@
 	</p>
 </section>
 <section class="section">
-	<h2>House Rules</h2>
+	<h3>House Rules</h3>
 	<p>
 		Please exercise common curtesy and stream with reasonable settings, <strong>
 			bandwidth isn't free!!

@@ -3,7 +3,7 @@
 >
 	<a href="/" class="text-4xl font-bold shrink-0">ライブ</a>
 	<ul
-		class="flex items-center justify-center gap-6 flex-wrap gap-y-2 no-underline transition-colors duration-300 ease-in-out text-neutral-100"
+		class="flex items-center justify-center gap-6 flex-wrap gap-y-2 no-underline transition-colors duration-300 ease-in-out"
 	>
 		<li><a href="/">Home</a></li>
 		<li><a href="#About">About</a></li>
