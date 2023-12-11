@@ -87,9 +87,7 @@
 	};
 </script>
 
-<div
-	class="flex sm:absolute sm:w-auto inset-0 static w-full text-left justify-center sm:justify-normal"
->
+<div class="flex grow static w-full text-left justify-center sm:justify-normal">
 	<section class="sm:max-w-[450px] max-w-[400px] w-full py-8 sm:px-16 px-6">
 		<!-- <p class="mt-8">We are not currently accepting sign ups. Come back later!</p> -->
 		<h2 class="text-2xl font-bold mb-6 border-b border-neutral-300 tracking-tight">Sign up</h2>
@@ -139,7 +137,7 @@
 		</form>
 	</section>
 	<div
-		class="min-h-full object-cover hidden sm:block bg-raibu-pattern bg-repeat bg-[length:1750px] grow"
+		class="object-cover hidden sm:block bg-raibu-pattern bg-repeat bg-[length:1750px] grow"
 		alt=""
 	/>
 </div>

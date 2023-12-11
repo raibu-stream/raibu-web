@@ -1,5 +1,5 @@
 <footer
-	class="flex justify-center items-center min-h-[4.5rem] sm:py-6 py-4 px-6 border-t border-neutral-300 gap-6 tracking-tight"
+	class="flex justify-center items-center sm:py-6 py-4 px-6 border-t border-neutral-300 gap-6 tracking-tight"
 >
 	<a href="/" class="text-4xl font-extrabold shrink-0">ライブ</a>
 	<ul

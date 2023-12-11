@@ -12,13 +12,16 @@
 </script>
 
 <div class="bg-neutral-800 text-neutral-100 text-center overflow-x-clip">
-	{#key data.loggedIn}
-		<Nav loggedIn={data.loggedIn} email={data.email} />
-	{/key}
-	<LoginModal {loginModalOn} />
-	<main class="w-full h-full min-h-screen flex flex-col items-center relative pt-18 sm:pt-0">
-		<slot />
-		<ScrollTop></ScrollTop>
-	</main>
+	<div class="min-h-screen flex flex-col overflow-visible">
+		{#key data.loggedIn}
+			<Nav loggedIn={data.loggedIn} email={data.email} />
+		{/key}
+		<LoginModal {loginModalOn} />
+		<main class="w-full grow relative sm:pt-0 flex flex-col items-center overflow-visible">
+			<slot />
+			<ScrollTop></ScrollTop>
+		</main>
+	</div>
+
 	<Footer />
 </div>
