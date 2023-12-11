@@ -87,8 +87,10 @@
 	};
 </script>
 
-<div class="flex sm:absolute inset-0 static text-left">
-	<section class="sm:max-w-[450px] w-full py-8 sm:px-16 px-6">
+<div
+	class="flex sm:absolute sm:w-auto inset-0 static w-full text-left justify-center sm:justify-normal"
+>
+	<section class="sm:max-w-[450px] max-w-[400px] w-full py-8 sm:px-16 px-6">
 		<!-- <p class="mt-8">We are not currently accepting sign ups. Come back later!</p> -->
 		<h2 class="text-2xl font-bold mb-6 border-b border-neutral-300 tracking-tight">Sign up</h2>
 		<form on:submit|preventDefault={handleSubmit} novalidate>
@@ -119,7 +121,7 @@
 					<FormError class="mt-2">{passwordError}</FormError>
 				{/if}
 			</div>
-			<button class="button w-full !text-lg">
+			<button class="button w-full !text-lg max-w-md">
 				{#await request}
 					<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>
 					<span class="sr-only">Loading</span>

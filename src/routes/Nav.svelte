@@ -127,7 +127,7 @@
 			<hr class="border-neutral-300 mb-4" class:mb-6={!loggedIn} />
 			{#if loggedIn}
 				<li><button class="link" on:click={signOut}>Sign out</button></li>
-				<li class="mt-auto">
+				<li class="mt-auto fixed bottom-3">
 					<button class="w-full" on:click={toggleMobileNavOpen}>
 						<a href="/user" class="flex items-center gap-2 mb-1">
 							<i class="fa-solid fa-circle-user text-3xl"></i>
