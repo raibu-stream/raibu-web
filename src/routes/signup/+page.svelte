@@ -125,7 +125,7 @@
 					<span class="sr-only">Loading</span>
 					<!-- eslint-disable-next-line no-unused-vars -->
 				{:then _}
-					Log in
+					Sign up
 				{/await}
 			</button>
 			{#if apiError !== undefined}
@@ -136,8 +136,5 @@
 			{/if}
 		</form>
 	</section>
-	<div
-		class="object-cover hidden sm:block bg-raibu-pattern bg-repeat bg-[length:1750px] grow"
-		alt=""
-	/>
+	<div class="object-cover hidden sm:block bg-raibu-pattern bg-repeat bg-[length:1750px] grow" />
 </div>

@@ -1,10 +1,8 @@
 <script>
 	import LoginModal from '$lib/LoginModal.svelte';
 	import { slide } from 'svelte/transition';
-	import { quintOut } from 'svelte/easing';
-	import { invalidateAll, goto } from '$app/navigation';
-	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
+	import { invalidateAll } from '$app/navigation';
+	import Dropdown from '$lib/Dropdown.svelte';
 
 	export let loggedIn;
 	export let email;
@@ -25,25 +23,9 @@
 		return fetch('/user/session', {
 			method: 'delete'
 		}).then(async () => {
-			if ($page.path === '/') {
-				await invalidateAll();
-			} else {
-				await goto('/', {
-					invalidateAll: true
-				});
-			}
+			await invalidateAll();
 		});
 	};
-
-	onMount(() => {
-		if (userDropdown !== undefined) {
-			document.body.addEventListener('click', (event) => {
-				if (!userDropdown.contains(event.target)) {
-					userDropdownOpen = false;
-				}
-			});
-		}
-	});
 </script>
 
 <nav
@@ -65,18 +47,15 @@
 					<i class="fa-solid fa-circle-user text-4xl"></i>
 				</button>
 				{#if userDropdownOpen}
-					<ul
-						class="absolute top-full right-0 z-10 mt-2 rounded bg-secondary-800 border border-neutral-300 p-4 text-left text-sm tracking-wide"
-						transition:slide={{ easing: quintOut, duration: 200 }}
-					>
-						<li class="mb-4 whitespace-nowrap">
+					<Dropdown inside={userDropdown} close={() => (userDropdownOpen = false)}>
+						<li>
 							<a href="/user" on:click={() => (userDropdownOpen = false)}>
 								<i class="fa-solid fa-gauge" aria-hidden="true"></i>
 								Dashboard
 							</a>
 						</li>
-						<hr class="mb-4 text-neutral-300" />
-						<li class="whitespace-nowrap">
+						<hr class="text-neutral-300" />
+						<li>
 							<button
 								class="link"
 								on:click={async () => {
@@ -88,7 +67,7 @@
 								Sign out
 							</button>
 						</li>
-					</ul>
+					</Dropdown>
 				{/if}
 			</li>
 		{:else}

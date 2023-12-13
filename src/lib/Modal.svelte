@@ -6,8 +6,9 @@
 	export let title;
 </script>
 
-<div
+<aside
 	class="inset-0 fixed flex justify-center items-center z-40"
+	role="dialog"
 	transition:fade={{ duration: 200, easing: quintOut }}
 >
 	<section class="section !scale-100 !shadow-lg !max-w-[450px] z-10">
@@ -27,7 +28,7 @@
 		class="inset-0 fixed w-full bg-primary-400 bg-opacity-25 cursor-default"
 		on:click={closeModal}
 	/>
-</div>
+</aside>
 
 <svelte:head>
 	<style>

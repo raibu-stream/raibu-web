@@ -109,7 +109,4 @@
 	.value {
 		@apply text-primary-200 rounded bg-secondary-700 px-1 select-all;
 	}
-	code {
-		@apply font-sans;
-	}
 </style>

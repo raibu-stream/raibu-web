@@ -1,6 +1,5 @@
-const defaultTheme = require('tailwindcss/defaultTheme');
+import defaultTheme from 'tailwindcss/defaultTheme';
 
-/** @type {import('tailwindcss').Config} */
 export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
 	theme: {
@@ -22,10 +21,10 @@ export default {
 		colors: {
 			neutral: {
 				100: '#fcf8f9',
-				200: 'rgba(255, 255, 255, 0.5)',
-				300: 'rgba(255, 255, 255, 0.1)',
+				200: '#ffffff80',
+				300: '#ffffff1a',
 				800: '#16080d',
-				900: 'rgb(8, 1, 2)'
+				900: '#080102'
 			},
 			primary: {
 				200: '#f495b5',
