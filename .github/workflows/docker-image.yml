@@ -26,7 +26,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: registry.ellite.dev/raibu-web:${{ steps.prep.outputs.tag }}
+          tags: registry.ellite.dev/raibu-web:${{ steps.prep.outputs.tag }}, registry.ellite.dev/raibu-web:latest
           build-args: |
             RAIBU_DB_HOST=${{ secrets.RAIBU_DB_HOST }}
             RAIBU_DB_USER='${{ secrets.RAIBU_DB_USER }}'
