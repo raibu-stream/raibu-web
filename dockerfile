@@ -1,13 +1,10 @@
-# Use the most recent stable version of Node as the base image
-FROM node:latest AS build
+# Use a smaller base image
+FROM node:alpine AS build
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files to the working directory
 COPY package*.json ./
 
-# Declare the arguments
 ARG RAIBU_DB_HOST
 ARG RAIBU_DB_USER
 ARG RAIBU_DB_PASSWORD
@@ -16,13 +13,10 @@ ARG RAIBU_EMAIL_PORT
 ARG RAIBU_EMAIL_USER
 ARG RAIBU_EMAIL_PASS
 
-# Install the dependencies
 RUN npm install
 
-# Copy the rest of the application code to the working directory
 COPY . .
 
-# Set the environment variables for the database connection
 ENV RAIBU_DB_HOST=${RAIBU_DB_HOST}
 ENV RAIBU_DB_USER=${RAIBU_DB_USER}
 ENV RAIBU_DB_PASSWORD=${RAIBU_DB_PASSWORD}
@@ -31,21 +25,19 @@ ENV RAIBU_EMAIL_PORT=${RAIBU_EMAIL_PORT}
 ENV RAIBU_EMAIL_USER=${RAIBU_EMAIL_USER}
 ENV RAIBU_EMAIL_PASS=${RAIBU_EMAIL_PASS}
 
-# Build the SvelteKit website
 RUN npm run build
 
-# Use Node.js to serve the built app
-FROM node:latest AS production
+# Start a new, final image to keep it clean
+FROM node:alpine AS production
 
-# Set the working directory
 WORKDIR /app
 
-# Copy the built app from the build stage
+# Copy only the built app and the package files
 COPY --from=build /app/build .
-
-# Install production dependencies
 COPY package*.json ./
-RUN npm install --only=production
+
+# Install only production dependencies
+RUN npm install --production
 
 # Expose the port the app runs on
 EXPOSE 3000
