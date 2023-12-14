@@ -23,7 +23,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: registry.ellite.dev/raibu-web:${{ github.ref }}
+          tags: registry.ellite.dev/raibu-web:${{ github.ref }}.replace('refs/tags/', '').replace('/', '-')
           build-args: |
             --build-arg RAIBU_DB_HOST=${{ secrets.RAIBU_DB_HOST }}
             --build-arg RAIBU_DB_USER=${{ secrets.RAIBU_DB_USER }}
