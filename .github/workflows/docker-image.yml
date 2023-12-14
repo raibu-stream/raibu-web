@@ -37,7 +37,7 @@ jobs:
             RAIBU_EMAIL_PASS='${{ secrets.RAIBU_EMAIL_PASS }}'
       - name: Test image
         run: |
-          docker pull registry.ellite.dev/raibu-web:${{ github.ref }}
+          docker pull registry.ellite.dev/raibu-web:${{ steps.prep.outputs.tag }}
           if [ $? -eq 0 ]; then
             echo "Image exists"
           else
