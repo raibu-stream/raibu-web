@@ -28,13 +28,13 @@ jobs:
           push: true
           tags: registry.ellite.dev/raibu-web:${{ steps.prep.outputs.tag }}
           build-args: |
-            --build-arg RAIBU_DB_HOST=${{ secrets.RAIBU_DB_HOST }}
-            --build-arg RAIBU_DB_USER='${{ secrets.RAIBU_DB_USER }}'
-            --build-arg RAIBU_DB_PASSWORD='${{ secrets.RAIBU_DB_PASSWORD }}'
-            --build-arg RAIBU_EMAIL_HOST=${{ secrets.RAIBU_EMAIL_HOST }}
-            --build-arg RAIBU_EMAIL_PORT=${{ secrets.RAIBU_EMAIL_PORT }}
-            --build-arg RAIBU_EMAIL_USER='${{ secrets.RAIBU_EMAIL_USER }}'
-            --build-arg RAIBU_EMAIL_PASS='${{ secrets.RAIBU_EMAIL_PASS }}'
+            RAIBU_DB_HOST=${{ secrets.RAIBU_DB_HOST }}
+            RAIBU_DB_USER='${{ secrets.RAIBU_DB_USER }}'
+            RAIBU_DB_PASSWORD='${{ secrets.RAIBU_DB_PASSWORD }}'
+            RAIBU_EMAIL_HOST=${{ secrets.RAIBU_EMAIL_HOST }}
+            RAIBU_EMAIL_PORT=${{ secrets.RAIBU_EMAIL_PORT }}
+            RAIBU_EMAIL_USER='${{ secrets.RAIBU_EMAIL_USER }}'
+            RAIBU_EMAIL_PASS='${{ secrets.RAIBU_EMAIL_PASS }}'
       - name: Test image
         run: |
           docker pull registry.ellite.dev/raibu-web:${{ github.ref }}
