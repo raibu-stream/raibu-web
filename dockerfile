@@ -1,28 +1,46 @@
-# Use a Node.js image to build and run the Svelte application
-FROM node:18 AS build-and-run
+# Use a smaller base image
+FROM node:alpine AS build
 
 WORKDIR /app
 
-# Copy package.json and package-lock.json (if available)
 COPY package*.json ./
 
-# Install dependencies
+ARG RAIBU_DB_HOST
+ARG RAIBU_DB_USER
+ARG RAIBU_DB_PASSWORD
+ARG RAIBU_EMAIL_HOST
+ARG RAIBU_EMAIL_PORT
+ARG RAIBU_EMAIL_USER
+ARG RAIBU_EMAIL_PASS
+
 RUN npm install
 
-# Copy the rest of your app's source code
 COPY . .
 
-# Build the app
+ENV RAIBU_DB_HOST=${RAIBU_DB_HOST}
+ENV RAIBU_DB_USER=${RAIBU_DB_USER}
+ENV RAIBU_DB_PASSWORD=${RAIBU_DB_PASSWORD}
+ENV RAIBU_EMAIL_HOST=${RAIBU_EMAIL_HOST}
+ENV RAIBU_EMAIL_PORT=${RAIBU_EMAIL_PORT}
+ENV RAIBU_EMAIL_USER=${RAIBU_EMAIL_USER}
+ENV RAIBU_EMAIL_PASS=${RAIBU_EMAIL_PASS}
+
 RUN npm run build
 
-# Run the app
-CMD ["node", "./build"]
+# Start a new, final image to keep it clean
+FROM node:alpine AS production
 
-# Use the official NGINX image as the base
-FROM nginx as deploy
+WORKDIR /app
 
-# Copy the nginx.conf file to the appropriate location
-COPY nginx.conf /etc/nginx/nginx.conf
+# Copy only the built app and the package files
+COPY --from=build /app/build .
+COPY package*.json ./
 
-# Run the script when the container starts
-ENTRYPOINT ["nginx", "-g", "daemon off;"]
+# Install only production dependencies
+RUN npm install --production
+
+# Expose the port the app runs on
+EXPOSE 3000
+
+# Start the server
+CMD ["node", "index.js"]
