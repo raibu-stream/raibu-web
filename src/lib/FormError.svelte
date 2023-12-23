@@ -7,7 +7,7 @@
 </script>
 
 <div
-	class="text-primary-200 text-sm {extraClasses}"
+	class="text-sm text-primary-200 {extraClasses}"
 	transition:slide={{ duration: 300, easing: quintOut }}
 >
 	<i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>

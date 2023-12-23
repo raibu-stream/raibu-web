@@ -19,7 +19,7 @@
 	<p class="mb-4">
 		In OBS, Set <span class="value">Stream > Service</span> to <span class="value">Custom...</span>
 	</p>
-	<ul class="flex flex-col gap-1 mb-2">
+	<ul class="mb-2 flex flex-col gap-1">
 		<li>
 			<code>
 				<CopyMe>rtmp://ellite.dev/</CopyMe>
@@ -48,7 +48,7 @@
 
 <section class="section">
 	<h3>Reading From Server</h3>
-	<ul class="flex flex-col gap-1 mb-2">
+	<ul class="mb-2 flex flex-col gap-1">
 		<li>
 			<code>
 				<CopyMe>rtmp://ellite.dev:1935/<em>{streamkey}</em></CopyMe>
@@ -107,6 +107,6 @@
 		@apply mb-2;
 	}
 	.value {
-		@apply text-primary-200 rounded bg-secondary-700 px-1 select-all;
+		@apply select-all rounded bg-secondary-700 px-1 text-primary-200;
 	}
 </style>

@@ -29,19 +29,19 @@
 </script>
 
 <nav
-	class="fixed w-full bg-neutral-800 z-20 sm:static sm:w-auto sm:bg-transparent flex items-center gap-4 h-18 px-6 border-neutral-300 border-b"
+	class="sm:bg-transparent fixed z-20 flex h-18 w-full items-center gap-4 border-b border-neutral-300 bg-neutral-800 px-6 sm:static sm:w-auto"
 >
 	<h1>
-		<a href="/" class="sm:text-4xl text-2xl font-extrabold tracking-tight">ライブ</a>
+		<a href="/" class="text-2xl font-extrabold tracking-tight sm:text-4xl">ライブ</a>
 	</h1>
-	<ul class="sm:flex items-center gap-6 hidden ml-auto tracking-tight font-medium">
+	<ul class="ml-auto hidden items-center gap-6 font-medium tracking-tight sm:flex">
 		<li><a href="/">Home</a></li>
 		<li><a href="/#About">About</a></li>
 		<li><a href="/#Team">Team</a></li>
 		{#if loggedIn}
-			<li class="mt-auto relative" bind:this={userDropdown}>
+			<li class="relative mt-auto" bind:this={userDropdown}>
 				<button
-					class="flex items-center gap-3 link"
+					class="link flex items-center gap-3"
 					on:click={() => (userDropdownOpen = !userDropdownOpen)}
 				>
 					<i class="fa-solid fa-circle-user text-4xl"></i>
@@ -77,7 +77,7 @@
 			</li>
 		{/if}
 	</ul>
-	<button on:click={toggleMobileNavOpen} class="sm:hidden text-xl ml-auto">
+	<button on:click={toggleMobileNavOpen} class="ml-auto text-xl sm:hidden">
 		<i class="fa-solid fa-bars text-neutral-100" aria-hidden="true"></i>
 		<span class="sr-only">Open menu</span>
 	</button>
@@ -85,9 +85,9 @@
 	{#if mobileNavOpen}
 		<ul
 			transition:slide={{ duration: 300, axis: 'x' }}
-			class="fixed top-0 pt-18 right-0 h-screen w-[75%] bg-neutral-800 -z-10 p-4 text-left text-lg font-semibold flex flex-col"
+			class="fixed right-0 top-0 -z-10 flex h-screen w-[75%] flex-col bg-neutral-800 p-4 pt-18 text-left text-lg font-semibold"
 		>
-			<div class="mb-6 border-t border-neutral-300 -mx-4 relative -top-px"></div>
+			<div class="relative -top-px -mx-4 mb-6 border-t border-neutral-300"></div>
 			<li class="pb-4">
 				<button on:click={toggleMobileNavOpen}>
 					<a href="/">Home</a>
@@ -103,15 +103,15 @@
 					<a href="/#Team">Team</a>
 				</button>
 			</li>
-			<hr class="border-neutral-300 mb-4" class:mb-6={!loggedIn} />
+			<hr class="mb-4 border-neutral-300" class:mb-6={!loggedIn} />
 			{#if loggedIn}
 				<li><button class="link" on:click={signOut}>Sign out</button></li>
-				<li class="mt-auto fixed bottom-3">
+				<li class="fixed bottom-3 mt-auto">
 					<button class="w-full" on:click={toggleMobileNavOpen}>
-						<a href="/user" class="flex items-center gap-2 mb-1">
+						<a href="/user" class="mb-1 flex items-center gap-2">
 							<i class="fa-solid fa-circle-user text-3xl"></i>
 							<span
-								class="text-sm text-neutral-200 italic text-ellipsis whitespace-nowrap overflow-hidden min-w-0"
+								class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-sm italic text-neutral-200"
 							>
 								{email}
 							</span>

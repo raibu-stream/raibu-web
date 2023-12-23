@@ -6,14 +6,14 @@
 </script>
 
 <div
-	class="bg-secondary-700 border border-neutral-300 h-[9.5rem] rounded flex items-center shadow overflow-hidden hover:scale-105 transition-transform ease-out"
+	class="flex h-[9.5rem] items-center overflow-hidden rounded border border-neutral-300 bg-secondary-700 shadow transition-transform ease-out hover:scale-105"
 >
-	<img src={imageUrl} alt="" class="pfp h-full object-cover aspect-square" />
-	<div class="p-4 h-full flex flex-col justify-evenly items-start">
+	<img src={imageUrl} alt="" class="pfp aspect-square h-full object-cover" />
+	<div class="flex h-full flex-col items-start justify-evenly p-4">
 		<div>
-			<h4 class="name font-bold text-xl !leading-tight">{name}</h4>
+			<h4 class="name text-xl font-bold !leading-tight">{name}</h4>
 			{#each titles as title}
-				<p class="font-medium !text-base text-neutral-200 !leading-tight tracking-tight">{title}</p>
+				<p class="!text-base font-medium !leading-tight tracking-tight text-neutral-200">{title}</p>
 			{/each}
 		</div>
 		<a class="button text-center" href={twitterUrl} target="_blank"> Twitter </a>

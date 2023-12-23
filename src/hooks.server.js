@@ -1,4 +1,4 @@
-import { auth } from '$lib/auth';
+import { auth } from '$lib/models/db';
 
 export const handle = async ({ event, resolve }) => {
 	event.locals.auth = auth.handleRequest(event);

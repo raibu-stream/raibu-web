@@ -8,7 +8,7 @@
 	export { isNew as new };
 </script>
 
-<div class="w-full input flex gap-4">
+<div class="input flex w-full gap-4">
 	<input
 		class="grow"
 		type={!hidePassword || hiderIsHovered ? 'text' : 'password'}

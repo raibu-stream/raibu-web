@@ -15,7 +15,7 @@ export default {
 				'section-width': '800px'
 			},
 			backgroundImage: {
-				'raibu-pattern': "url('$lib/img/raibu-pattern.svg')",
+				'raibu-pattern': "url('$lib/img/raibu-pattern.svg')"
 			}
 		},
 		colors: {

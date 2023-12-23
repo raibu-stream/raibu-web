@@ -1,0 +1,52 @@
+<script>
+	let inputs = [];
+
+	const onKeydown = (event, index) => {
+		if (event.keyCode === 8 && event.target.value === '' && index > 0) {
+			inputs[index - 1].focus();
+		}
+	};
+
+	const onInput = (event, index) => {
+		if (event.data === null || event.data === '') {
+			event.target.value = '';
+			value = inputs.map((input) => input.value).join('');
+			isFull = inputs.every((input) => input.value !== '');
+			return;
+		}
+		const [first, ...rest] = event.data;
+		event.target.value = first;
+
+		if (first !== undefined && first !== null && index !== 5) {
+			inputs[index + 1].focus();
+			rest.slice(0, 5 - index).forEach((character, restIndex, rest) => {
+				inputs[index + 1 + restIndex].value = character;
+				if (rest.length - 1 === restIndex) {
+					let focusIndex = index + 2 + restIndex >= 5 ? 5 : index + 2 + restIndex;
+					inputs[focusIndex].focus();
+				}
+			});
+		}
+
+		value = inputs.map((input) => input.value).join('');
+		isFull = inputs.every((input) => input.value !== '');
+	};
+
+	export let value = '';
+	export let isFull = false;
+</script>
+
+<fieldset class="flex gap-3 text-xl sm:gap-4 sm:text-2xl">
+	<!-- eslint-disable-next-line no-unused-vars -->
+	{#each { length: 6 } as _, index}
+		<input
+			name="code"
+			class="h-12 w-10 rounded-xl bg-secondary-800 text-center sm:h-16 sm:w-14"
+			type="text"
+			inputmode="numeric"
+			bind:this={inputs[index]}
+			on:input={(event) => onInput(event, index)}
+			on:keydown={(event) => onKeydown(event, index)}
+		/>
+	{/each}
+</fieldset>

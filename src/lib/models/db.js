@@ -4,13 +4,15 @@ import { dev } from '$app/environment';
 import { mongoose } from '@lucia-auth/adapter-mongoose';
 import mongodb from 'mongoose';
 import { RAIBU_DB_HOST, RAIBU_DB_USER, RAIBU_DB_PASSWORD } from '$env/static/private';
+import EmailVerificationCodeSchema from './emailVerificationCode';
+import TooManyLoginsTokenSchema from './tooManyLoginsToken';
+import passwordResetTokenSchema from './passwordResetToken';
 
 // Mongoose state somehow carries-over over reloads and it causes errors when we remake the models.
 // So we clear out the models and connection to prevent this.
 mongodb.models = [];
-mongodb.connection.close();
 
-const User = mongodb.model(
+export const User = mongodb.model(
 	'User',
 	new mongodb.Schema(
 		{
@@ -24,12 +26,21 @@ const User = mongodb.model(
 				unique: true,
 				trim: true,
 				lowercase: true
+			},
+			isEmailVerified: {
+				type: Boolean,
+				required: true
+			},
+			isLocked: {
+				type: Boolean,
+				required: true,
+				default: false
 			}
 		},
 		{ _id: false }
 	)
 );
-const Key = mongodb.model(
+export const Key = mongodb.model(
 	'Key',
 	new mongodb.Schema(
 		{
@@ -46,7 +57,7 @@ const Key = mongodb.model(
 		{ _id: false }
 	)
 );
-const Session = mongodb.model(
+export const Session = mongodb.model(
 	'Session',
 	new mongodb.Schema(
 		{
@@ -71,6 +82,24 @@ const Session = mongodb.model(
 	)
 );
 
+export const EmailVerificationCode = mongodb.model(
+	'EmailVerificationCode',
+	EmailVerificationCodeSchema
+);
+export const TooManyLoginsToken = mongodb.model('TooManyLoginsToken', TooManyLoginsTokenSchema);
+export const passwordResetToken = mongodb.model('passwordResetToken', passwordResetTokenSchema);
+
+mongodb
+	.connect(`mongodb://${RAIBU_DB_HOST}/${dev ? 'raibu_test' : 'raibu'}`, {
+		auth: {
+			password: RAIBU_DB_PASSWORD,
+			username: RAIBU_DB_USER
+		},
+		authSource: 'admin',
+		tls: true
+	})
+	.then(() => console.log('Connected to DB'));
+
 export const auth = lucia({
 	env: dev ? 'DEV' : 'PROD',
 	middleware: sveltekit(),
@@ -81,16 +110,17 @@ export const auth = lucia({
 	}),
 	getUserAttributes: (data) => {
 		return {
-			email: data.email
+			email: data.email,
+			isEmailVerified: data.isEmailVerified,
+			isLocked: data.isLocked
 		};
 	}
 });
 
-mongodb.connect(`mongodb://${RAIBU_DB_HOST}/${dev ? 'raibu_test' : 'raibu'}`, {
-	auth: {
-		password: RAIBU_DB_PASSWORD,
-		username: RAIBU_DB_USER
-	},
-	authSource: 'admin',
-	tls: true
-});
+// if (dev) {
+// 	Promise.all([
+// 		User.deleteMany(undefined),
+// 		Key.deleteMany(undefined),
+// 		Session.deleteMany(undefined)
+// 	]).then(() => console.log('DB Cleared'));
+// }

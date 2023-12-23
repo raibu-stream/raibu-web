@@ -11,14 +11,14 @@
 </script>
 
 <header
-	class="bg-neutral-900 text-center flex justify-center items-center h-[40vh] relative overflow-hidden border-neutral-300 border-b w-full mb-6"
+	class="relative mb-6 flex h-[40vh] w-full items-center justify-center overflow-hidden border-b border-neutral-300 bg-neutral-900 text-center"
 >
-	<div class="flex flex-col justify-center items-center z-10 px-6 cursor-default group">
-		<h2 class="font-extrabold text-7xl -mb-5 group-hover:text-neutral-200 transition-colors">
+	<div class="group z-10 flex cursor-default flex-col items-center justify-center px-6">
+		<h2 class="-mb-5 text-7xl font-extrabold transition-colors group-hover:text-neutral-200">
 			ライブ
 		</h2>
 		<div
-			class="pr-8 pl-6 italic w-full flex justify-between text-xl font-normal text-neutral-200 group-hover:text-neutral-100 transition-colors"
+			class="flex w-full justify-between pl-6 pr-8 text-xl font-normal italic text-neutral-200 transition-colors group-hover:text-neutral-100"
 		>
 			<span>ra</span>
 			<span class="pl-2">i</span>
@@ -29,7 +29,7 @@
 </header>
 <section id="About" class="section">
 	<h3 class="uppercase">About</h3>
-	<p class="text-neutral-200 text-xl italic mb-4">
+	<p class="mb-4 text-xl italic text-neutral-200">
 		Raibu was born out of the desire to self-host our own simple low-latency streaming server. It is
 		NOT a CDN, as we currently only have 1 server in Germany, so it's not really a network.
 		Eventually it grew into an idea to provide affordable low-latency streaming to more people.
@@ -37,7 +37,7 @@
 </section>
 <section id="Team" class="section">
 	<h3>The Team</h3>
-	<div class="grid gap-6 grid-cols-[repeat(auto-fit,minmax(300px,1fr))]">
+	<div class="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6">
 		<TeamMember
 			imageUrl={ellite}
 			name="Ellite"

@@ -54,9 +54,9 @@
 </script>
 
 <div
-	class="star bg-neutral-100 shadow-neutral-100 absolute w-[2px] h-[2px] rounded-full {speed ===
+	class="star absolute h-[2px] w-[2px] rounded-full bg-neutral-100 shadow-neutral-100 {speed ===
 	'fast'
-		? 'after:absolute after:w-[100px] after:h-[2px] after:top-0 after:left-0 after:bg-gradient-to-r after:from-neutral-100 after:to-transparent after:origin-right'
+		? 'after:to-transparent after:absolute after:left-0 after:top-0 after:h-[2px] after:w-[100px] after:origin-right after:bg-gradient-to-r after:from-neutral-100'
 		: ''}"
 	style:top="{top}%"
 	style:left="{left}%"

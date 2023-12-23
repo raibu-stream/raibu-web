@@ -24,7 +24,7 @@
 </script>
 
 <ul
-	class="absolute top-full right-0 z-10 mt-2 rounded bg-secondary-800 border border-neutral-300 p-4 text-left text-sm tracking-wide flex flex-col gap-4 whitespace-nowrap"
+	class="absolute right-0 top-full z-10 mt-2 flex flex-col gap-4 whitespace-nowrap rounded border border-neutral-300 bg-secondary-800 p-4 text-left text-sm tracking-wide"
 	transition:slide={{ easing: quintOut, duration: 200 }}
 	bind:this={dropdown}
 >

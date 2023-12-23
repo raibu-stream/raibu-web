@@ -7,25 +7,25 @@
 </script>
 
 <aside
-	class="inset-0 fixed flex justify-center items-center z-40"
+	class="fixed inset-0 z-40 flex items-center justify-center"
 	role="dialog"
 	transition:fade={{ duration: 200, easing: quintOut }}
 >
-	<section class="section !scale-100 !shadow-lg !max-w-[450px] z-10">
-		<div class="flex justify-between items-start">
-			<h3 class="!text-3xl font-semibold">{title}</h3>
+	<section class="section z-10 !max-w-[450px] !scale-100 !shadow-lg">
+		<div class="flex items-start justify-between">
+			<h3 class="!text-2xl font-medium">{title}</h3>
 			<button
 				on:click={closeModal}
-				class="text-2xl hover:text-primary-200 transition-colors duration-100"
+				class="text-2xl transition-colors duration-100 hover:text-primary-200"
 			>
 				<i class="fa-solid fa-xmark" title="Close" aria-hidden="true"></i>
 				<span class="sr-only">Close</span>
 			</button>
 		</div>
-		<slot />
+		<div class="grid grid-cols-1 grid-rows-1 overflow-hidden"><slot /></div>
 	</section>
 	<button
-		class="inset-0 fixed w-full bg-primary-400 bg-opacity-25 cursor-default"
+		class="fixed inset-0 w-full cursor-default bg-primary-400 bg-opacity-25"
 		on:click={closeModal}
 	/>
 </aside>

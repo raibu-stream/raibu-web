@@ -14,7 +14,7 @@
 <svelte:window bind:innerWidth bind:innerHeight />
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="background absolute inset-0 overflow-hidden z-0" on:mousemove={mouseMove}>
+<div class="background absolute inset-0 z-0 overflow-hidden" on:mousemove={mouseMove}>
 	<!-- eslint-disable-next-line no-unused-vars -->
 	{#each { length: 100 } as _}
 		<Star mouseTarget={target} />

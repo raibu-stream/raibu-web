@@ -1,18 +1,17 @@
 <script>
-	import resolveConfig from 'tailwindcss/resolveConfig';
-	import tailwindConfig from './tailwind.config.js';
+	import theme from '$lib/tailwindConfig.js';
 
 	export let previewText;
 
-	const fullConfig = resolveConfig(tailwindConfig);
-	const colorNeutral = fullConfig.theme.colors.neutral;
+	const colorNeutral = theme.colors.neutral;
 </script>
 
 <mjml lang="en-US" dir="ltr">
 	<mj-head>
 		<mj-preview>
 			<span id="__raibu-preview-text">
-				{previewText + ' &#8199;&#847;'.repeat(200) + '&shy;'.repeat(200) + '&nbsp;'}
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html previewText + ' &#8199;&#847;'.repeat(200) + '&shy;'.repeat(200) + '&nbsp;'}
 			</span>
 		</mj-preview>
 		<mj-title>Raibu</mj-title>
@@ -29,9 +28,9 @@
 					</mj-text>
 				</mj-column>
 			</mj-section>
-			<mj-section padding="12px" full-width="">
-				<slot />
-			</mj-section>
+
+			<slot />
+
 			<mj-section border-top="1px solid {colorNeutral[300]}" full-width="" text-align="center">
 				<mj-column vertical-align="middle">
 					<mj-text align="center" line-height="20px">

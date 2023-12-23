@@ -1,44 +1,46 @@
-import { error } from "@sveltejs/kit";
-import { auth } from "$lib/auth";
-import { LuciaError } from "lucia";
+import { error } from '@sveltejs/kit';
+import { auth } from '$lib/models/db';
+import { LuciaError } from 'lucia';
 import { dev } from '$app/environment';
-
-const emailRegex = /[^@\s]+@[^@\s]+/;
+import { EmailVerificationCode } from '$lib/models/db.js';
+import emailRegex from '$lib/emailRegex';
+import commonPasswordList from 'fxa-common-password-list';
 
 export const POST = async ({ request, locals }) => {
 	if (!dev) {
-		throw error(400, "We are currently not accepting registrations. Come back later")
+		throw error(400, 'We are currently not accepting registrations. Come back later');
 	}
 
-	const formData = await request.json()
+	const formData = await request.json();
 	const email = formData.email;
 	const password = formData.password;
 
-	if (typeof email !== "string" ||
-		email === '' ||
-		!emailRegex.test(email) ||
-		email.length > 255) {
+	if (typeof email !== 'string' || email === '' || !emailRegex.test(email) || email.length > 255) {
 		throw error(400, {
-			message: "Invalid email"
+			message: 'Invalid email'
 		});
 	}
-	if (typeof password !== "string" ||
+	if (
+		typeof password !== 'string' ||
 		password.length < 8 ||
-		password.length > 255) {
+		password.length > 255 ||
+		commonPasswordList.test(password)
+	) {
 		throw error(400, {
-			message: "Invalid password"
+			message: 'Invalid password'
 		});
 	}
 
 	try {
 		const user = await auth.createUser({
 			key: {
-				providerId: "email",
+				providerId: 'email',
 				providerUserId: email.toLowerCase(),
 				password
 			},
 			attributes: {
-				email
+				email,
+				isEmailVerified: false
 			}
 		});
 
@@ -47,18 +49,20 @@ export const POST = async ({ request, locals }) => {
 			attributes: {}
 		});
 		locals.auth.setSession(session);
+
+		EmailVerificationCode.new(user);
 	} catch (e) {
 		if (e instanceof LuciaError && e.message === 'AUTH_DUPLICATE_KEY_ID') {
 			throw error(400, {
-				message: "This email is already being used"
+				message: 'This email is already being used'
 			});
 		}
 		throw error(500, {
-			message: "An unknown error occurred"
+			message: 'An unknown error occurred'
 		});
 	}
 
 	return new Response(JSON.stringify(undefined), {
 		status: 200
 	});
-}
+};

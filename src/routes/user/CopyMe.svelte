@@ -9,10 +9,10 @@
 	};
 </script>
 
-<div class="flex items-center gap-y-1 gap-x-4 flex-wrap">
+<div class="flex flex-wrap items-center gap-x-4 gap-y-1">
 	<span
 		bind:this={value}
-		class="text-primary-200 rounded bg-secondary-700 px-1 select-all break-words overflow-hidden"
+		class="select-all overflow-hidden break-words rounded bg-secondary-700 px-1 text-primary-200"
 	>
 		<slot />
 	</span>

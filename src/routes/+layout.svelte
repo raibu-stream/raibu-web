@@ -6,18 +6,21 @@
 	import Footer from './Footer.svelte';
 	import '@fortawesome/fontawesome-free/css/all.min.css';
 	import LoginModal from '../lib/LoginModal.svelte';
+	import ResetPasswordModal from '../lib/resetPasswordModal.svelte';
 
 	export let data;
-	const loginModalOn = data.loginModal === 'true';
+	let resetPasswordModalOn = data.resetPasswordToken !== null;
+	let loginModalOn = data.loginModal === 'true';
 </script>
 
-<div class="bg-neutral-800 text-neutral-100 text-center overflow-x-clip">
-	<div class="min-h-screen flex flex-col overflow-visible">
+<div class="overflow-x-clip bg-neutral-800 text-center text-neutral-100">
+	<div class="flex min-h-screen flex-col overflow-visible">
 		{#key data.loggedIn}
 			<Nav loggedIn={data.loggedIn} email={data.email} />
 		{/key}
+		<ResetPasswordModal {resetPasswordModalOn} resetPasswordToken={data.resetPasswordToken} />
 		<LoginModal {loginModalOn} />
-		<main class="w-full grow relative sm:pt-0 flex flex-col items-center overflow-visible">
+		<main class="relative flex w-full grow flex-col items-center overflow-visible sm:pt-0">
 			<slot />
 			<ScrollTop></ScrollTop>
 		</main>

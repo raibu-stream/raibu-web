@@ -4,9 +4,10 @@
 	import FormError from '$lib/FormError.svelte';
 	import { dev } from '$app/environment';
 	import { goto } from '$app/navigation';
+	import emailRegex from '$lib/emailRegex';
+	import handleApiResponse from '$lib/handleApiResponse';
 
 	const MINIMUM_PASSWORD_LENGTH = 8;
-	const emailRegex = /[^@\s]+@[^@\s]+/;
 
 	let request;
 	let apiError;
@@ -63,37 +64,19 @@
 			method: 'post',
 			body: JSON.stringify({ email, password })
 		}).then(async (res) => {
-			if (res.statusText === 'OK') {
-				goto('/user');
-			} else {
-				let data;
-				try {
-					data = await res.json();
-				} catch {
-					console.error(res);
-					apiError = 'An unknown error occurred';
-					return;
-				}
-
-				if (data.message !== undefined) {
-					apiError = data.message;
-				} else {
-					console.warn(res);
-					console.warn(data);
-					apiError = 'An unknown error occurred';
-				}
-			}
+			apiError = await handleApiResponse(res, () => {
+				goto('/user/email-verification?pre-sent=true');
+			});
 		});
 	};
 </script>
 
-<div class="flex grow static w-full text-left justify-center sm:justify-normal">
-	<section class="sm:max-w-[450px] max-w-[400px] w-full py-8 sm:px-16 px-6">
-		<!-- <p class="mt-8">We are not currently accepting sign ups. Come back later!</p> -->
-		<h2 class="text-2xl font-bold mb-6 border-b border-neutral-300 tracking-tight">Sign up</h2>
+<div class="static flex w-full grow justify-center text-left sm:justify-normal">
+	<section class="w-full max-w-[400px] px-6 py-8 sm:max-w-[450px] sm:px-16">
+		<h2 class="mb-6 border-b border-neutral-300 text-2xl font-bold tracking-tight">Sign up</h2>
 		<form on:submit|preventDefault={handleSubmit} novalidate>
 			<label for="email">Email</label>
-			<div class="mt-2 mb-8">
+			<div class="mb-8 mt-2">
 				<input
 					class="input w-full"
 					type="email"
@@ -108,7 +91,7 @@
 				{/if}
 			</div>
 			<label for="password">Password</label>
-			<div class="mt-2 mb-12">
+			<div class="mb-12 mt-2">
 				<PasswordInput
 					new
 					bind:password
@@ -119,7 +102,7 @@
 					<FormError class="mt-2">{passwordError}</FormError>
 				{/if}
 			</div>
-			<button class="button w-full !text-lg max-w-md">
+			<button class="button w-full max-w-md !text-lg">
 				{#await request}
 					<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>
 					<span class="sr-only">Loading</span>
@@ -136,5 +119,5 @@
 			{/if}
 		</form>
 	</section>
-	<div class="object-cover hidden sm:block bg-raibu-pattern bg-repeat bg-[length:1750px] grow" />
+	<div class="hidden grow bg-raibu-pattern bg-[length:1750px] bg-repeat object-cover sm:block" />
 </div>
