@@ -28,6 +28,7 @@ jobs:
           push: true
           tags: registry.ellite.dev/raibu-web:${{ steps.prep.outputs.tag }}, registry.ellite.dev/raibu-web:latest
           build-args: |
+            PUBLIC_RAIBU_URL==${{ secrets.PUBLIC_RAIBU_URL }}
             RAIBU_DB_HOST=${{ secrets.RAIBU_DB_HOST }}
             RAIBU_DB_USER=${{ secrets.RAIBU_DB_USER }}
             RAIBU_DB_PASSWORD=${{ secrets.RAIBU_DB_PASSWORD }}
