@@ -1,4 +1,6 @@
-export const load = async ({ locals, url }) => {
+import type { LayoutServerLoad } from './$types';
+
+export const load: LayoutServerLoad = async ({ locals, url }) => {
 	const login = url.searchParams.get('login');
 	const resetPasswordToken = url.searchParams.get('password-reset');
 	const session = await locals.auth.validate();

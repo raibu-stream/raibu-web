@@ -1,7 +1,8 @@
-<script>
+<script lang="ts">
 	import CopyMe from './CopyMe.svelte';
+	import type { PageServerData } from './$types';
 
-	export let data;
+	export let data: PageServerData;
 
 	let streamkey = 'foobar';
 </script>

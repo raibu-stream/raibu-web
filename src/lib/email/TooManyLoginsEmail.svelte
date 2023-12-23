@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
 	import EmailLayout from '$lib/email/EmailLayout.svelte';
 	import theme from '$lib/tailwindConfig.js';
 
-	export let unlockLink;
+	export let unlockLink: string;
 
 	const colorNeutral = theme.colors.neutral;
 	const colorPrimary = theme.colors.primary;

@@ -1,8 +1,8 @@
-<script>
-	export let imageUrl;
-	export let name;
-	export let titles;
-	export let twitterUrl;
+<script lang="ts">
+	export let imageUrl: string;
+	export let name: string;
+	export let titles: string[];
+	export let twitterUrl: string;
 </script>
 
 <div

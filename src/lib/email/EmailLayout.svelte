@@ -1,7 +1,7 @@
-<script>
+<script lang="ts">
 	import theme from '$lib/tailwindConfig.js';
 
-	export let previewText;
+	export let previewText: string;
 
 	const colorNeutral = theme.colors.neutral;
 </script>

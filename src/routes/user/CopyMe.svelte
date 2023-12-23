@@ -1,6 +1,6 @@
-<script>
-	let value;
-	let showSuccess;
+<script lang="ts">
+	let value: HTMLElement;
+	let showSuccess: boolean;
 
 	let copy = () => {
 		navigator.clipboard.writeText(value.innerText);

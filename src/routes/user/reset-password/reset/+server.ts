@@ -1,9 +1,10 @@
 import { error } from '@sveltejs/kit';
-import { passwordResetToken } from '$lib/models/db.js';
+import { passwordResetToken } from '$lib/models/db';
 import { auth } from '$lib/models/db';
 import commonPasswordList from 'fxa-common-password-list';
+import type { RequestEvent, RequestHandler } from './$types';
 
-export const POST = async ({ request }) => {
+export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 	const formData = await request.json();
 	const newPassword = formData.newPassword;
 	const token = formData.token;

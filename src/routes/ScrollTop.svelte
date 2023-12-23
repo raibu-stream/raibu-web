@@ -1,7 +1,7 @@
-<script>
+<script lang="ts">
 	import { fade } from 'svelte/transition';
 
-	let pxScrollFromTop;
+	let pxScrollFromTop: number;
 
 	let scrollToTop = () => {
 		pxScrollFromTop = 0;

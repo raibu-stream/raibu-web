@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { goto } from '$app/navigation';
 	import { fly } from 'svelte/transition';
 	import FormError from './FormError.svelte';
@@ -7,19 +7,19 @@
 	import emailRegex from '$lib/emailRegex';
 	import handleApiResponse from '$lib/handleApiResponse';
 
-	export let loginModalOn;
+	export let loginModalOn: boolean;
 
 	let password = '';
 	let email = '';
 
-	let apiError;
-	let passwordError;
-	let emailError;
-	let request;
+	let apiError: string | undefined;
+	let passwordError: string | undefined;
+	let emailError: string | undefined;
+	let request: Promise<unknown> | undefined;
 
 	let forgetPassword = false;
 	let successfulPasswordResetRequest = false;
-	let loginFormHeight;
+	let loginFormHeight: number;
 
 	const handleSubmit = async () => {
 		emailError = undefined;
@@ -125,7 +125,7 @@
 					{#await request}
 						<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>
 						<span class="sr-only">Loading</span>
-						<!-- eslint-disable-next-line no-unused-vars -->
+						<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 					{:then _}
 						Log in
 					{/await}
@@ -177,7 +177,7 @@
 								{#await request}
 									<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>
 									<span class="sr-only">Loading</span>
-									<!-- eslint-disable-next-line no-unused-vars -->
+									<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 								{:then _}
 									Reset password
 								{/await}

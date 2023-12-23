@@ -2,11 +2,12 @@ import { error } from '@sveltejs/kit';
 import { auth } from '$lib/models/db';
 import { LuciaError } from 'lucia';
 import { dev } from '$app/environment';
-import { EmailVerificationCode } from '$lib/models/db.js';
+import { EmailVerificationCode } from '$lib/models/db';
 import emailRegex from '$lib/emailRegex';
 import commonPasswordList from 'fxa-common-password-list';
+import type { RequestEvent, RequestHandler } from './$types';
 
-export const POST = async ({ request, locals }) => {
+export const POST: RequestHandler = async ({ request, locals }: RequestEvent) => {
 	if (!dev) {
 		throw error(400, 'We are currently not accepting registrations. Come back later');
 	}
@@ -40,7 +41,8 @@ export const POST = async ({ request, locals }) => {
 			},
 			attributes: {
 				email,
-				isEmailVerified: false
+				isEmailVerified: false,
+				isLocked: false
 			}
 		});
 

@@ -1,10 +1,10 @@
 import { generateRandomString, isWithinExpiration } from 'lucia/utils';
 import VerifyEmail from '$lib/email/VerifyEmail.svelte';
-import { renderMjmlComponent } from '$lib/email/email';
-import { sendEmail } from '../email/email';
+import { renderMjmlComponent, sendEmail } from '$lib/email/email';
 import { error } from '@sveltejs/kit';
 import { auth } from './db';
 import mongodb from 'mongoose';
+import type { User } from 'lucia';
 
 const ONE_MINUTE_IN_MS = 1000 * 60;
 const THIRTY_MINUTES_IN_MS = ONE_MINUTE_IN_MS * 30;
@@ -33,7 +33,7 @@ const EmailVerificationCodeSchema = new mongodb.Schema(
 	},
 	{
 		statics: {
-			async new(user) {
+			async new(user: User) {
 				const codes = await this.find({ user: user.userId }).exec();
 
 				let code;
@@ -44,7 +44,7 @@ const EmailVerificationCodeSchema = new mongodb.Schema(
 				}
 
 				if (code === undefined) {
-					let randomCode = generateRandomString(6, '0123456789');
+					const randomCode = generateRandomString(6, '0123456789');
 					code = await new this({
 						code: randomCode,
 						user: user.userId,
@@ -59,7 +59,7 @@ const EmailVerificationCodeSchema = new mongodb.Schema(
 
 				return code;
 			},
-			async verifyAndDelete(verifyMe, user) {
+			async verifyAndDelete(verifyMe: string, user: User) {
 				const token = await this.findOne({ code: verifyMe, user: user.userId }).exec();
 				if (token === null) {
 					throw error(400, 'Token does not exist');

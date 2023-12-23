@@ -1,15 +1,15 @@
-<script>
+<script lang="ts">
 	import { slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import { onDestroy, onMount } from 'svelte';
 
-	export let inside = undefined;
-	export let close;
+	export let inside: HTMLElement | undefined = undefined;
+	export let close: () => void;
 
-	let dropdown;
+	let dropdown: HTMLElement;
 
-	const onBodyClick = (event) => {
-		if (!(inside ?? dropdown).contains(event.target)) {
+	const onBodyClick = (event: Event) => {
+		if (!(inside ?? dropdown).contains(event.target as Node)) {
 			close();
 		}
 	};

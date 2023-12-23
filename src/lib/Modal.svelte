@@ -1,9 +1,9 @@
-<script>
+<script lang="ts">
 	import { quintOut } from 'svelte/easing';
 	import { fade } from 'svelte/transition';
 
-	export let closeModal;
-	export let title;
+	export let closeModal: () => void;
+	export let title: string;
 </script>
 
 <aside

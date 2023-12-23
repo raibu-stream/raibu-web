@@ -1,10 +1,10 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 
-	export let mouseTarget;
+	export let mouseTarget: { x: number; y: number; ease: number };
 
-	let speed;
+	let speed: 'fast' | 'normal' | 'slow' | 'slowest';
 	let speedOffset = 0;
 
 	let left = Math.random() * 100;

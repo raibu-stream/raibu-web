@@ -7,9 +7,10 @@ import { RAIBU_DB_HOST, RAIBU_DB_USER, RAIBU_DB_PASSWORD } from '$env/static/pri
 import EmailVerificationCodeSchema from './emailVerificationCode';
 import TooManyLoginsTokenSchema from './tooManyLoginsToken';
 import passwordResetTokenSchema from './passwordResetToken';
+import type { KeyDoc } from '@lucia-auth/adapter-mongoose/dist/docs';
 
-// Mongoose state somehow carries-over over reloads and it causes errors when we remake the models.
-// So we clear out the models and connection to prevent this.
+// @ts-expect-error Mongoose state somehow carries-over over reloads and it causes errors when we remake the models.
+// So we clear out the models and connection to prevent this
 mongodb.models = [];
 
 export const User = mongodb.model(
@@ -40,7 +41,7 @@ export const User = mongodb.model(
 		{ _id: false }
 	)
 );
-export const Key = mongodb.model(
+const Key = mongodb.model(
 	'Key',
 	new mongodb.Schema(
 		{
@@ -53,7 +54,7 @@ export const Key = mongodb.model(
 				required: true
 			},
 			hashed_password: String
-		},
+		} as unknown as KeyDoc,
 		{ _id: false }
 	)
 );
@@ -116,6 +117,7 @@ export const auth = lucia({
 		};
 	}
 });
+export type Auth = typeof auth;
 
 // if (dev) {
 // 	Promise.all([

@@ -1,10 +1,11 @@
 import { error } from '@sveltejs/kit';
 import { auth } from '$lib/models/db';
-import { TooManyLoginsToken } from '$lib/models/db.js';
+import { TooManyLoginsToken } from '$lib/models/db';
+import type { RequestEvent, RequestHandler } from './$types';
 
-export const GET = async ({ params, locals }) => {
-	let token = params.token;
-	let user = await TooManyLoginsToken.verifyAndDelete(token);
+export const GET: RequestHandler = async ({ params, locals }: RequestEvent) => {
+	const token = params.token;
+	const user = await TooManyLoginsToken.verifyAndDelete(token);
 	let sessionCookie;
 
 	try {

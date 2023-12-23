@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Background from './Background.svelte';
 	import TeamMember from './TeamMember.svelte';
 

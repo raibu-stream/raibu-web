@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { goto } from '$app/navigation';
 	import FormError from './FormError.svelte';
 	import Modal from './Modal.svelte';
@@ -6,14 +6,14 @@
 	import commonPasswordList from 'fxa-common-password-list';
 	import handleApiResponse from '$lib/handleApiResponse';
 
-	export let resetPasswordModalOn;
-	export let resetPasswordToken;
+	export let resetPasswordModalOn: boolean;
+	export let resetPasswordToken: string | null;
 
 	let password = '';
 
-	let apiError;
-	let passwordError;
-	let request;
+	let apiError: string | undefined;
+	let passwordError: string | undefined;
+	let request: Promise<unknown> | undefined;
 
 	const handleSubmit = async () => {
 		passwordError = undefined;
@@ -54,7 +54,7 @@
 				{#await request}
 					<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>
 					<span class="sr-only">Loading</span>
-					<!-- eslint-disable-next-line no-unused-vars -->
+					<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 				{:then _}
 					Reset
 				{/await}

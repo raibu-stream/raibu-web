@@ -1,15 +1,16 @@
 import { error } from '@sveltejs/kit';
 import { auth } from '$lib/models/db';
-import { EmailVerificationCode } from '$lib/models/db.js';
+import { EmailVerificationCode } from '$lib/models/db';
+import type { RequestEvent, RequestHandler } from './$types';
 
-export const POST = async ({ request, locals }) => {
+export const POST: RequestHandler = async ({ request, locals }: RequestEvent) => {
 	let session = await locals.auth.validate();
 	if (!session) {
 		throw error(401);
 	}
 
 	const formData = await request.json();
-	let code = formData.code;
+	const code = formData.code;
 	await EmailVerificationCode.verifyAndDelete(code, session.user);
 
 	let sessionCookie;

@@ -1,11 +1,11 @@
-<script>
+<script lang="ts">
 	import LoginModal from '$lib/LoginModal.svelte';
 	import { slide } from 'svelte/transition';
 	import { invalidateAll } from '$app/navigation';
 	import Dropdown from '$lib/Dropdown.svelte';
 
-	export let loggedIn;
-	export let email;
+	export let loggedIn: boolean;
+	export let email: string | undefined;
 
 	let userDropdown;
 

@@ -1,9 +1,10 @@
-<script>
+<script lang="ts">
 	let hidePassword = true;
 	let hiderIsHovered = false;
 
 	export let password = '';
-	export let onInput = () => undefined;
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	export let onInput = (_: Event) => undefined;
 	let isNew = false;
 	export { isNew as new };
 </script>
@@ -16,7 +17,7 @@
 		autocomplete={isNew ? 'new-password' : 'current-password'}
 		id="password"
 		on:input={(event) => {
-			password = event.target.value;
+			password = event.currentTarget.value;
 			onInput(event);
 		}}
 	/>

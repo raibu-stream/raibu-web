@@ -2,13 +2,14 @@ import { auth } from '$lib/models/db';
 import { LuciaError } from 'lucia';
 import { error } from '@sveltejs/kit';
 import ExpiryMap from 'expiry-map';
-import { TooManyLoginsToken } from '../../../lib/models/db.js';
+import { TooManyLoginsToken } from '$lib/models/db';
+import type { RequestEvent, RequestHandler } from './$types';
 
 const ONE_DAY_IN_MS = 1000 * 60 * 60 * 24;
 
 const loginAttempts = new ExpiryMap(ONE_DAY_IN_MS);
 
-export const POST = async ({ request, locals }) => {
+export const POST: RequestHandler = async ({ request, locals }: RequestEvent) => {
 	const formData = await request.json();
 	let email = formData.email;
 	const password = formData.password;
@@ -37,7 +38,7 @@ export const POST = async ({ request, locals }) => {
 					passThrough: true,
 					message:
 						'Too many failed login attempts. Your account has been locked. Check your email to unlock it.'
-				});
+				} as unknown as Error);
 			}
 		}
 
@@ -48,12 +49,12 @@ export const POST = async ({ request, locals }) => {
 		});
 		locals.auth.setSession(session);
 		loginAttempts.delete(email);
-	} catch (e) {
+	} catch (e: any) {
 		if (
 			e instanceof LuciaError &&
 			(e.message === 'AUTH_INVALID_KEY_ID' || e.message === 'AUTH_INVALID_PASSWORD')
 		) {
-			if (error.message === 'AUTH_INVALID_KEY_ID') {
+			if (e.message === 'AUTH_INVALID_KEY_ID') {
 				throw error(400, {
 					message: 'Incorrect email or password'
 				});
@@ -77,7 +78,7 @@ export const POST = async ({ request, locals }) => {
 	});
 };
 
-export const DELETE = async ({ locals }) => {
+export const DELETE: RequestHandler = async ({ locals }: RequestEvent) => {
 	const session = await locals.auth.validate();
 	if (!session) throw error(401);
 
@@ -89,7 +90,7 @@ export const DELETE = async ({ locals }) => {
 	});
 };
 
-const wrongPassword = async (email) => {
+const wrongPassword = async (email: string) => {
 	const attempts = loginAttempts.get(email);
 	const key = await auth.getKey('email', email);
 	const user = await auth.getUser(key.userId);

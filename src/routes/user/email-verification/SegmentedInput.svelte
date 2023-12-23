@@ -1,25 +1,31 @@
-<script>
-	let inputs = [];
+<script lang="ts">
+	let inputs: HTMLInputElement[] = [];
 
-	const onKeydown = (event, index) => {
-		if (event.keyCode === 8 && event.target.value === '' && index > 0) {
+	const onKeydown = (
+		event: KeyboardEvent & { currentTarget: EventTarget & HTMLInputElement },
+		index: number
+	) => {
+		if (event.keyCode === 8 && event.currentTarget.value === '' && index > 0) {
 			inputs[index - 1].focus();
 		}
 	};
 
-	const onInput = (event, index) => {
+	const onInput = (eventUnknown: unknown, index: number) => {
+		const event = eventUnknown as InputEvent & {
+			currentTarget: EventTarget & HTMLInputElement;
+		};
 		if (event.data === null || event.data === '') {
-			event.target.value = '';
+			event.currentTarget.value = '';
 			value = inputs.map((input) => input.value).join('');
 			isFull = inputs.every((input) => input.value !== '');
 			return;
 		}
 		const [first, ...rest] = event.data;
-		event.target.value = first;
+		event.currentTarget.value = first;
 
 		if (first !== undefined && first !== null && index !== 5) {
 			inputs[index + 1].focus();
-			rest.slice(0, 5 - index).forEach((character, restIndex, rest) => {
+			rest.slice(0, 5 - index).forEach((character: string, restIndex: number, rest: string[]) => {
 				inputs[index + 1 + restIndex].value = character;
 				if (rest.length - 1 === restIndex) {
 					let focusIndex = index + 2 + restIndex >= 5 ? 5 : index + 2 + restIndex;
@@ -37,7 +43,7 @@
 </script>
 
 <fieldset class="flex gap-3 text-xl sm:gap-4 sm:text-2xl">
-	<!-- eslint-disable-next-line no-unused-vars -->
+	<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 	{#each { length: 6 } as _, index}
 		<input
 			name="code"

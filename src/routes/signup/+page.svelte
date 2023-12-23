@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import PasswordInput from '$lib/PasswordInput.svelte';
 	import commonPasswordList from 'fxa-common-password-list';
 	import FormError from '$lib/FormError.svelte';
@@ -9,16 +9,16 @@
 
 	const MINIMUM_PASSWORD_LENGTH = 8;
 
-	let request;
-	let apiError;
+	let request: Promise<unknown> | undefined;
+	let apiError: string | undefined;
 
 	let password = '';
 	let email = '';
 
-	let passwordError;
-	let emailError;
+	let passwordError: string | undefined;
+	let emailError: string | undefined;
 
-	const checkPasswordLength = (toCheck) => {
+	const checkPasswordLength = (toCheck: string) => {
 		const length = toCheck.length;
 		if (length === 0) {
 			return undefined;
@@ -44,7 +44,7 @@
 			return;
 		}
 
-		if (checkPasswordLength(password, MINIMUM_PASSWORD_LENGTH) !== undefined) {
+		if (checkPasswordLength(password) !== undefined) {
 			return;
 		}
 
@@ -95,8 +95,7 @@
 				<PasswordInput
 					new
 					bind:password
-					onInput={(event) =>
-						(passwordError = checkPasswordLength(event.target.value, MINIMUM_PASSWORD_LENGTH))}
+					on:input={() => (passwordError = checkPasswordLength(password))}
 				/>
 				{#if passwordError !== undefined}
 					<FormError class="mt-2">{passwordError}</FormError>
@@ -106,7 +105,7 @@
 				{#await request}
 					<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>
 					<span class="sr-only">Loading</span>
-					<!-- eslint-disable-next-line no-unused-vars -->
+					<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 				{:then _}
 					Sign up
 				{/await}

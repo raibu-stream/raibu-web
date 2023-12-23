@@ -1,7 +1,7 @@
-<script>
+<script lang="ts">
 	import EmailLayout from '$lib/email/EmailLayout.svelte';
 
-	export let verifyCode;
+	export let verifyCode: string;
 </script>
 
 <EmailLayout previewText="Use your verification code {verifyCode} to start using your account">

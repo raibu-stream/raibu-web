@@ -1,4 +1,4 @@
-const handleApiResponse = async (res, onSuccess) => {
+const handleApiResponse = async (res: Response, onSuccess: () => void) => {
 	if (res.statusText === 'OK') {
 		onSuccess();
 	} else {

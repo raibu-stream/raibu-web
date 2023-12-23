@@ -1,12 +1,13 @@
 import { error } from '@sveltejs/kit';
-import { EmailVerificationCode } from '$lib/models/db.js';
+import { EmailVerificationCode } from '$lib/models/db';
 import ExpiryMap from 'expiry-map';
+import type { RequestEvent, RequestHandler } from './$types';
 
 const ONE_MINUTE_IN_MS = 1000 * 60;
 
-let timeouts = new ExpiryMap(ONE_MINUTE_IN_MS);
+const timeouts = new ExpiryMap(ONE_MINUTE_IN_MS);
 
-export const POST = async ({ locals }) => {
+export const POST: RequestHandler = async ({ locals }: RequestEvent) => {
 	const session = await locals.auth.validate();
 
 	if (!session) {
@@ -14,7 +15,7 @@ export const POST = async ({ locals }) => {
 			message: 'You are not logged in'
 		});
 	}
-	let timeout = timeouts.get(session.user.userId);
+	const timeout = timeouts.get(session.user.userId);
 	if (timeout === null) {
 		throw error(400, { message: `You cannot send another email for the next minute` });
 	}

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import '../app.css';
 	import '$lib/fonts/CascadiaCode.css';
 	import ScrollTop from './ScrollTop.svelte';
@@ -7,8 +7,9 @@
 	import '@fortawesome/fontawesome-free/css/all.min.css';
 	import LoginModal from '../lib/LoginModal.svelte';
 	import ResetPasswordModal from '../lib/resetPasswordModal.svelte';
+	import type { LayoutServerData } from './$types';
 
-	export let data;
+	export let data: LayoutServerData;
 	let resetPasswordModalOn = data.resetPasswordToken !== null;
 	let loginModalOn = data.loginModal === 'true';
 </script>

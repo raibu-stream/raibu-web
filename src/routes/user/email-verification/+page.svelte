@@ -1,24 +1,25 @@
-<script>
+<script lang="ts">
 	import { slide } from 'svelte/transition';
 	import FormError from '$lib/FormError.svelte';
 	import SegmentedInput from './SegmentedInput.svelte';
 	import handleApiResponse from '$lib/handleApiResponse';
 	import { goto } from '$app/navigation';
+	import type { PageServerData } from './$types';
 
-	export let data;
+	export let data: PageServerData;
 
 	let timer = 60;
-	let timerInterval;
+	let timerInterval: NodeJS.Timeout | undefined;
 
 	const apiSuccessfulMessage =
 		'Your verification email has been sent successfully. Please check your spam folder.';
 
 	let apiError = data.isPreSent ? apiSuccessfulMessage : undefined;
-	let resendRequest;
-	let verifyRequest;
+	let resendRequest: Promise<unknown>;
+	let verifyRequest: Promise<unknown>;
 
-	let code;
-	let isCodeReady;
+	let code: string;
+	let isCodeReady: boolean;
 
 	if (data.isPreSent) {
 		const url = new URL(window.location.toString());
@@ -78,7 +79,7 @@
 				{#await verifyRequest}
 					<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>
 					<span class="sr-only">Loading</span>
-					<!-- eslint-disable-next-line no-unused-vars -->
+					<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 				{:then _}
 					Submit
 				{/await}
@@ -89,7 +90,7 @@
 			<button
 				class="font-semibold disabled:text-neutral-200"
 				on:click={resendVerificationEmail}
-				disabled={timerInterval}
+				disabled={timerInterval === undefined}
 			>
 				Resend email
 			</button>
@@ -98,7 +99,7 @@
 					{#await resendRequest}
 						<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>
 						<span class="sr-only">Loading</span>
-						<!-- eslint-disable-next-line no-unused-vars -->
+						<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 					{:then _}
 						- {timer}
 					{/await}

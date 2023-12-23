@@ -1,9 +1,10 @@
 import { error } from '@sveltejs/kit';
-import { passwordResetToken } from '$lib/models/db.js';
+import { passwordResetToken } from '$lib/models/db';
 import { LuciaError } from 'lucia';
 import { auth } from '$lib/models/db';
+import type { RequestEvent, RequestHandler } from './$types';
 
-export const POST = async ({ request }) => {
+export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 	const formData = await request.json();
 	const email = formData.email;
 
