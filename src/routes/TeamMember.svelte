@@ -16,6 +16,6 @@
 				<p class="!text-base font-medium !leading-tight tracking-tight text-neutral-200">{title}</p>
 			{/each}
 		</div>
-		<a class="button text-center" href={twitterUrl} target="_blank"> Twitter </a>
+		<a class="button text-center font-medium" href={twitterUrl} target="_blank"> Twitter </a>
 	</div>
 </div>

@@ -89,7 +89,7 @@
 					<small>
 						New to Raibu?
 						<button type="button" on:click={() => (loginModalOn = false)}>
-							<a class="underline" href="/signup">Sign up</a>
+							<a class="font-semibold" href="/signup">Sign up</a>
 						</button>
 					</small>
 				</div>
@@ -105,6 +105,7 @@
 					<small>
 						<button
 							type="button"
+							class="link font-semibold"
 							on:click={() => {
 								forgetPassword = true;
 								apiError = undefined;

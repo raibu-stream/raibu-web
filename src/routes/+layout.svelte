@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import '$lib/fonts/CascadiaCode.css';
+	import '$lib/fonts/fonts.css';
 	import ScrollTop from './ScrollTop.svelte';
 	import Nav from './Nav.svelte';
 	import Footer from './Footer.svelte';

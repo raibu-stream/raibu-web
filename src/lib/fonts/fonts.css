@@ -1,0 +1,15 @@
+@font-face {
+	font-family: 'Cascadia Code';
+	src: url('./CascadiaCode.woff2');
+}
+
+@font-face {
+	font-family: 'Cascadia Code';
+	src: url('./CascadiaCodeItalic.woff2');
+	font-style: italic;
+}
+
+@font-face {
+	font-family: 'Noto Sans JP';
+	src: url('./NotoSansJP.ttf');
+}

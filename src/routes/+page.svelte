@@ -14,11 +14,11 @@
 	class="relative mb-6 flex h-[40vh] w-full items-center justify-center overflow-hidden border-b border-neutral-300 bg-neutral-900 text-center"
 >
 	<div class="group z-10 flex cursor-default flex-col items-center justify-center px-6">
-		<h2 class="-mb-5 text-7xl font-extrabold transition-colors group-hover:text-neutral-200">
+		<h2 class="font-jp text-7xl font-semibold transition-colors group-hover:text-neutral-200">
 			ライブ
 		</h2>
 		<div
-			class="flex w-full justify-between pl-6 pr-8 text-xl font-normal italic text-neutral-200 transition-colors group-hover:text-neutral-100"
+			class="transition-color flex w-full justify-between pl-6 pr-8 text-xl font-semibold italic text-neutral-200 duration-300 ease-out group-hover:text-neutral-100"
 		>
 			<span>ra</span>
 			<span class="pl-2">i</span>

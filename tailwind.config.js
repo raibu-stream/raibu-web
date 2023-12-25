@@ -5,7 +5,8 @@ export default {
 	theme: {
 		extend: {
 			fontFamily: {
-				sans: ['"Cascadia Code"', ...defaultTheme.fontFamily.sans]
+				sans: ['"Cascadia Code"', ...defaultTheme.fontFamily.sans],
+				jp: ['"Noto Sans JP"', ...defaultTheme.fontFamily.sans]
 			},
 			screens: {
 				'section-width': '800px'

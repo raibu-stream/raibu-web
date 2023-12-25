@@ -32,7 +32,7 @@
 	class="sm:bg-transparent fixed z-20 flex h-18 w-full items-center gap-4 border-b border-neutral-300 bg-neutral-800 px-6 sm:static sm:w-auto"
 >
 	<h1>
-		<a href="/" class="text-2xl font-extrabold tracking-tight sm:text-4xl">ライブ</a>
+		<a href="/" class="font-jp text-2xl font-semibold tracking-tight sm:text-4xl">ライブ</a>
 	</h1>
 	<ul class="ml-auto hidden items-center gap-6 font-medium tracking-tight sm:flex">
 		<li><a href="/">Home</a></li>
