@@ -1,8 +1,8 @@
 import { auth } from '$lib/models/db';
 import { LuciaError } from 'lucia';
-import { error } from '@sveltejs/kit';
+import { error, type HttpError } from '@sveltejs/kit';
 import ExpiryMap from 'expiry-map';
-import { TooManyLoginsToken } from '$lib/models/db';
+import { newTooManyLoginsToken } from '$lib/models/tooManyLoginsToken';
 import type { RequestEvent, RequestHandler } from './$types';
 
 const ONE_DAY_IN_MS = 1000 * 60 * 60 * 24;
@@ -33,12 +33,11 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 			const user = await auth.getUser(key.userId);
 
 			if (user.isLocked) {
-				TooManyLoginsToken.new(user);
+				newTooManyLoginsToken(user);
 				throw error(400, {
-					passThrough: true,
 					message:
 						'Too many failed login attempts. Your account has been locked. Check your email to unlock it.'
-				} as unknown as Error);
+				});
 			}
 		}
 
@@ -49,7 +48,7 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 		});
 		locals.auth.setSession(session);
 		loginAttempts.delete(email);
-	} catch (e: any) {
+	} catch (e) {
 		if (
 			e instanceof LuciaError &&
 			(e.message === 'AUTH_INVALID_KEY_ID' || e.message === 'AUTH_INVALID_PASSWORD')
@@ -65,7 +64,7 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 				message: 'Incorrect email or password'
 			});
 		}
-		if (e.body.passThrough) {
+		if (isHttpError(e)) {
 			throw e;
 		}
 		throw error(500, {
@@ -104,7 +103,7 @@ const wrongPassword = async (email: string) => {
 			isLocked: true
 		});
 		await auth.invalidateAllUserSessions(user.userId);
-		await TooManyLoginsToken.new(user);
+		await newTooManyLoginsToken(user);
 		loginAttempts.delete(email);
 
 		throw error(400, {
@@ -115,4 +114,8 @@ const wrongPassword = async (email: string) => {
 
 	loginAttempts.delete(email);
 	loginAttempts.set(email, attempts === undefined ? 1 : attempts + 1);
+};
+
+const isHttpError = (e: any): e is HttpError => {
+	return 'code' in e && 'body' in e && 'message' in e.body;
 };

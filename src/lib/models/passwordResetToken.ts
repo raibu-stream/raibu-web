@@ -4,77 +4,79 @@ import { renderMjmlComponent } from '$lib/email/email';
 import { PUBLIC_RAIBU_URL } from '$env/static/public';
 import { sendEmail } from '$lib/email/email';
 import { error } from '@sveltejs/kit';
-import { auth } from './db';
-import mongodb from 'mongoose';
+import { auth, db } from './db';
 import type { User } from 'lucia';
+import { passwordResetToken } from './schema';
+import { eq, lt, type InferSelectModel } from 'drizzle-orm';
 
 const ONE_HOUR_IN_MS = 1000 * 60 * 60;
 const FOUR_HOURS_IN_MS = ONE_HOUR_IN_MS * 4;
 
-const passwordResetTokenSchema = new mongodb.Schema(
-	{
-		user: {
-			type: String,
-			ref: 'User',
-			required: true
-		},
-		token: {
-			type: String,
-			required: true,
-			unique: true
-		},
-		expires: {
-			type: Number,
-			required: true
-		},
-		createdAt: {
-			type: Date,
-			expires: FOUR_HOURS_IN_MS / 1000,
-			default: Date.now
-		}
-	},
-	{
-		statics: {
-			async new(user: User) {
-				const tokens = await this.find({ user: user.userId }).exec();
+export type PasswordResetToken = InferSelectModel<typeof passwordResetToken>;
 
-				if (tokens.length > 0) {
-					const existingToken = tokens.find((token) => {
-						return isWithinExpiration(token.expires - ONE_HOUR_IN_MS);
-					});
-					if (existingToken !== undefined) {
-						return existingToken;
-					}
-				}
+/**
+ * Finds a {@linkcode passwordResetToken} associated with the user,
+ * and returns if one exists and it won't be expired after 1 hour from now.
+ * Otherwise, create a new token and email it to the user.
+ *
+ * @returns The found or newly created token.
+ */
+export const newPasswordResetToken = async (user: User): Promise<PasswordResetToken> => {
+	const tokens = await db.query.passwordResetToken.findMany({
+		where: eq(passwordResetToken.userId, user.userId)
+	});
 
-				const randomString = generateRandomString(63);
-				const token = await new this({
-					token: randomString,
-					user: user.userId,
-					expires: new Date().getTime() + FOUR_HOURS_IN_MS
-				}).save();
-
-				const emailHtml = renderMjmlComponent(ResetPasswordEmail, {
-					resetLink: `${PUBLIC_RAIBU_URL}/?password-reset=${token.token}`
-				});
-				sendEmail(emailHtml, 'Reset your password', user.email);
-
-				return token;
-			},
-			async verifyAndDelete(verifyMe: string) {
-				const token = await this.findOne({ token: verifyMe }).exec();
-				if (token === null) {
-					throw error(400, 'Token does not exist');
-				}
-				this.deleteOne({ token: token.token }).exec();
-				if (!isWithinExpiration(token.expires)) {
-					throw error(400, 'Token is expired');
-				}
-
-				return await auth.getUser(token.user);
-			}
+	if (tokens.length > 0) {
+		const existingToken = tokens.find((token) => {
+			return isWithinExpiration(token.expires - ONE_HOUR_IN_MS);
+		});
+		if (existingToken !== undefined) {
+			return existingToken;
 		}
 	}
-);
 
-export default passwordResetTokenSchema;
+	const randomString = generateRandomString(63);
+	const token = (
+		await db
+			.insert(passwordResetToken)
+			.values({
+				token: randomString,
+				userId: user.userId,
+				expires: new Date().getTime() + FOUR_HOURS_IN_MS
+			})
+			.returning()
+	)[0];
+
+	const emailHtml = renderMjmlComponent(ResetPasswordEmail, {
+		resetLink: `${PUBLIC_RAIBU_URL}/?password-reset=${token.token}`
+	});
+	sendEmail(emailHtml, 'Reset your password', user.email);
+
+	return token;
+};
+
+/**
+ * Checks if a {@linkcode passwordResetToken} matching verifyMe exists that isn't expired,
+ * then deletes it. Throws if there is no valid token.
+ *
+ * @returns The user associated with the now deleted token.
+ */
+export const verifyPasswordResetToken = async (verifyMe: string): Promise<User> => {
+	const condition = eq(passwordResetToken.token, verifyMe);
+
+	const token = await db.query.passwordResetToken.findFirst({ where: condition });
+	if (token === undefined) {
+		throw error(400, 'Token does not exist');
+	}
+
+	await db.delete(passwordResetToken).where(condition);
+
+	if (!isWithinExpiration(token.expires)) {
+		throw error(400, 'Token is expired');
+	}
+
+	// We're treating passwordResetToken.expires as a TTL here
+	db.delete(passwordResetToken).where(lt(passwordResetToken.expires, new Date().getTime()));
+
+	return await auth.getUser(token.userId);
+};

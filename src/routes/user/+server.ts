@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 import { auth } from '$lib/models/db';
 import { LuciaError } from 'lucia';
 import { dev } from '$app/environment';
-import { EmailVerificationCode } from '$lib/models/db';
+import { newEmailVerificationCode } from '$lib/models/emailVerificationCode';
 import emailRegex from '$lib/emailRegex';
 import commonPasswordList from 'fxa-common-password-list';
 import type { RequestEvent, RequestHandler } from './$types';
@@ -52,7 +52,7 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 		});
 		locals.auth.setSession(session);
 
-		EmailVerificationCode.new(user);
+		await newEmailVerificationCode(user);
 	} catch (e) {
 		if (e instanceof LuciaError && e.message === 'AUTH_DUPLICATE_KEY_ID') {
 			throw error(400, {

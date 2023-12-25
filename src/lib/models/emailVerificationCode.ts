@@ -2,77 +2,84 @@ import { generateRandomString, isWithinExpiration } from 'lucia/utils';
 import VerifyEmail from '$lib/email/VerifyEmail.svelte';
 import { renderMjmlComponent, sendEmail } from '$lib/email/email';
 import { error } from '@sveltejs/kit';
-import { auth } from './db';
-import mongodb from 'mongoose';
+import { auth, db } from './db';
 import type { User } from 'lucia';
+import { and, eq, lt, type InferSelectModel } from 'drizzle-orm';
+import { emailVerificationCode } from './schema';
 
 const ONE_MINUTE_IN_MS = 1000 * 60;
 const THIRTY_MINUTES_IN_MS = ONE_MINUTE_IN_MS * 30;
 
-const EmailVerificationCodeSchema = new mongodb.Schema(
-	{
-		user: {
-			type: String,
-			ref: 'User',
-			required: true
-		},
-		code: {
-			type: String,
-			required: true,
-			unique: true
-		},
-		expires: {
-			type: Number,
-			required: true
-		},
-		createdAt: {
-			type: Date,
-			expires: THIRTY_MINUTES_IN_MS / 1000,
-			default: Date.now
-		}
-	},
-	{
-		statics: {
-			async new(user: User) {
-				const codes = await this.find({ user: user.userId }).exec();
+export type EmailVerificationCode = InferSelectModel<typeof emailVerificationCode>;
 
-				let code;
-				if (codes.length > 0) {
-					code = codes.find((token) => {
-						return isWithinExpiration(token.expires - ONE_MINUTE_IN_MS * 10);
-					});
-				}
+/**
+ * Finds an {@linkcode emailVerificationCode} associated with the user,
+ * and returns if one exists and it won't be expired after 10 minutes from now.
+ * Otherwise, create a new code and email it to the user.
+ *
+ * @returns The newly created or found code.
+ */
+export const newEmailVerificationCode = async (user: User): Promise<EmailVerificationCode> => {
+	const codes = await db.query.emailVerificationCode.findMany({
+		where: eq(emailVerificationCode.userId, user.userId)
+	});
 
-				if (code === undefined) {
-					const randomCode = generateRandomString(6, '0123456789');
-					code = await new this({
-						code: randomCode,
-						user: user.userId,
-						expires: new Date().getTime() + THIRTY_MINUTES_IN_MS
-					}).save();
-				}
-
-				const emailHtml = renderMjmlComponent(VerifyEmail, {
-					verifyCode: code.code
-				});
-				sendEmail(emailHtml, 'Your email verification code', user.email);
-
-				return code;
-			},
-			async verifyAndDelete(verifyMe: string, user: User) {
-				const token = await this.findOne({ code: verifyMe, user: user.userId }).exec();
-				if (token === null) {
-					throw error(400, 'Token does not exist');
-				}
-				this.deleteOne({ code: verifyMe, user: user.userId }).exec();
-				if (!isWithinExpiration(token.expires)) {
-					throw error(400, 'Token is expired');
-				}
-
-				return await auth.getUser(token.user);
-			}
-		}
+	let code: EmailVerificationCode | undefined;
+	if (codes.length > 0) {
+		code = codes.find((code) => {
+			return isWithinExpiration(code.expires - ONE_MINUTE_IN_MS * 10);
+		});
 	}
-);
 
-export default EmailVerificationCodeSchema;
+	if (code === undefined) {
+		const randomCode = generateRandomString(6, '0123456789');
+		code = (
+			await db
+				.insert(emailVerificationCode)
+				.values({
+					code: randomCode,
+					userId: user.userId,
+					expires: new Date().getTime() + THIRTY_MINUTES_IN_MS
+				})
+				.returning()
+		)[0];
+	}
+
+	const emailHtml = renderMjmlComponent(VerifyEmail, {
+		verifyCode: code.code
+	});
+	sendEmail(emailHtml, 'Your email verification code', user.email);
+
+	return code;
+};
+
+/**
+ * Checks if the user has a {@linkcode emailVerificationCode} matching verifyMe that isn't expired,
+ * then deletes it. Throws if there is no valid code.
+ *
+ * @returns The user associated with the now deleted code.
+ */
+export const verifyEmailVerificationCode = async (verifyMe: string, user: User): Promise<User> => {
+	const condition = and(
+		eq(emailVerificationCode.userId, user.userId),
+		eq(emailVerificationCode.code, verifyMe)
+	);
+
+	const code = await db.query.emailVerificationCode.findFirst({
+		where: condition
+	});
+	if (code === undefined) {
+		throw error(400, 'Code does not exist');
+	}
+
+	await db.delete(emailVerificationCode).where(condition);
+
+	if (!isWithinExpiration(code.expires)) {
+		throw error(400, 'Code is expired');
+	}
+
+	// We're treating emailVerificationCode.expires as a TTL here
+	db.delete(emailVerificationCode).where(lt(emailVerificationCode.expires, new Date().getTime()));
+
+	return await auth.getUser(code.userId);
+};

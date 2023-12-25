@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { passwordResetToken } from '$lib/models/db';
+import { newPasswordResetToken } from '$lib/models/passwordResetToken';
 import { LuciaError } from 'lucia';
 import { auth } from '$lib/models/db';
 import type { RequestEvent, RequestHandler } from './$types';
@@ -13,7 +13,7 @@ export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 		const user = await auth.getUser(key.userId);
 
 		if (user.isEmailVerified) {
-			await passwordResetToken.new(user);
+			await newPasswordResetToken(user);
 		}
 	} catch (e) {
 		if (e instanceof LuciaError && e.message === 'AUTH_INVALID_KEY_ID') {

@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { auth } from '$lib/models/db';
-import { EmailVerificationCode } from '$lib/models/db';
+import { verifyEmailVerificationCode } from '$lib/models/emailVerificationCode';
 import type { RequestEvent, RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, locals }: RequestEvent) => {
@@ -11,7 +11,7 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 
 	const formData = await request.json();
 	const code = formData.code;
-	await EmailVerificationCode.verifyAndDelete(code, session.user);
+	await verifyEmailVerificationCode(code, session.user);
 
 	let sessionCookie;
 	try {

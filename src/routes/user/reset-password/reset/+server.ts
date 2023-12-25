@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { passwordResetToken } from '$lib/models/db';
+import { verifyPasswordResetToken } from '$lib/models/passwordResetToken';
 import { auth } from '$lib/models/db';
 import commonPasswordList from 'fxa-common-password-list';
 import type { RequestEvent, RequestHandler } from './$types';
@@ -26,7 +26,7 @@ export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 	}
 
 	try {
-		const user = await passwordResetToken.verifyAndDelete(token);
+		const user = await verifyPasswordResetToken(token);
 		await auth.invalidateAllUserSessions(user.userId);
 		await auth.updateKeyPassword('email', user.email, newPassword);
 

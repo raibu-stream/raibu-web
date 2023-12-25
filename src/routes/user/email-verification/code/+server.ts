@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { EmailVerificationCode } from '$lib/models/db';
+import { newEmailVerificationCode } from '$lib/models/emailVerificationCode';
 import ExpiryMap from 'expiry-map';
 import type { RequestEvent, RequestHandler } from './$types';
 
@@ -24,7 +24,7 @@ export const POST: RequestHandler = async ({ locals }: RequestEvent) => {
 	}
 
 	try {
-		EmailVerificationCode.new(session.user);
+		await newEmailVerificationCode(session.user);
 	} catch (e) {
 		throw error(500, {
 			message: 'An unknown error occurred'
