@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import FormError from '$lib/FormError.svelte';
-	import SegmentedInput from './SegmentedInput.svelte';
+	import FormError from '$lib/components/FormError.svelte';
+	import SegmentedInput from '$lib/components/SegmentedInput.svelte';
 	import handleApiResponse from '$lib/handleApiResponse';
 	import { goto } from '$app/navigation';
 	import type { PageServerData } from './$types';
@@ -9,10 +9,10 @@
 	export let data: PageServerData;
 
 	let timer = 60;
-	let timerInterval: NodeJS.Timeout | undefined;
+	let timerInterval: NodeJS.Timeout | undefined = undefined;
 
 	const apiSuccessfulMessage =
-		'Your verification email has been sent successfully. Please check your spam folder.';
+		'Your verification email has been sent successfully. Please check your spam folder. It will expire in 30 minutes.';
 
 	let apiError = data.isPreSent ? apiSuccessfulMessage : undefined;
 	let resendRequest: Promise<unknown>;
@@ -32,7 +32,7 @@
 		resendRequest = fetch('/user/email-verification/code', {
 			method: 'post'
 		}).then(async (res) => {
-			apiError = await handleApiResponse(res, () => {
+			let error = await handleApiResponse(res, () => {
 				apiError = apiSuccessfulMessage;
 				timer = 60;
 				timerInterval = setInterval(() => {
@@ -45,6 +45,10 @@
 					}
 				}, 1000);
 			});
+
+			if (error !== undefined) {
+				apiError = error;
+			}
 		});
 	};
 
@@ -90,7 +94,7 @@
 			<button
 				class="font-semibold disabled:text-neutral-200"
 				on:click={resendVerificationEmail}
-				disabled={timerInterval === undefined}
+				disabled={timerInterval !== undefined}
 			>
 				Resend email
 			</button>
@@ -101,7 +105,7 @@
 						<span class="sr-only">Loading</span>
 						<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 					{:then _}
-						- {timer}
+						- {timer}s
 					{/await}
 				</span>
 			{/if}

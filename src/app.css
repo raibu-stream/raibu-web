@@ -30,7 +30,6 @@
 		@apply font-medium tracking-wide;
 	}
 
-	a,
 	.link {
 		@apply text-neutral-100 no-underline transition-colors duration-150 ease-out hover:text-primary-400;
 	}

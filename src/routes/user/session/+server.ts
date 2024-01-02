@@ -100,7 +100,7 @@ const wrongPassword = async (email: string) => {
 
 	if (attempts !== undefined && attempts >= 4) {
 		await auth.updateUserAttributes(user.userId, {
-			isLocked: true
+			is_locked: true
 		});
 		await auth.invalidateAllUserSessions(user.userId);
 		await newTooManyLoginsToken(user);

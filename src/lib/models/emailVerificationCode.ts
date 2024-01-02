@@ -4,7 +4,7 @@ import { renderMjmlComponent, sendEmail } from '$lib/email/email';
 import { error } from '@sveltejs/kit';
 import { auth, db } from './db';
 import type { User } from 'lucia';
-import { and, eq, lt, type InferSelectModel } from 'drizzle-orm';
+import { and, eq, type InferSelectModel } from 'drizzle-orm';
 import { emailVerificationCode } from './schema';
 
 const ONE_MINUTE_IN_MS = 1000 * 60;
@@ -69,7 +69,7 @@ export const verifyEmailVerificationCode = async (verifyMe: string, user: User):
 		where: condition
 	});
 	if (code === undefined) {
-		throw error(400, 'Code does not exist');
+		throw error(400, 'Code is expired or does not exist');
 	}
 
 	await db.delete(emailVerificationCode).where(condition);
@@ -77,9 +77,6 @@ export const verifyEmailVerificationCode = async (verifyMe: string, user: User):
 	if (!isWithinExpiration(code.expires)) {
 		throw error(400, 'Code is expired');
 	}
-
-	// We're treating emailVerificationCode.expires as a TTL here
-	db.delete(emailVerificationCode).where(lt(emailVerificationCode.expires, new Date().getTime()));
 
 	return await auth.getUser(code.userId);
 };

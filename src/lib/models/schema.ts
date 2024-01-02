@@ -1,4 +1,13 @@
-import { pgTable, bigint, varchar, boolean, primaryKey } from 'drizzle-orm/pg-core';
+import {
+	pgTable,
+	bigint,
+	varchar,
+	boolean,
+	primaryKey,
+	text,
+	timestamp,
+	uuid
+} from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
 	id: varchar('id', {
@@ -7,8 +16,9 @@ export const user = pgTable('user', {
 	email: varchar('email', {
 		length: 255
 	}).notNull(),
-	isEmailVerified: boolean('isEmailVerified').notNull(),
-	isLocked: boolean('isLocked').notNull()
+	isEmailVerified: boolean('is_email_verified').notNull(),
+	isLocked: boolean('is_locked').notNull(),
+	isAdmin: boolean('is_admin').notNull().default(false)
 });
 
 export const session = pgTable('user_session', {
@@ -87,6 +97,30 @@ export const tooManyLoginsToken = pgTable('password_reset_token', {
 	token: varchar('token', {
 		length: 63
 	}).primaryKey(),
+	expires: bigint('expires', {
+		mode: 'number'
+	}).notNull()
+});
+
+export const requestLog = pgTable('request_log', {
+	userId: varchar('user_id', {
+		length: 15
+	}).references(() => user.id),
+	routeId: text('route_id').notNull(),
+	requestMethod: varchar('request_method', {
+		length: 8
+	}).notNull(),
+	latencyInNs: bigint('latency_in_ns', { mode: 'bigint' }).notNull(),
+	expires: bigint('expires', {
+		mode: 'number'
+	}).notNull(),
+	requestDate: timestamp('request_date').defaultNow().notNull()
+});
+
+export const errorLog = pgTable('error_log', {
+	errorId: varchar('error_id', { length: 64 }).primaryKey(),
+	error: text('error').notNull(),
+	errorDate: timestamp('error_date').defaultNow().notNull(),
 	expires: bigint('expires', {
 		mode: 'number'
 	}).notNull()

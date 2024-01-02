@@ -41,8 +41,9 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 			},
 			attributes: {
 				email,
-				isEmailVerified: false,
-				isLocked: false
+				is_email_verified: false,
+				is_locked: false,
+				is_admin: false
 			}
 		});
 

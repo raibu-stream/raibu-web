@@ -18,7 +18,7 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 		await auth.invalidateAllUserSessions(session.user.userId);
 
 		await auth.updateUserAttributes(session.user.userId, {
-			isEmailVerified: true
+			is_email_verified: true
 		});
 
 		session = await auth.createSession({

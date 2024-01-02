@@ -34,7 +34,8 @@ export default {
 			secondary: {
 				800: '#2d151d',
 				700: '#3e1f28'
-			}
+			},
+			transparent: '#0000'
 		}
 	},
 	plugins: []

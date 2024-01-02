@@ -1,5 +1,5 @@
 <script lang="ts">
-	import CopyMe from './CopyMe.svelte';
+	import CopyMe from '$lib/components/CopyMe.svelte';
 	import type { PageServerData } from './$types';
 
 	export let data: PageServerData;

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import PasswordInput from '$lib/PasswordInput.svelte';
+	import PasswordInput from '$lib/components/PasswordInput.svelte';
 	import commonPasswordList from 'fxa-common-password-list';
-	import FormError from '$lib/FormError.svelte';
+	import FormError from '$lib/components/FormError.svelte';
 	import { dev } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import emailRegex from '$lib/emailRegex';

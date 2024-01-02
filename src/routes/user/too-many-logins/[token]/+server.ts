@@ -12,7 +12,7 @@ export const GET: RequestHandler = async ({ params, locals }: RequestEvent) => {
 		await auth.invalidateAllUserSessions(user.userId);
 
 		await auth.updateUserAttributes(user.userId, {
-			isLocked: false
+			is_locked: false
 		});
 
 		const session = await auth.createSession({

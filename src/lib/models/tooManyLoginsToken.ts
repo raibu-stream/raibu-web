@@ -7,7 +7,7 @@ import { error } from '@sveltejs/kit';
 import { auth, db } from './db';
 import type { User } from 'lucia';
 import { tooManyLoginsToken } from './schema';
-import { eq, lt, type InferSelectModel } from 'drizzle-orm';
+import { eq, type InferSelectModel } from 'drizzle-orm';
 
 export type PasswordResetToken = InferSelectModel<typeof tooManyLoginsToken>;
 
@@ -72,9 +72,6 @@ export const verifyTooManyLoginsToken = async (verifyMe: string) => {
 	if (!isWithinExpiration(token.expires)) {
 		throw error(400, 'Token is expired');
 	}
-
-	// We're treating tooManyLoginsToken.expires as a TTL here
-	db.delete(tooManyLoginsToken).where(lt(tooManyLoginsToken.expires, new Date().getTime()));
 
 	return await auth.getUser(token.userId);
 };

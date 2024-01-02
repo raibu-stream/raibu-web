@@ -7,7 +7,7 @@ import { error } from '@sveltejs/kit';
 import { auth, db } from './db';
 import type { User } from 'lucia';
 import { passwordResetToken } from './schema';
-import { eq, lt, type InferSelectModel } from 'drizzle-orm';
+import { eq, type InferSelectModel } from 'drizzle-orm';
 
 const ONE_HOUR_IN_MS = 1000 * 60 * 60;
 const FOUR_HOURS_IN_MS = ONE_HOUR_IN_MS * 4;
@@ -74,9 +74,6 @@ export const verifyPasswordResetToken = async (verifyMe: string): Promise<User> 
 	if (!isWithinExpiration(token.expires)) {
 		throw error(400, 'Token is expired');
 	}
-
-	// We're treating passwordResetToken.expires as a TTL here
-	db.delete(passwordResetToken).where(lt(passwordResetToken.expires, new Date().getTime()));
 
 	return await auth.getUser(token.userId);
 };

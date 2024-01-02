@@ -56,7 +56,7 @@
 <div
 	class="star absolute h-[2px] w-[2px] rounded-full bg-neutral-100 shadow-neutral-100 {speed ===
 	'fast'
-		? 'after:to-transparent after:absolute after:left-0 after:top-0 after:h-[2px] after:w-[100px] after:origin-right after:bg-gradient-to-r after:from-neutral-100'
+		? 'after:absolute after:left-0 after:top-0 after:h-[2px] after:w-[100px] after:origin-right after:bg-gradient-to-r after:from-neutral-100 after:to-transparent'
 		: ''}"
 	style:top="{top}%"
 	style:left="{left}%"

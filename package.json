@@ -1,6 +1,7 @@
 {
 	"name": "raibu-web",
 	"version": "1.2.1",
+	"license": "UNLICENSED",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
@@ -34,8 +35,8 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@faker-js/faker": "^8.3.1",
 		"@fortawesome/fontawesome-free": "^6.5.1",
-		"@lucia-auth/adapter-mongoose": "^3.0.1",
 		"@lucia-auth/adapter-postgresql": "^2.0.2",
 		"@typescript-eslint/eslint-plugin": "^6.15.0",
 		"@typescript-eslint/parser": "^6.15.0",
@@ -44,11 +45,12 @@
 		"expiry-map": "^2.0.0",
 		"fxa-common-password-list": "^0.0.4",
 		"html-to-text": "^9.0.5",
+		"layercake": "^8.0.2",
 		"lucia": "^2.7.4",
 		"mjml": "^4.14.1",
-		"mongoose": "^8.0.3",
 		"nodemailer": "^6.9.7",
 		"postgres": "^3.4.3",
+		"toad-scheduler": "^3.0.0",
 		"tslib": "^2.6.2",
 		"typescript": "^5.3.3"
 	}

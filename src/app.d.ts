@@ -4,8 +4,9 @@ declare global {
 		type Auth = import('$lib/models/db').Auth;
 		type DatabaseUserAttributes = {
 			email: string;
-			isEmailVerified: boolean;
-			isLocked: boolean;
+			is_email_verified: boolean;
+			is_locked: boolean;
+			is_admin: boolean;
 		};
 		// eslint-disable-next-line @typescript-eslint/ban-types
 		type DatabaseSessionAttributes = {};
@@ -13,6 +14,10 @@ declare global {
 	namespace App {
 		interface Locals {
 			auth: import('lucia').AuthRequest;
+		}
+		interface Error {
+			message: string;
+			errorId?: string;
 		}
 	}
 }

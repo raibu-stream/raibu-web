@@ -7,6 +7,9 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
 import * as schema from './schema';
+import { ToadScheduler, SimpleIntervalJob, AsyncTask } from 'toad-scheduler';
+import { lt } from 'drizzle-orm';
+import { faker } from '@faker-js/faker';
 
 // You should use npm run db-push in dev
 if (!dev) {
@@ -35,16 +38,56 @@ export const auth = lucia({
 	getUserAttributes: (data) => {
 		return {
 			email: data.email,
-			isEmailVerified: data.isEmailVerified,
-			isLocked: data.isLocked
+			isEmailVerified: data.is_email_verified,
+			isLocked: data.is_locked,
+			isAdmin: data.is_admin
 		};
 	}
 });
 export type Auth = typeof auth;
 console.log('Connected to database');
 
-// if (dev) {
-// 	await Promise.all(Object.values(schema).map(table => {
-// 		return db.delete(table);
-// 	}));
-// }
+// eslint-disable-next-line no-constant-condition
+if (dev && false) {
+	await Promise.all(
+		Object.values(schema).map((table) => {
+			return db.delete(table);
+		})
+	);
+	await Promise.all(
+		[...Array(20)].map(async () => {
+			const email = faker.internet.email().toLowerCase();
+			await auth.createUser({
+				key: {
+					providerId: 'email',
+					providerUserId: email,
+					password: faker.internet.password()
+				},
+				attributes: {
+					email,
+					is_email_verified: false,
+					is_locked: false,
+					is_admin: false
+				}
+			});
+		})
+	);
+	console.log('Fake users inserted');
+}
+
+const scheduler = new ToadScheduler();
+const ttlTask = new AsyncTask('db ttl', async () => {
+	Promise.all([
+		db
+			.delete(schema.emailVerificationCode)
+			.where(lt(schema.emailVerificationCode.expires, new Date().getTime())),
+		db
+			.delete(schema.passwordResetToken)
+			.where(lt(schema.passwordResetToken.expires, new Date().getTime())),
+		db
+			.delete(schema.tooManyLoginsToken)
+			.where(lt(schema.tooManyLoginsToken.expires, new Date().getTime()))
+	]);
+});
+const ttlJob = new SimpleIntervalJob({ minutes: 1 }, ttlTask);
+scheduler.addSimpleIntervalJob(ttlJob);

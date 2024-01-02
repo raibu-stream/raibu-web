@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Star from './Star.svelte';
+	import Star from '$lib/components/Star.svelte';
 
 	let target = { x: 0, y: 0, ease: 0.05 };
 	let innerHeight: number;
