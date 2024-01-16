@@ -86,7 +86,10 @@ const ttlTask = new AsyncTask('db ttl', async () => {
 			.where(lt(schema.passwordResetToken.expires, new Date().getTime())),
 		db
 			.delete(schema.tooManyLoginsToken)
-			.where(lt(schema.tooManyLoginsToken.expires, new Date().getTime()))
+			.where(lt(schema.tooManyLoginsToken.expires, new Date().getTime())),
+		db
+			.delete(schema.timeOut)
+			.where(lt(schema.timeOut.expires, new Date().getTime()))
 	]);
 });
 const ttlJob = new SimpleIntervalJob({ minutes: 1 }, ttlTask);

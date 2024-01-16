@@ -44,7 +44,6 @@
 		"d3-scale": "^4.0.2",
 		"dotenv": "^16.3.1",
 		"drizzle-orm": "^0.29.1",
-		"expiry-map": "^2.0.0",
 		"fxa-common-password-list": "^0.0.4",
 		"html-to-text": "^9.0.5",
 		"layercake": "^8.0.2",

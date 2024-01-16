@@ -125,3 +125,10 @@ export const errorLog = pgTable('error_log', {
 		mode: 'number'
 	}).notNull()
 });
+
+export const timeOut = pgTable('time_out', {
+	timerId: text('id').notNull(),
+	expires: bigint('expires', {
+		mode: 'number'
+	}).notNull()
+})
