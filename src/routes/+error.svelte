@@ -1,9 +1,6 @@
 <script lang="ts">
+	import HttpError from "./httpError.svelte";
 	import { page } from '$app/stores';
 </script>
 
-<h2>{$page.status}</h2>
-<p>{$page.error?.message}</p>
-{#if $page.error?.errorId !== undefined}
-	<small>{$page.error?.errorId}</small>
-{/if}
+<HttpError page={$page} />
