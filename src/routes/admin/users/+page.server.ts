@@ -16,7 +16,10 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		throw redirect(302, '/admin/users');
 	}
 
-	const searchCondition = searchString !== null ? or(ilike(user.email, `%${searchString}%`), ilike(user.id, `%${searchString}%`)) : undefined;
+	const searchCondition =
+		searchString !== null
+			? or(ilike(user.email, `%${searchString}%`), ilike(user.id, `%${searchString}%`))
+			: undefined;
 
 	// TODO: count() is slow :(
 	const usersCount = await db
@@ -32,7 +35,10 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	});
 
 	if (users.length === 0 && pageIndex !== 0 && searchString === null) {
-		throw redirect(302, `/admin/users${searchString !== null && usersCount !== 0 ? `?search=${searchString}` : ''}`);
+		throw redirect(
+			302,
+			`/admin/users${searchString !== null && usersCount !== 0 ? `?search=${searchString}` : ''}`
+		);
 	}
 
 	return {

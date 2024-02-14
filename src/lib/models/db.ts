@@ -1,8 +1,8 @@
-import { lucia } from 'lucia';
+import { LuciaError, lucia } from 'lucia';
 import { sveltekit } from 'lucia/middleware';
 import { dev } from '$app/environment';
 import { postgres as postgresAdapter } from '@lucia-auth/adapter-postgresql';
-import { RAIBU_DB_URL } from '$env/static/private';
+import { RAIBU_DB_URL, RAIBU_ADMIN_PASS } from '$env/static/private';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
@@ -45,6 +45,26 @@ export const auth = lucia({
 	}
 });
 export type Auth = typeof auth;
+try {
+	await auth.createUser({
+		key: {
+			providerId: 'email',
+			providerUserId: 'contact@raibu.stream',
+			password: RAIBU_ADMIN_PASS
+		},
+		attributes: {
+			email: 'contact@raibu.stream',
+			is_email_verified: true,
+			is_locked: false,
+			is_admin: true
+		}
+	});
+} catch (e) {
+	if (!(e instanceof LuciaError && e.message === 'AUTH_DUPLICATE_KEY_ID')) {
+		throw e;
+	}
+}
+
 console.log('Connected to database');
 
 // eslint-disable-next-line no-constant-condition
@@ -87,9 +107,7 @@ const ttlTask = new AsyncTask('db ttl', async () => {
 		db
 			.delete(schema.tooManyLoginsToken)
 			.where(lt(schema.tooManyLoginsToken.expires, new Date().getTime())),
-		db
-			.delete(schema.timeOut)
-			.where(lt(schema.timeOut.expires, new Date().getTime()))
+		db.delete(schema.timeOut).where(lt(schema.timeOut.expires, new Date().getTime()))
 	]);
 });
 const ttlJob = new SimpleIntervalJob({ minutes: 1 }, ttlTask);

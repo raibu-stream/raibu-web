@@ -131,5 +131,5 @@ export const timeOut = pgTable('time_out', {
 	expires: bigint('expires', {
 		mode: 'number'
 	}).notNull(),
-	attempts: smallint("attempts")
-})
+	attempts: smallint('attempts')
+});

@@ -4,10 +4,8 @@
 	import FormError from '$lib/components/FormError.svelte';
 	import { dev } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import emailRegex from '$lib/emailRegex';
-	import handleApiResponse from '$lib/handleApiResponse';
-
-	const MINIMUM_PASSWORD_LENGTH = 8;
+	import { emailRegex } from '$lib/utils.js';
+	import { handleApiResponse, checkPasswordLength } from '$lib/utils.js';
 
 	let request: Promise<unknown> | undefined;
 	let apiError: string | undefined;
@@ -17,20 +15,6 @@
 
 	let passwordError: string | undefined;
 	let emailError: string | undefined;
-
-	const checkPasswordLength = (toCheck: string) => {
-		const length = toCheck.length;
-		if (length === 0) {
-			return undefined;
-		}
-		if (length < MINIMUM_PASSWORD_LENGTH) {
-			return `Must be at least ${MINIMUM_PASSWORD_LENGTH} characters`;
-		}
-		if (length > 255) {
-			return 'Must be below 255 characters';
-		}
-		return undefined;
-	};
 
 	const handleSubmit = () => {
 		apiError = undefined;

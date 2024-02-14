@@ -1,5 +1,5 @@
 <script lang="ts">
-	import HttpError from "./httpError.svelte";
+	import HttpError from './httpError.svelte';
 	import { page } from '$app/stores';
 </script>
 

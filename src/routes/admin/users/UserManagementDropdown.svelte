@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import handleApiResponse from '$lib/handleApiResponse';
+	import { handleApiResponse } from '$lib/utils.js';
 	import { dropdown } from '../../../stores';
 	import type { user as userSchema } from '$lib/models/schema';
 	import type { InferSelectModel } from 'drizzle-orm';
 
 	export let user: InferSelectModel<typeof userSchema>;
 
+	// eslint-disable-next-line no-undef
 	const patch = (update: Partial<Lucia.DatabaseUserAttributes>) => {
 		$dropdown = undefined;
 

@@ -2,7 +2,7 @@
 	import { slide } from 'svelte/transition';
 	import FormError from '$lib/components/FormError.svelte';
 	import SegmentedInput from '$lib/components/SegmentedInput.svelte';
-	import handleApiResponse from '$lib/handleApiResponse';
+	import { handleApiResponse } from '$lib/utils.js';
 	import { goto } from '$app/navigation';
 	import type { PageServerData } from './$types';
 

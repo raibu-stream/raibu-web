@@ -2,7 +2,7 @@ import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/models/db';
 import { count, ilike, or } from 'drizzle-orm';
-import { errorLog, user } from '$lib/models/schema';
+import { errorLog } from '$lib/models/schema';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	const session = await locals.auth.validate();
@@ -10,16 +10,16 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		throw error(401, 'You are not an admin');
 	}
 
-
 	const pageIndex = Number(url.searchParams.get('page')) || 0;
 	const searchString = url.searchParams.get('search');
 	if (isNaN(Number(url.searchParams.get('page'))) || 0 > pageIndex) {
 		throw redirect(302, '/admin/errors');
 	}
 
-
-
-	const searchCondition = searchString !== null ? or(ilike(errorLog.errorId, `%${searchString}%`), ilike(errorLog.error, `%${searchString}%`)) : undefined;
+	const searchCondition =
+		searchString !== null
+			? or(ilike(errorLog.errorId, `%${searchString}%`), ilike(errorLog.error, `%${searchString}%`))
+			: undefined;
 
 	// TODO: count() is slow :(
 	const errorsCount = await db

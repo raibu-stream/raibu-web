@@ -3,7 +3,7 @@ import { auth } from '$lib/models/db';
 import { LuciaError } from 'lucia';
 import { dev } from '$app/environment';
 import { newEmailVerificationCode } from '$lib/models/emailVerificationCode';
-import emailRegex from '$lib/emailRegex';
+import { checkPasswordLength, emailRegex } from '$lib/utils.js';
 import commonPasswordList from 'fxa-common-password-list';
 import type { RequestEvent, RequestHandler } from './$types';
 
@@ -23,8 +23,7 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 	}
 	if (
 		typeof password !== 'string' ||
-		password.length < 8 ||
-		password.length > 255 ||
+		checkPasswordLength(password) !== undefined ||
 		commonPasswordList.test(password)
 	) {
 		throw error(400, {

@@ -14,7 +14,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 	const password = formData.password;
 
 	const timeout = await db.query.timeOut.findFirst({
-		where: and(eq(timeOut.timerId, getClientAddress() + "session"), gt(timeOut.attempts, 10))
+		where: and(eq(timeOut.timerId, getClientAddress() + 'session'), gt(timeOut.attempts, 10))
 	});
 	if (timeout !== undefined) {
 		throw error(400, "You've tried logging in too many times. Try again in 1 minute.");
@@ -53,20 +53,23 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 			attributes: {}
 		});
 		locals.auth.setSession(session);
-		await db.delete(timeOut).where(eq(timeOut.timerId, email + "session"));
+		await db.delete(timeOut).where(eq(timeOut.timerId, email + 'session'));
 	} catch (e) {
 		if (
 			e instanceof LuciaError &&
 			(e.message === 'AUTH_INVALID_KEY_ID' || e.message === 'AUTH_INVALID_PASSWORD')
 		) {
 			const timeout = await db.query.timeOut.findFirst({
-				where: eq(timeOut.timerId, getClientAddress() + "session")
+				where: eq(timeOut.timerId, getClientAddress() + 'session')
 			});
 			if (timeout !== undefined) {
-				await db.update(timeOut).set({ attempts: sql`${timeOut.attempts} + 1` }).where(eq(timeOut.timerId, getClientAddress() + "session"))
+				await db
+					.update(timeOut)
+					.set({ attempts: sql`${timeOut.attempts} + 1` })
+					.where(eq(timeOut.timerId, getClientAddress() + 'session'));
 			} else {
 				await db.insert(timeOut).values({
-					timerId: getClientAddress() + "session",
+					timerId: getClientAddress() + 'session',
 					expires: new Date().getTime() + ONE_MINUTE_IN_MS,
 					attempts: 1
 				});
@@ -115,9 +118,11 @@ const wrongPassword = async (email: string) => {
 		return;
 	}
 
-	const attempts = (await db.query.timeOut.findFirst({
-		where: eq(timeOut.timerId, email + "session")
-	}))?.attempts;
+	const attempts = (
+		await db.query.timeOut.findFirst({
+			where: eq(timeOut.timerId, email + 'session')
+		})
+	)?.attempts;
 
 	if (attempts !== undefined && attempts !== null && attempts >= 4) {
 		await auth.updateUserAttributes(user.userId, {
@@ -125,7 +130,7 @@ const wrongPassword = async (email: string) => {
 		});
 		await auth.invalidateAllUserSessions(user.userId);
 		await newTooManyLoginsToken(user);
-		await db.delete(timeOut).where(eq(timeOut.timerId, email + "session"));
+		await db.delete(timeOut).where(eq(timeOut.timerId, email + 'session'));
 
 		throw error(400, {
 			message:
@@ -133,12 +138,15 @@ const wrongPassword = async (email: string) => {
 		});
 	} else if (attempts === undefined) {
 		await db.insert(timeOut).values({
-			timerId: email + "session",
+			timerId: email + 'session',
 			expires: new Date().getTime() + ONE_MINUTE_IN_MS,
 			attempts: 1
 		});
 	} else {
-		await db.update(timeOut).set({ attempts: sql`${timeOut.attempts} + 1` }).where(eq(timeOut.timerId, email + "session"))
+		await db
+			.update(timeOut)
+			.set({ attempts: sql`${timeOut.attempts} + 1` })
+			.where(eq(timeOut.timerId, email + 'session'));
 	}
 };
 

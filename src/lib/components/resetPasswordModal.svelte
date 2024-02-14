@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import FormError from './FormError.svelte';
-	import Modal from './Modal.svelte';
 	import PasswordInput from './PasswordInput.svelte';
 	import commonPasswordList from 'fxa-common-password-list';
-	import handleApiResponse from '$lib/handleApiResponse';
+	import { handleApiResponse } from '$lib/utils.js';
 	import { modal } from '../../stores';
 
 	export let resetPasswordToken: string | null;

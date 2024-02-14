@@ -3,8 +3,8 @@
 	import { fly } from 'svelte/transition';
 	import FormError from './FormError.svelte';
 	import PasswordInput from './PasswordInput.svelte';
-	import emailRegex from '$lib/emailRegex';
-	import handleApiResponse from '$lib/handleApiResponse';
+	import { emailRegex } from '$lib/utils.js';
+	import { handleApiResponse } from '$lib/utils.js';
 	import { modal } from '../../stores';
 
 	let password = '';

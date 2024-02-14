@@ -2,8 +2,9 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import Table from '$lib/components/Table.svelte';
-	import { dropdown } from '../../../stores.js';
+	import { dropdown, modal } from '../../../stores.js';
 	import UserManagementDropdown from './UserManagementDropdown.svelte';
+	import AddUserModal from './AddUserModal.svelte';
 	export let data;
 
 	let searchString = '';
@@ -26,7 +27,15 @@
 	</div>
 </form>
 
-<Table {headings}>
+<Table
+	{headings}
+	add={() => {
+		$modal = {
+			component: AddUserModal,
+			title: 'Add User'
+		};
+	}}
+>
 	{#each data.users as user, index}
 		<tr class="h-12 border-t-2 border-neutral-300">
 			<td class="pl-6">
