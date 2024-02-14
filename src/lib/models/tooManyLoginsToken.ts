@@ -64,7 +64,7 @@ export const newTooManyLoginsToken = async (user: User): Promise<PasswordResetTo
 export const verifyTooManyLoginsToken = async (verifyMe: string) => {
 	const condition = eq(tooManyLoginsToken.token, verifyMe);
 
-	const token = await db.query.passwordResetToken.findFirst({ where: condition });
+	const token = await db.query.tooManyLoginsToken.findFirst({ where: condition });
 	if (token === undefined) {
 		throw error(400, 'Token does not exist');
 	}

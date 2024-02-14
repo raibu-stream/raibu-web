@@ -6,7 +6,7 @@ import {
 	primaryKey,
 	text,
 	timestamp,
-	uuid
+	smallint
 } from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
@@ -88,7 +88,7 @@ export const passwordResetToken = pgTable('password_reset_token', {
 	}).notNull()
 });
 
-export const tooManyLoginsToken = pgTable('password_reset_token', {
+export const tooManyLoginsToken = pgTable('too_many_logins_token', {
 	userId: varchar('user_id', {
 		length: 15
 	})
@@ -127,8 +127,9 @@ export const errorLog = pgTable('error_log', {
 });
 
 export const timeOut = pgTable('time_out', {
-	timerId: text('id').notNull(),
+	timerId: text('id').primaryKey(),
 	expires: bigint('expires', {
 		mode: 'number'
-	}).notNull()
+	}).notNull(),
+	attempts: smallint("attempts")
 })

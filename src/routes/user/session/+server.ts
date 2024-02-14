@@ -1,18 +1,24 @@
-import { auth } from '$lib/models/db';
+import { auth, db } from '$lib/models/db';
 import { LuciaError } from 'lucia';
 import { error, type HttpError } from '@sveltejs/kit';
-import ExpiryMap from 'expiry-map';
 import { newTooManyLoginsToken } from '$lib/models/tooManyLoginsToken';
 import type { RequestEvent, RequestHandler } from './$types';
+import { timeOut } from '$lib/models/schema';
+import { and, eq, gt, sql } from 'drizzle-orm';
 
-const ONE_DAY_IN_MS = 1000 * 60 * 60 * 24;
+const ONE_MINUTE_IN_MS = 1000 * 60;
 
-const loginAttempts = new ExpiryMap(ONE_DAY_IN_MS);
-
-export const POST: RequestHandler = async ({ request, locals }: RequestEvent) => {
+export const POST: RequestHandler = async ({ request, locals, getClientAddress }: RequestEvent) => {
 	const formData = await request.json();
 	let email = formData.email;
 	const password = formData.password;
+
+	const timeout = await db.query.timeOut.findFirst({
+		where: and(eq(timeOut.timerId, getClientAddress() + "session"), gt(timeOut.attempts, 10))
+	});
+	if (timeout !== undefined) {
+		throw error(400, "You've tried logging in too many times. Try again in 1 minute.");
+	}
 
 	if (typeof email !== 'string') {
 		throw error(400, {
@@ -47,12 +53,25 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 			attributes: {}
 		});
 		locals.auth.setSession(session);
-		loginAttempts.delete(email);
+		await db.delete(timeOut).where(eq(timeOut.timerId, email + "session"));
 	} catch (e) {
 		if (
 			e instanceof LuciaError &&
 			(e.message === 'AUTH_INVALID_KEY_ID' || e.message === 'AUTH_INVALID_PASSWORD')
 		) {
+			const timeout = await db.query.timeOut.findFirst({
+				where: eq(timeOut.timerId, getClientAddress() + "session")
+			});
+			if (timeout !== undefined) {
+				await db.update(timeOut).set({ attempts: sql`${timeOut.attempts} + 1` }).where(eq(timeOut.timerId, getClientAddress() + "session"))
+			} else {
+				await db.insert(timeOut).values({
+					timerId: getClientAddress() + "session",
+					expires: new Date().getTime() + ONE_MINUTE_IN_MS,
+					attempts: 1
+				});
+			}
+
 			if (e.message === 'AUTH_INVALID_KEY_ID') {
 				throw error(400, {
 					message: 'Incorrect email or password'
@@ -90,32 +109,39 @@ export const DELETE: RequestHandler = async ({ locals }: RequestEvent) => {
 };
 
 const wrongPassword = async (email: string) => {
-	const attempts = loginAttempts.get(email);
 	const key = await auth.getKey('email', email);
 	const user = await auth.getUser(key.userId);
-
 	if (!user.isEmailVerified) {
 		return;
 	}
 
-	if (attempts !== undefined && attempts >= 4) {
+	const attempts = (await db.query.timeOut.findFirst({
+		where: eq(timeOut.timerId, email + "session")
+	}))?.attempts;
+
+	if (attempts !== undefined && attempts !== null && attempts >= 4) {
 		await auth.updateUserAttributes(user.userId, {
 			is_locked: true
 		});
 		await auth.invalidateAllUserSessions(user.userId);
 		await newTooManyLoginsToken(user);
-		loginAttempts.delete(email);
+		await db.delete(timeOut).where(eq(timeOut.timerId, email + "session"));
 
 		throw error(400, {
 			message:
 				'Too many failed login attempts. Your account has been locked. Check your email to unlock it.'
 		});
+	} else if (attempts === undefined) {
+		await db.insert(timeOut).values({
+			timerId: email + "session",
+			expires: new Date().getTime() + ONE_MINUTE_IN_MS,
+			attempts: 1
+		});
+	} else {
+		await db.update(timeOut).set({ attempts: sql`${timeOut.attempts} + 1` }).where(eq(timeOut.timerId, email + "session"))
 	}
-
-	loginAttempts.delete(email);
-	loginAttempts.set(email, attempts === undefined ? 1 : attempts + 1);
 };
 
 const isHttpError = (e: any): e is HttpError => {
-	return 'code' in e && 'body' in e && 'message' in e.body;
+	return 'status' in e && 'body' in e && 'message' in e.body;
 };

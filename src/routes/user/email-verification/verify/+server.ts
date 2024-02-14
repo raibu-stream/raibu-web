@@ -1,12 +1,21 @@
 import { error } from '@sveltejs/kit';
-import { auth } from '$lib/models/db';
+import { auth, db } from '$lib/models/db';
 import { verifyEmailVerificationCode } from '$lib/models/emailVerificationCode';
 import type { RequestEvent, RequestHandler } from './$types';
+import { timeOut } from '$lib/models/schema';
+import { eq } from 'drizzle-orm';
 
 export const POST: RequestHandler = async ({ request, locals }: RequestEvent) => {
 	let session = await locals.auth.validate();
 	if (!session) {
 		throw error(401);
+	}
+
+	const timeout = await db.query.timeOut.findFirst({
+		where: eq(timeOut.timerId, session.user.userId)
+	});
+	if (timeout !== undefined) {
+		throw error(400, { message: `You cannot attempt to verify your account for the next minute` });
 	}
 
 	const formData = await request.json();
