@@ -41,13 +41,13 @@
 		<TeamMember
 			imageUrl={ellite}
 			name="Ellite"
-			titles={['Founder', 'Lead Developer']}
+			titles={['Founder', 'Project Lead']}
 			twitterUrl="https://twitter.com/ellitedev"
 		/>
 		<TeamMember
 			imageUrl={vixie}
 			name="Vixie"
-			titles={['Developer']}
+			titles={['Lead Developer']}
 			twitterUrl="https://twitter.com/VixieTSQ"
 		/>
 		<TeamMember
