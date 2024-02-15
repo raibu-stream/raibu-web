@@ -34,6 +34,7 @@ jobs:
             RAIBU_EMAIL_PORT=${{ secrets.RAIBU_EMAIL_PORT }}
             RAIBU_EMAIL_USER=${{ secrets.RAIBU_EMAIL_USER }}
             RAIBU_EMAIL_PASS=${{ secrets.RAIBU_EMAIL_PASS }}
+            RAIBU_ADMIN_PASS=${{ secrets.RAIBU_ADMIN_PASS }}
       - name: Test image
         run: |
           docker pull registry.ellite.dev/raibu-web:${{ steps.prep.outputs.tag }}

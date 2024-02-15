@@ -4,7 +4,7 @@
 
 	export let data: PageServerData;
 
-	let streamkey = 'foobar';
+	let streamkey = 'stream_key';
 </script>
 
 <div class="my-8">
