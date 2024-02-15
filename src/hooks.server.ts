@@ -34,6 +34,12 @@ export const handleError = async ({ error }) => {
 		console.error(error);
 	}
 
+	if (isNotFoundError(error)) {
+		return {
+			message: 'This page does not exist.',
+		};
+	}
+
 	const errorId = crypto.randomUUID();
 
 	db.insert(errorLog)
@@ -49,3 +55,7 @@ export const handleError = async ({ error }) => {
 		errorId
 	};
 };
+
+const isNotFoundError = (error: any): boolean => {
+	return 'stack' in error && error.stack.startsWith("Error: Not found:")
+}
