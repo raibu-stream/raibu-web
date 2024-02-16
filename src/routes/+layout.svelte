@@ -37,7 +37,7 @@
 		{#key data.loggedIn}
 			<Nav loggedIn={data.loggedIn} email={data.email} />
 		{/key}
-		<main class="relative flex w-full grow flex-col items-center overflow-visible pt-18 sm:pt-0">
+		<main class="relative flex w-full grow flex-col items-center overflow-visible">
 			<slot />
 			<ScrollTop></ScrollTop>
 		</main>

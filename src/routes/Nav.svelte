@@ -4,6 +4,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { dropdown, modal } from '../stores';
 	import UserDropdown from './UserDropdown.svelte';
+	import { onMount } from 'svelte';
 
 	export let loggedIn: boolean;
 	export let email: string | undefined;
@@ -28,10 +29,49 @@
 			await invalidateAll();
 		});
 	};
+
+	const onScroll = (pxScrollFromTop: number) => {
+		if (pxScrollFromTop === 0) {
+			isScrollingUp = false;
+		}
+
+		if (Math.abs(previousPxScrollFromTop - pxScrollFromTop) <= 5) return;
+
+		if (pxScrollFromTop < previousPxScrollFromTop && pxScrollFromTop > navHeight) {
+			isScrollingUp = true;
+		} else if (pxScrollFromTop < navHeight) {
+		} else {
+			isScrollingUp = false;
+		}
+
+		previousPxScrollFromTop = pxScrollFromTop;
+	};
+
+	let pxScrollFromTop = 0;
+	let previousPxScrollFromTop = 0;
+	let isScrollingUp = false;
+	let navHeight = 0;
+	let didScroll = false;
+
+	setInterval(() => {
+		if (didScroll) {
+			onScroll(pxScrollFromTop);
+			didScroll = false;
+		}
+	}, 250);
+
+	$: {
+		pxScrollFromTop;
+		didScroll = true;
+	}
 </script>
 
+<svelte:window bind:scrollY={pxScrollFromTop} />
+
 <nav
-	class="fixed z-20 flex h-18 w-full items-center gap-4 border-b border-neutral-300 bg-neutral-800 px-6 sm:static sm:w-auto sm:bg-transparent"
+	class="sticky -top-18 z-20 flex h-18 items-center gap-4 border-b border-neutral-300 bg-neutral-800 px-6 transition-all"
+	class:!top-0={isScrollingUp || mobileNavOpen}
+	bind:clientHeight={navHeight}
 >
 	<h1>
 		<a href="/" class="link font-jp text-2xl font-semibold tracking-tight sm:text-4xl">ライブ</a>
