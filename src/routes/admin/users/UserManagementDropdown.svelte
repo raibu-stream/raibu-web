@@ -4,6 +4,8 @@
 	import { dropdown } from '../../../stores';
 	import type { user as userSchema } from '$lib/models/schema';
 	import type { InferSelectModel } from 'drizzle-orm';
+	import { toast } from 'svelte-sonner';
+	import { error } from '@sveltejs/kit';
 
 	export let user: InferSelectModel<typeof userSchema>;
 
@@ -11,27 +13,51 @@
 	const patch = (update: Partial<Lucia.DatabaseUserAttributes>) => {
 		$dropdown = undefined;
 
-		fetch('/admin/users', {
-			method: 'PATCH',
-			body: JSON.stringify({ update: update, userId: user.id })
-		}).then(async (res) => {
-			await handleApiResponse(res, async () => {
-				invalidateAll();
-			});
-		});
+		toast.promise(
+			fetch('/admin/users', {
+				method: 'PATCH',
+				body: JSON.stringify({ update: update, userId: user.id })
+			}).then(async (res) => {
+				const maybeError = await handleApiResponse(res, async () => {
+					invalidateAll();
+				});
+
+				if (maybeError !== undefined) {
+					throw maybeError;
+				}
+			}),
+			{
+				loading: 'Loading...',
+				success: 'Updated!',
+				error: 'An error occurred.'
+			}
+		);
 	};
 
 	const deleteUser = () => {
 		$dropdown = undefined;
 
-		fetch('/admin/users', {
-			method: 'DELETE',
-			body: JSON.stringify({ userId: user.id })
-		}).then(async (res) => {
-			await handleApiResponse(res, async () => {
-				invalidateAll();
-			});
-		});
+		toast.promise(
+			fetch('/admin/users', {
+				method: 'DELETE',
+				body: JSON.stringify({ userId: user.id })
+			})
+				.then(async (res) => {
+					return handleApiResponse(res, async () => {
+						invalidateAll();
+					});
+				})
+				.then((res) => {
+					if (res !== undefined) {
+						toast.error(res);
+					}
+				}),
+			{
+				loading: 'Loading...',
+				success: 'Deleted!',
+				error: 'An error occurred.'
+			}
+		);
 	};
 </script>
 

@@ -51,7 +51,7 @@ export const handleError = async ({ error }) => {
 		.catch((e) => console.error(e));
 
 	return {
-		message: 'An unexpected error occured.',
+		message: 'An unexpected error occurred.',
 		errorId
 	};
 };

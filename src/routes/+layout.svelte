@@ -10,6 +10,7 @@
 	import type { LayoutServerData } from './$types';
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import Modal from '$lib/components/Modal.svelte';
+	import Toaster from '$lib/components/Toaster.svelte';
 	import { modal } from '../stores';
 
 	export let data: LayoutServerData;
@@ -31,6 +32,7 @@
 <div class="overflow-x-clip bg-neutral-800 text-center text-neutral-100">
 	<Modal />
 	<Dropdown />
+	<Toaster />
 	<div class="flex min-h-screen flex-col overflow-visible">
 		{#key data.loggedIn}
 			<Nav loggedIn={data.loggedIn} email={data.email} />

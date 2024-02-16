@@ -76,4 +76,8 @@
 			@apply !transform-none !animate-none !scroll-auto !transition-none;
 		}
 	}
+
+	.sonner-toast>div[data-icon] {
+		@apply mt-1
+	}
 }
