@@ -63,7 +63,11 @@
 			body: JSON.stringify({ code: code })
 		}).then(async (res) => {
 			apiError = await handleApiResponse(res, async () => {
-				goto('/user');
+				if (data.redirectTo !== null) {
+					goto(`/${data.redirectTo.slice(1)}`);
+				} else {
+					goto('/user');
+				}
 			});
 		});
 	};

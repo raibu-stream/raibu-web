@@ -20,19 +20,19 @@
 			props: { resetPasswordToken: data.resetPasswordToken },
 			title: 'Reset your password'
 		};
-	}
-	if (data.loginModal === 'true') {
+	} else if (data.loginModal === 'true') {
 		$modal = {
 			component: LoginModal,
+			props: data.redirectTo !== null ? { redirectTo: data.redirectTo } : undefined,
 			title: 'Login'
 		};
 	}
 </script>
 
 <div class="overflow-x-clip bg-neutral-800 text-center text-neutral-100">
-	<Modal />
 	<Dropdown />
 	<Toaster />
+	<Modal />
 	<div class="flex min-h-screen flex-col overflow-visible">
 		{#key data.loggedIn}
 			<Nav loggedIn={data.loggedIn} email={data.email} />

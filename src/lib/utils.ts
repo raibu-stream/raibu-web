@@ -36,3 +36,8 @@ export const checkPasswordLength = (toCheck: string) => {
 	}
 	return undefined;
 };
+
+export const createLoginRedirectURL = (url: URL, to: string = '/?login=true') => {
+	const path = encodeURIComponent(url.pathname + url.search);
+	return `${to}${to.includes('?') ? '&' : '?'}redirect-to=${path}`;
+};

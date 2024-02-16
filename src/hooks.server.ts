@@ -36,7 +36,7 @@ export const handleError = async ({ error }) => {
 
 	if (isNotFoundError(error)) {
 		return {
-			message: 'This page does not exist.',
+			message: 'This page does not exist.'
 		};
 	}
 
@@ -57,5 +57,5 @@ export const handleError = async ({ error }) => {
 };
 
 const isNotFoundError = (error: any): boolean => {
-	return 'stack' in error && error.stack.startsWith("Error: Not found:")
-}
+	return 'stack' in error && error.stack.startsWith('Error: Not found:');
+};

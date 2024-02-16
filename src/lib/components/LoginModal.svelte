@@ -6,6 +6,10 @@
 	import { emailRegex } from '$lib/utils.js';
 	import { handleApiResponse } from '$lib/utils.js';
 	import { modal } from '../../stores';
+	import { onMount } from 'svelte';
+	import { toast } from 'svelte-sonner';
+
+	export let redirectTo: string | undefined = undefined;
 
 	let password = '';
 	let email = '';
@@ -40,7 +44,11 @@
 			body: JSON.stringify({ email, password })
 		}).then(async (res) => {
 			apiError = await handleApiResponse(res, () => {
-				goto('/user');
+				if (redirectTo !== undefined) {
+					goto(`/${redirectTo.slice(1)}`);
+				} else {
+					goto('/user');
+				}
 				$modal = undefined;
 			});
 		});
@@ -69,6 +77,12 @@
 			});
 		});
 	};
+
+	onMount(() => {
+		if (redirectTo !== undefined) {
+			toast.info('You are not logged in. Login to access this page.', { duration: 7000 });
+		}
+	});
 </script>
 
 {#if !forgetPassword}

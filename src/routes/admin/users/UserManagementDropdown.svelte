@@ -5,7 +5,6 @@
 	import type { user as userSchema } from '$lib/models/schema';
 	import type { InferSelectModel } from 'drizzle-orm';
 	import { toast } from 'svelte-sonner';
-	import { error } from '@sveltejs/kit';
 
 	export let user: InferSelectModel<typeof userSchema>;
 

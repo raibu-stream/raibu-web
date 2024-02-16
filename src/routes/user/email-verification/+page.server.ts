@@ -1,11 +1,14 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { createLoginRedirectURL } from '$lib/utils';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
+	const redirectTo = url.searchParams.get('redirect-to');
+
 	const session = await locals.auth.validate();
 
 	if (!session) {
-		throw redirect(302, '/?login=true');
+		throw redirect(302, createLoginRedirectURL(url));
 	}
 	if (session.user.isEmailVerified) {
 		throw redirect(302, '/user');
@@ -15,6 +18,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	return {
 		email: session.user.email,
-		isPreSent: isPreSent
+		isPreSent: isPreSent,
+		redirectTo
 	};
 };
