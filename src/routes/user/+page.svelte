@@ -1,5 +1,6 @@
 <script lang="ts">
 	import CopyMe from '$lib/components/CopyMe.svelte';
+	import Streams from './Streams.svelte';
 	import type { PageServerData } from './$types';
 
 	export let data: PageServerData;
@@ -102,6 +103,8 @@
 		</li>
 	</ul>
 </section>
+
+<Streams></Streams>
 
 <style lang="postcss">
 	p {
