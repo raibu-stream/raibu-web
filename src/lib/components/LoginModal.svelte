@@ -198,13 +198,13 @@
 				</div>
 			{:else}
 				<div transition:fly={{ x: 500, opacity: 0, duration: 350 }} class="col-start-1 row-start-1">
-					<div class="mb-2 rounded bg-primary-400 bg-opacity-50 p-2 pr-4 text-sm">
+					<div class="mb-3 rounded bg-primary-400 bg-opacity-50 p-2 pr-4 text-sm">
 						<p>
 							<i class="fa-solid fa-circle-check" aria-hidden="true"></i>
 							We sent an email to {email} with instructions.
 						</p>
 					</div>
-					<small class="text-xs text-neutral-200">
+					<small class="text-xs leading-6 text-neutral-200">
 						If the email doesn't show up, check your spam folder. We sent it from
 						noreply@raibu.stream. If you still don't see it, your email address may not be verified.
 					</small>

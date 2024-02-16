@@ -35,6 +35,8 @@ export default {
 				800: '#2d151d',
 				700: '#3e1f28'
 			},
+			danger: '#ED5155',
+			happy: '#7ef2cb',
 			transparent: '#0000'
 		}
 	},
