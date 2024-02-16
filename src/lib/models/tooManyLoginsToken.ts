@@ -66,11 +66,11 @@ export const verifyTooManyLoginsToken = async (verifyMe: string) => {
 
 	const token = await db.query.tooManyLoginsToken.findFirst({ where: condition });
 	if (token === undefined) {
-		throw error(400, 'Token does not exist');
+		error(400, 'Token does not exist');
 	}
 	await db.delete(tooManyLoginsToken).where(condition);
 	if (!isWithinExpiration(token.expires)) {
-		throw error(400, 'Token is expired');
+		error(400, 'Token is expired');
 	}
 
 	return await auth.getUser(token.userId);

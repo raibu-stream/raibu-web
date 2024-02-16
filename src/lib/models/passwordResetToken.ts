@@ -66,13 +66,13 @@ export const verifyPasswordResetToken = async (verifyMe: string): Promise<User> 
 
 	const token = await db.query.passwordResetToken.findFirst({ where: condition });
 	if (token === undefined) {
-		throw error(400, 'Token does not exist');
+		error(400, 'Invalid or expired password reset link');
 	}
 
 	await db.delete(passwordResetToken).where(condition);
 
 	if (!isWithinExpiration(token.expires)) {
-		throw error(400, 'Token is expired');
+		error(400, 'Expired password reset link');
 	}
 
 	return await auth.getUser(token.userId);

@@ -5,10 +5,10 @@ import { createLoginRedirectURL } from '$lib/utils';
 export const load: PageServerLoad = async ({ locals, url }) => {
 	const session = await locals.auth.validate();
 	if (!session) {
-		throw redirect(302, createLoginRedirectURL(url));
+		redirect(302, createLoginRedirectURL(url));
 	}
 	if (!session.user.isEmailVerified) {
-		throw redirect(302, createLoginRedirectURL(url, '/user/email-verification'));
+		redirect(302, createLoginRedirectURL(url, '/user/email-verification'));
 	}
 
 	return {

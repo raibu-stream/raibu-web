@@ -8,25 +8,18 @@ export const GET: RequestHandler = async ({ params, locals }: RequestEvent) => {
 	const user = await verifyTooManyLoginsToken(token);
 	let sessionCookie;
 
-	try {
-		await auth.invalidateAllUserSessions(user.userId);
+	await auth.invalidateAllUserSessions(user.userId);
 
-		await auth.updateUserAttributes(user.userId, {
-			is_locked: false
-		});
+	await auth.updateUserAttributes(user.userId, {
+		is_locked: false
+	});
 
-		const session = await auth.createSession({
-			userId: user.userId,
-			attributes: {}
-		});
-		sessionCookie = auth.createSessionCookie(session);
-		locals.auth.setSession(session);
-	} catch (e) {
-		console.error(e);
-		throw error(500, {
-			message: 'An unknown error occurred'
-		});
-	}
+	const session = await auth.createSession({
+		userId: user.userId,
+		attributes: {}
+	});
+	sessionCookie = auth.createSessionCookie(session);
+	locals.auth.setSession(session);
 
 	return new Response(undefined, {
 		status: 302,

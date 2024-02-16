@@ -21,9 +21,9 @@ export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 				status: 200
 			});
 		}
-		throw error(500, {
-			message: 'An unknown error occurred'
-		});
+		error(500, {
+        			message: 'An unknown error occurred'
+        		});
 	}
 
 	return new Response(JSON.stringify(undefined), {

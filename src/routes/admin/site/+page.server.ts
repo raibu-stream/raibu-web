@@ -7,7 +7,7 @@ import { requestLog } from '$lib/models/schema';
 export const load: PageServerLoad = async ({ locals }) => {
 	const session = await locals.auth.validate();
 	if (!session || !session.user.isAdmin) {
-		throw error(401, 'You are not an admin');
+		error(401, 'You are not an admin');
 	}
 
 	const logsForUniqueRoutes = new Map(

@@ -7,13 +7,13 @@ import { errorLog } from '$lib/models/schema';
 export const load: PageServerLoad = async ({ locals, url }) => {
 	const session = await locals.auth.validate();
 	if (!session || !session.user.isAdmin) {
-		throw error(401, 'You are not an admin');
+		error(401, 'You are not an admin');
 	}
 
 	const pageIndex = Number(url.searchParams.get('page')) || 0;
 	const searchString = url.searchParams.get('search');
 	if (isNaN(Number(url.searchParams.get('page'))) || 0 > pageIndex) {
-		throw redirect(302, '/admin/errors');
+		redirect(302, '/admin/errors');
 	}
 
 	const searchCondition =
@@ -35,7 +35,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	});
 
 	if (errors.length === 0 && pageIndex !== 0 && searchString === null) {
-		throw redirect(302, `/admin/errors${errorsCount !== 0 ? `?search=${searchString}` : ''}`);
+		redirect(302, `/admin/errors${errorsCount !== 0 ? `?search=${searchString}` : ''}`);
 	}
 
 	return {

@@ -29,12 +29,12 @@ export const handle = async ({ event, resolve }) => {
 	return response;
 };
 
-export const handleError = async ({ error }) => {
+export const handleError = async ({ error, status }) => {
 	if (dev) {
 		console.error(error);
 	}
 
-	if (isNotFoundError(error)) {
+	if (status === 404) {
 		return {
 			message: 'This page does not exist.'
 		};
@@ -54,8 +54,4 @@ export const handleError = async ({ error }) => {
 		message: 'An unexpected error occurred.',
 		errorId
 	};
-};
-
-const isNotFoundError = (error: any): boolean => {
-	return 'stack' in error && error.stack.startsWith('Error: Not found:');
 };

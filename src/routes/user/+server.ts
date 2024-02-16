@@ -9,7 +9,7 @@ import type { RequestEvent, RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, locals }: RequestEvent) => {
 	if (!dev) {
-		throw error(400, 'We are currently not accepting registrations. Come back later');
+		error(400, 'We are currently not accepting registrations. Come back later');
 	}
 
 	const formData = await request.json();
@@ -17,18 +17,18 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 	const password = formData.password;
 
 	if (typeof email !== 'string' || email === '' || !emailRegex.test(email) || email.length > 255) {
-		throw error(400, {
-			message: 'Invalid email'
-		});
+		error(400, {
+        			message: 'Invalid email'
+        		});
 	}
 	if (
 		typeof password !== 'string' ||
 		checkPasswordLength(password) !== undefined ||
 		commonPasswordList.test(password)
 	) {
-		throw error(400, {
-			message: 'Invalid password'
-		});
+		error(400, {
+        			message: 'Invalid password'
+        		});
 	}
 
 	try {
@@ -55,13 +55,13 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 		await newEmailVerificationCode(user);
 	} catch (e) {
 		if (e instanceof LuciaError && e.message === 'AUTH_DUPLICATE_KEY_ID') {
-			throw error(400, {
-				message: 'This email is already being used'
-			});
+			error(400, {
+            				message: 'This email is already being used'
+            			});
 		}
-		throw error(500, {
-			message: 'An unknown error occurred'
-		});
+		error(500, {
+        			message: 'An unknown error occurred'
+        		});
 	}
 
 	return new Response(JSON.stringify(undefined), {

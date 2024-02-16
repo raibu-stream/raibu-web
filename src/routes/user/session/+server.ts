@@ -17,16 +17,16 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 		where: and(eq(timeOut.timerId, getClientAddress() + 'session'), gt(timeOut.attempts, 10))
 	});
 	if (timeout !== undefined) {
-		throw error(400, "You've tried logging in too many times. Try again in 1 minute.");
+		error(400, "You've tried logging in too many times. Try again in 1 minute.");
 	}
 
 	if (typeof email !== 'string') {
-		throw error(400, {
+		error(400, {
 			message: 'Invalid email'
 		});
 	}
 	if (typeof password !== 'string') {
-		throw error(400, {
+		error(400, {
 			message: 'Invalid password'
 		});
 	}
@@ -40,7 +40,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 
 			if (user.isLocked) {
 				newTooManyLoginsToken(user);
-				throw error(400, {
+				error(400, {
 					message:
 						'Too many failed login attempts. Your account has been locked. Check your email to unlock it.'
 				});
@@ -76,20 +76,18 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 			}
 
 			if (e.message === 'AUTH_INVALID_KEY_ID') {
-				throw error(400, {
+				error(400, {
 					message: 'Incorrect email or password'
 				});
 			}
 
 			await wrongPassword(email);
-			throw error(400, {
+			error(400, {
 				message: 'Incorrect email or password'
 			});
 		}
-		if (isHttpError(e)) {
-			throw e;
-		}
-		throw error(500, {
+
+		error(500, {
 			message: 'An unknown error occurred'
 		});
 	}
@@ -101,7 +99,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 
 export const DELETE: RequestHandler = async ({ locals }: RequestEvent) => {
 	const session = await locals.auth.validate();
-	if (!session) throw error(401);
+	if (!session) error(401);
 
 	await auth.invalidateSession(session.sessionId);
 	locals.auth.setSession(null);
@@ -132,7 +130,7 @@ const wrongPassword = async (email: string) => {
 		await newTooManyLoginsToken(user);
 		await db.delete(timeOut).where(eq(timeOut.timerId, email + 'session'));
 
-		throw error(400, {
+		error(400, {
 			message:
 				'Too many failed login attempts. Your account has been locked. Check your email to unlock it.'
 		});
@@ -148,8 +146,4 @@ const wrongPassword = async (email: string) => {
 			.set({ attempts: sql`${timeOut.attempts} + 1` })
 			.where(eq(timeOut.timerId, email + 'session'));
 	}
-};
-
-const isHttpError = (e: any): e is HttpError => {
-	return 'status' in e && 'body' in e && 'message' in e.body;
 };

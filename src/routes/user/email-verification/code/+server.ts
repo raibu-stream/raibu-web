@@ -11,7 +11,7 @@ export const POST: RequestHandler = async ({ locals }: RequestEvent) => {
 	const session = await locals.auth.validate();
 
 	if (!session) {
-		throw error(401, {
+		error(401, {
 			message: 'You are not logged in'
 		});
 	}
@@ -20,19 +20,13 @@ export const POST: RequestHandler = async ({ locals }: RequestEvent) => {
 		where: eq(timeOut.timerId, session.user.userId)
 	});
 	if (timeout !== undefined) {
-		throw error(400, { message: `You cannot send another email for the next minute` });
+		error(400, { message: `You cannot send another email for the next minute` });
 	}
 	if (session.user.isEmailVerified) {
-		throw error(400, { message: 'You are already verified' });
+		error(400, { message: 'You are already verified' });
 	}
 
-	try {
-		await newEmailVerificationCode(session.user);
-	} catch (e) {
-		throw error(500, {
-			message: 'An unknown error occurred'
-		});
-	}
+	await newEmailVerificationCode(session.user);
 
 	await db.insert(timeOut).values({
 		timerId: session.user.userId,

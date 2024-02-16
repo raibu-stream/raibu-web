@@ -69,13 +69,13 @@ export const verifyEmailVerificationCode = async (verifyMe: string, user: User):
 		where: condition
 	});
 	if (code === undefined) {
-		throw error(400, 'Code is expired or does not exist');
+		error(400, 'Code is expired or does not exist');
 	}
 
 	await db.delete(emailVerificationCode).where(condition);
 
 	if (!isWithinExpiration(code.expires)) {
-		throw error(400, 'Code is expired');
+		error(400, 'Code is expired');
 	}
 
 	return await auth.getUser(code.userId);
