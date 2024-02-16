@@ -1,34 +1,13 @@
 {
-	"version": "5",
-	"dialect": "pg",
-	"entries": [
-		{
-			"idx": 0,
-			"version": "5",
-			"when": 1703461975423,
-			"tag": "0000_salty_loki",
-			"breakpoints": true
-		},
-		{
-			"idx": 1,
-			"version": "5",
-			"when": 1704219641255,
-			"tag": "0001_right_bucky",
-			"breakpoints": true
-		},
-		{
-			"idx": 2,
-			"version": "5",
-			"when": 1705802185353,
-			"tag": "0002_eminent_deadpool",
-			"breakpoints": true
-		},
-		{
-			"idx": 3,
-			"version": "5",
-			"when": 1707941036385,
-			"tag": "0003_sweet_archangel",
-			"breakpoints": true
-		}
-	]
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1708068722157,
+      "tag": "0000_military_reptil",
+      "breakpoints": true
+    }
+  ]
 }

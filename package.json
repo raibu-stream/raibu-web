@@ -10,7 +10,8 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"db-migrate": "drizzle-kit generate:pg --config drizzle.config.ts",
-		"db-push": "drizzle-kit push:pg --config drizzle.config.ts"
+		"db-push": "drizzle-kit push:pg --config drizzle.config.ts",
+		"db-drop": "drizzle-kit drop --config drizzle.config.ts"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-node": "^1.3.1",
