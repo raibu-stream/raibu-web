@@ -1,8 +1,9 @@
 import { error } from '@sveltejs/kit';
 import { verifyPasswordResetToken } from '$lib/models/passwordResetToken';
-import { auth } from '$lib/models/db';
+import { auth, createSession, updateUserPassword } from '$lib/models/db';
 import commonPasswordList from 'fxa-common-password-list';
 import type { RequestEvent, RequestHandler } from './$types';
+import { checkPasswordLength } from '$lib/utils';
 
 export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 	const formData = await request.json();
@@ -11,8 +12,7 @@ export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 
 	if (
 		typeof newPassword !== 'string' ||
-		newPassword.length < 8 ||
-		newPassword.length > 255 ||
+		checkPasswordLength(newPassword) ||
 		commonPasswordList.test(newPassword)
 	) {
 		error(400, {
@@ -26,15 +26,8 @@ export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 	}
 
 	let user = await verifyPasswordResetToken(token);
-
-	await auth.invalidateAllUserSessions(user.userId);
-	await auth.updateKeyPassword('email', user.email, newPassword);
-
-	const session = await auth.createSession({
-		userId: user.userId,
-		attributes: {}
-	});
-	const sessionCookie = auth.createSessionCookie(session);
+	await updateUserPassword(user.id, newPassword);
+	const sessionCookie = await createSession(user.id);
 
 	return new Response(null, {
 		status: 200,

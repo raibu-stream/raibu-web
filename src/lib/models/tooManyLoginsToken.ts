@@ -1,4 +1,5 @@
-import { generateRandomString, isWithinExpiration } from 'lucia/utils';
+import { generateId } from "lucia";
+import { TimeSpan, createDate, isWithinExpirationDate } from "oslo";
 import TooManyLoginsEmail from '$lib/email/TooManyLoginsEmail.svelte';
 import { renderMjmlComponent } from '$lib/email/email';
 import { PUBLIC_RAIBU_URL } from '$env/static/public';
@@ -12,7 +13,6 @@ import { eq, type InferSelectModel } from 'drizzle-orm';
 export type PasswordResetToken = InferSelectModel<typeof tooManyLoginsToken>;
 
 const ONE_HOUR_IN_MS = 1000 * 60 * 60;
-const FOUR_HOURS_IN_MS = ONE_HOUR_IN_MS * 4;
 
 /**
  * Finds a {@linkcode tooManyLoginsToken} associated with the user,
@@ -21,28 +21,28 @@ const FOUR_HOURS_IN_MS = ONE_HOUR_IN_MS * 4;
  *
  * @returns The found or newly created token.
  */
-export const newTooManyLoginsToken = async (user: User): Promise<PasswordResetToken> => {
+export const newTooManyLoginsToken = async (email: string): Promise<PasswordResetToken> => {
 	const tokens = await db.query.tooManyLoginsToken.findMany({
-		where: eq(tooManyLoginsToken.userId, user.userId)
+		where: eq(tooManyLoginsToken.user, email)
 	});
 
 	if (tokens.length > 0) {
 		const existingToken = tokens.find((token) => {
-			return isWithinExpiration(token.expires - ONE_HOUR_IN_MS);
+			return isWithinExpirationDate(new Date(token.expires.getTime() - ONE_HOUR_IN_MS));
 		});
 		if (existingToken !== undefined) {
 			return existingToken;
 		}
 	}
 
-	const randomString = generateRandomString(63);
+	const randomString = generateId(63);
 	const token = (
 		await db
 			.insert(tooManyLoginsToken)
 			.values({
 				token: randomString,
-				userId: user.userId,
-				expires: new Date().getTime() + FOUR_HOURS_IN_MS
+				user: email,
+				expires: createDate(new TimeSpan(4, "h"))
 			})
 			.returning()
 	)[0];
@@ -50,28 +50,32 @@ export const newTooManyLoginsToken = async (user: User): Promise<PasswordResetTo
 	const emailHtml = renderMjmlComponent(TooManyLoginsEmail, {
 		unlockLink: `${PUBLIC_RAIBU_URL}/user/too-many-logins/${token.token}`
 	});
-	sendEmail(emailHtml, 'Unlock your account', user.email);
+	sendEmail(emailHtml, 'Unlock your account', email);
 
 	return token;
 };
 
 /**
  * Checks if a {@linkcode tooManyLoginsToken} matching verifyMe exists that isn't expired,
- * then deletes it. Throws if there is no valid token.
+ * then deletes it. Errors if there is no valid token.
  *
  * @returns The user associated with the now deleted token.
  */
-export const verifyTooManyLoginsToken = async (verifyMe: string) => {
+export const verifyTooManyLoginsToken = async (verifyMe: string): Promise<User> => {
 	const condition = eq(tooManyLoginsToken.token, verifyMe);
 
-	const token = await db.query.tooManyLoginsToken.findFirst({ where: condition });
-	if (token === undefined) {
-		error(400, 'Token does not exist');
-	}
-	await db.delete(tooManyLoginsToken).where(condition);
-	if (!isWithinExpiration(token.expires)) {
-		error(400, 'Token is expired');
-	}
+	return db.transaction(async (tx) => {
+		const token = await tx.query.tooManyLoginsToken.findFirst({ where: condition, with: { user: true } });
+		if (token === undefined) {
+			error(400, 'Invalid or expired token');
+		}
 
-	return await auth.getUser(token.userId);
+		await tx.delete(tooManyLoginsToken).where(condition);
+
+		if (!isWithinExpirationDate(token.expires)) {
+			error(400, 'Expired token');
+		}
+
+		return token.user;
+	})
 };

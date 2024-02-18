@@ -1,29 +1,46 @@
 import { dev } from '$app/environment';
 import { auth, db } from '$lib/models/db';
 import { errorLog, requestLog } from '$lib/models/schema';
-
-const THIRTY_DAYS_IN_MS = 1000 * 60 * 60 * 24 * 30;
+import { TimeSpan, createDate } from "oslo";
 
 export const handle = async ({ event, resolve }) => {
-	event.locals.auth = auth.handleRequest(event);
+	const sessionId = event.cookies.get(auth.sessionCookieName);
+	if (sessionId === undefined) {
+		event.locals.user = null;
+		event.locals.session = null;
+		return resolve(event);
+	}
 
-	const session = event.locals.auth.validate();
+	const { session, user } = await auth.validateSession(sessionId);
+	if (session !== null && session.fresh) {
+		const sessionCookie = auth.createSessionCookie(session.id);
+		event.cookies.set(sessionCookie.name, sessionCookie.value, {
+			path: ".",
+			...sessionCookie.attributes
+		});
+	}
+	if (session === null) {
+		const sessionCookie = auth.createBlankSessionCookie();
+		event.cookies.set(sessionCookie.name, sessionCookie.value, {
+			path: ".",
+			...sessionCookie.attributes
+		});
+	}
+	event.locals.user = user;
+	event.locals.session = session;
+
 	const startTime = process.hrtime.bigint();
 	const response = await resolve(event);
 	const durationInNs = process.hrtime.bigint() - startTime;
 
 	if (event.route.id !== null) {
-		session
-			.then((session) => {
-				return db.insert(requestLog).values({
-					routeId: event.route.id!,
-					requestMethod: event.request.method,
-					latencyInNs: durationInNs,
-					expires: new Date().getTime() + THIRTY_DAYS_IN_MS,
-					userId: session?.user?.userId
-				});
-			})
-			.catch((e) => console.error(e));
+		db.insert(requestLog).values({
+			routeId: event.route.id!,
+			requestMethod: event.request.method,
+			latencyInNs: durationInNs,
+			expires: createDate(new TimeSpan(30, "d")),
+			user: user?.id
+		}).catch((err) => arbitraryHandleError(err));
 	}
 
 	return response;
@@ -40,13 +57,17 @@ export const handleError = async ({ error, status }) => {
 		};
 	}
 
+	return await arbitraryHandleError(error);
+};
+
+export const arbitraryHandleError = async (error: unknown) => {
 	const errorId = crypto.randomUUID();
 
-	db.insert(errorLog)
+	await db.insert(errorLog)
 		.values({
 			error: typeof error !== 'string' ? JSON.stringify(error) : error,
 			errorId,
-			expires: new Date().getTime() + THIRTY_DAYS_IN_MS
+			expires: createDate(new TimeSpan(30, "d"))
 		})
 		.catch((e) => console.error(e));
 

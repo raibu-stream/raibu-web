@@ -5,11 +5,12 @@
 	import type { user as userSchema } from '$lib/models/schema';
 	import type { InferSelectModel } from 'drizzle-orm';
 	import { toast } from 'svelte-sonner';
+	import type { User } from 'lucia';
 
 	export let user: InferSelectModel<typeof userSchema>;
 
 	// eslint-disable-next-line no-undef
-	const patch = (update: Partial<Lucia.DatabaseUserAttributes>) => {
+	const patch = (update: Partial<User>) => {
 		$dropdown = undefined;
 
 		toast.promise(
@@ -63,28 +64,28 @@
 <ul class="flex flex-col gap-2 p-4">
 	{#if user.isAdmin}
 		<li>
-			<button class="link" on:click={() => patch({ is_admin: false })}>Remove admin</button>
+			<button class="link" on:click={() => patch({ isAdmin: false })}>Remove admin</button>
 		</li>
 	{:else}
 		<li>
-			<button class="link" on:click={() => patch({ is_admin: true })}>Make admin</button>
+			<button class="link" on:click={() => patch({ isAdmin: true })}>Make admin</button>
 		</li>
 	{/if}
 	{#if user.isEmailVerified}
 		<li>
-			<button class="link" on:click={() => patch({ is_email_verified: false })}>
+			<button class="link" on:click={() => patch({ isEmailVerified: false })}>
 				Unverify email
 			</button>
 		</li>
 	{:else}
 		<li>
-			<button class="link" on:click={() => patch({ is_email_verified: true })}>Verify email</button>
+			<button class="link" on:click={() => patch({ isEmailVerified: true })}>Verify email</button>
 		</li>
 	{/if}
 
 	{#if user.isLocked}
 		<li>
-			<button class="link" on:click={() => patch({ is_locked: false })}>Unlock</button>
+			<button class="link" on:click={() => patch({ isLocked: false })}>Unlock</button>
 		</li>
 	{/if}
 

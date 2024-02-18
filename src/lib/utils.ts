@@ -1,5 +1,7 @@
 export const emailRegex = /^[\S\s]+@[\S\s]+$/;
 
+export const EMAIL_VERIFICATION_VERIFY_TIMEOUT_DISCRIMINATOR = 'emailverifyverify'
+
 export const handleApiResponse = async (res: Response, onSuccess?: () => void) => {
 	if (res.statusText === 'OK') {
 		if (onSuccess) onSuccess();

@@ -5,8 +5,7 @@ import { count, ilike, or } from 'drizzle-orm';
 import { errorLog } from '$lib/models/schema';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
-	const session = await locals.auth.validate();
-	if (!session || !session.user.isAdmin) {
+	if (locals.user === null || !locals.user?.isAdmin) {
 		error(401, 'You are not an admin');
 	}
 

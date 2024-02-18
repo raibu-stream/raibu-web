@@ -5,8 +5,7 @@ import { count, ilike, or } from 'drizzle-orm';
 import { user } from '$lib/models/schema';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
-	const session = await locals.auth.validate();
-	if (!session || !session.user.isAdmin) {
+	if (locals.user === null || !locals.user?.isAdmin) {
 		error(401, 'You are not an admin');
 	}
 
@@ -18,7 +17,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	const searchCondition =
 		searchString !== null
-			? or(ilike(user.email, `%${searchString}%`), ilike(user.id, `%${searchString}%`))
+			? or(ilike(user.id, `%${searchString}%`), ilike(user.id, `%${searchString}%`))
 			: undefined;
 
 	// TODO: count() is slow :(
@@ -36,9 +35,9 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	if (users.length === 0 && pageIndex !== 0 && searchString === null) {
 		redirect(
-        			302,
-        			`/admin/users${searchString !== null && usersCount !== 0 ? `?search=${searchString}` : ''}`
-        		);
+			302,
+			`/admin/users${searchString !== null && usersCount !== 0 ? `?search=${searchString}` : ''}`
+		);
 	}
 
 	return {

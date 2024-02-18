@@ -3,7 +3,7 @@
 	import commonPasswordList from 'fxa-common-password-list';
 	import FormError from '$lib/components/FormError.svelte';
 	import { dev } from '$app/environment';
-	import { goto } from '$app/navigation';
+	import { goto, invalidate, invalidateAll } from '$app/navigation';
 	import { emailRegex } from '$lib/utils.js';
 	import { handleApiResponse, checkPasswordLength } from '$lib/utils.js';
 
@@ -48,8 +48,8 @@
 			method: 'post',
 			body: JSON.stringify({ email, password })
 		}).then(async (res) => {
-			apiError = await handleApiResponse(res, () => {
-				goto('/user/email-verification?pre-sent=true');
+			apiError = await handleApiResponse(res, async () => {
+				goto('/user/email-verification?pre-sent=true', { invalidateAll: true });
 			});
 		});
 	};

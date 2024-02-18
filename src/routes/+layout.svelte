@@ -14,6 +14,7 @@
 	import { modal } from '../stores';
 
 	export let data: LayoutServerData;
+
 	if (data.resetPasswordToken !== null) {
 		$modal = {
 			component: ResetPasswordModal,

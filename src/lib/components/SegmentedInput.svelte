@@ -50,6 +50,7 @@
 			class="h-12 w-10 rounded-xl bg-secondary-800 text-center sm:h-16 sm:w-14"
 			type="text"
 			inputmode="numeric"
+			autocomplete="off"
 			bind:this={inputs[index]}
 			on:input={(event) => onInput(event, index)}
 			on:keydown={(event) => onKeydown(event, index)}

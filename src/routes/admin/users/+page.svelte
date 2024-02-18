@@ -9,7 +9,7 @@
 
 	let searchString = '';
 	$: currentPage = Number($page.url.searchParams.get('page') || 0);
-	let headings = ['ID', 'Email', 'Is Email Verified', 'Is locked', 'Is Admin', ''];
+	let headings = ['Email', 'Is Email Verified', 'Is locked', 'Is Admin', ''];
 	let userActionElements: HTMLElement[] = [];
 
 	const handleSearch = () => {
@@ -40,9 +40,6 @@
 		<tr class="h-12 border-t-2 border-neutral-300">
 			<td class="pl-6">
 				{user.id}
-			</td>
-			<td>
-				{user.email}
 			</td>
 			<td>
 				{user.isEmailVerified}

@@ -28,12 +28,12 @@
 <div class="relative flex w-full max-w-5xl grow gap-3 overflow-visible p-6">
 	<aside class="sticky top-6 hidden h-max w-full max-w-max shrink-0 pr-8 sm:block">
 		<nav>
-			<h2 class="mb-3 w-full whitespace-nowrap text-left text-xl font-semibold">
-				<span class="text-neutral-200">Admin /</span>
+			<span class="mb-3 w-full whitespace-nowrap text-left text-xl font-semibold">
+				<h2 class="inline text-neutral-200">Admin /</h2>
 				<h3 class="inline">
 					{pageTitle}
 				</h3>
-			</h2>
+			</span>
 			<ul class="flex flex-col gap-3 text-left font-medium">
 				<li>
 					<a

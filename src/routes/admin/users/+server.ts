@@ -1,19 +1,20 @@
 import { error, type RequestEvent } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { auth, db } from '$lib/models/db';
-import { LuciaError } from 'lucia';
+import { auth, createUser, db } from '$lib/models/db';
 import {
 	emailVerificationCode,
 	passwordResetToken,
 	requestLog,
-	tooManyLoginsToken
+	tooManyLoginsToken,
+	user
 } from '$lib/models/schema';
 import { eq } from 'drizzle-orm';
+import type { User } from 'lucia';
 import { newEmailVerificationCode } from '$lib/models/emailVerificationCode';
 
+
 export const POST: RequestHandler = async ({ request, locals }: RequestEvent) => {
-	const session = await locals.auth.validate();
-	if (!session || !session.user.isAdmin) {
+	if (locals.user === null || !locals.user?.isAdmin) {
 		error(401, 'You are not an admin');
 	}
 
@@ -32,32 +33,14 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 		});
 	}
 
-	try {
-		const user = await auth.createUser({
-			key: {
-				providerId: 'email',
-				providerUserId: email.toLowerCase(),
-				password
-			},
-			attributes: {
-				email,
-				is_email_verified: false,
-				is_locked: false,
-				is_admin: false
-			}
-		});
-
-		await newEmailVerificationCode(user);
-	} catch (e) {
-		if (e instanceof LuciaError && e.message === 'AUTH_DUPLICATE_KEY_ID') {
-			error(400, {
-				message: 'This email is already being used'
-			});
-		}
-		error(500, {
-			message: 'An unknown error occurred'
+	const user = await createUser(email, password);
+	if (user === undefined) {
+		error(400, {
+			message: 'This email is already being used'
 		});
 	}
+
+	await newEmailVerificationCode(user);
 
 	return new Response(JSON.stringify(undefined), {
 		status: 200
@@ -65,8 +48,7 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 };
 
 export const PATCH: RequestHandler = async ({ locals, request }) => {
-	const session = await locals.auth.validate();
-	if (!session || !session.user.isAdmin) {
+	if (locals.user === null || !locals.user?.isAdmin) {
 		error(401, 'You are not an admin');
 	}
 
@@ -76,21 +58,15 @@ export const PATCH: RequestHandler = async ({ locals, request }) => {
 
 	if (!(typeof userId === 'string')) error(400, 'Provide a user ID');
 
-	const update: Partial<Lucia.DatabaseUserAttributes> = {};
-	if (typeof rawUpdate.is_admin === 'boolean') update.is_admin = rawUpdate.is_admin;
-	if (typeof rawUpdate.is_email_verified === 'boolean')
-		update.is_email_verified = rawUpdate.is_email_verified;
-	if (typeof rawUpdate.is_locked === 'boolean') update.is_locked = rawUpdate.is_locked;
-	if (typeof rawUpdate.email === 'string') update.email = rawUpdate.email;
+	const update: Partial<User> = {};
+	if (typeof rawUpdate.isAdmin === 'boolean') update.isAdmin = rawUpdate.isAdmin;
+	if (typeof rawUpdate.isEmailVerified === 'boolean')
+		update.isEmailVerified = rawUpdate.isEmailVerified;
+	if (typeof rawUpdate.isLocked === 'boolean') update.isLocked = rawUpdate.isLocked;
+	if (typeof rawUpdate.id === 'string') update.id = rawUpdate.id;
 
-	try {
-		await auth.updateUserAttributes(userId, update);
-	} catch (e) {
-		if (e instanceof LuciaError && e.message === 'AUTH_INVALID_USER_ID') {
-			error(400, 'User does not exist');
-		}
-		error(500, 'An unknown error occurred');
-	}
+	await db.update(user).set(update).where(eq(user.id, userId));
+	await auth.invalidateUserSessions(userId);
 
 	return new Response(JSON.stringify(undefined), {
 		status: 200
@@ -98,8 +74,7 @@ export const PATCH: RequestHandler = async ({ locals, request }) => {
 };
 
 export const DELETE: RequestHandler = async ({ locals, request }) => {
-	const session = await locals.auth.validate();
-	if (!session || !session.user.isAdmin) {
+	if (locals.user === null || !locals.user?.isAdmin) {
 		error(401, 'You are not an admin');
 	}
 
@@ -107,15 +82,7 @@ export const DELETE: RequestHandler = async ({ locals, request }) => {
 	const userId = formData.userId;
 	if (typeof userId !== 'string') throw 'Provide a user ID';
 
-	await Promise.all([
-		db.delete(tooManyLoginsToken).where(eq(tooManyLoginsToken.userId, userId)),
-		db.delete(emailVerificationCode).where(eq(emailVerificationCode.userId, userId)),
-		db.delete(passwordResetToken).where(eq(passwordResetToken.userId, userId)),
-		db.delete(requestLog).where(eq(requestLog.userId, userId))
-	]);
-
-	await auth.deleteUser(userId);
-
+	await db.delete(user).where(eq(user.id, userId));
 
 	return new Response(JSON.stringify(undefined), {
 		status: 200

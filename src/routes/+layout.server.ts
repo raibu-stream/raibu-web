@@ -5,13 +5,11 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 	const resetPasswordToken = url.searchParams.get('password-reset');
 	const redirectTo = url.searchParams.get('redirect-to');
 
-	const session = await locals.auth.validate();
-
 	return {
-		loggedIn: !!session,
+		loggedIn: locals.user !== null,
 		resetPasswordToken: resetPasswordToken,
 		loginModal: login,
 		redirectTo,
-		email: session?.user.email
+		email: locals.user?.id
 	};
 };

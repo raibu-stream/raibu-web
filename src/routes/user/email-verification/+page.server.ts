@@ -3,21 +3,18 @@ import type { PageServerLoad } from './$types';
 import { createLoginRedirectURL } from '$lib/utils';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
-	const redirectTo = url.searchParams.get('redirect-to');
-
-	const session = await locals.auth.validate();
-
-	if (!session) {
+	if (locals.user === null) {
 		redirect(302, createLoginRedirectURL(url));
 	}
-	if (session.user.isEmailVerified) {
+	if (locals.user.isEmailVerified) {
 		redirect(302, '/user');
 	}
 
+	const redirectTo = url.searchParams.get('redirect-to');
 	const isPreSent = url.searchParams.get('pre-sent') === 'true';
 
 	return {
-		email: session.user.email,
+		email: locals.user.id,
 		isPreSent: isPreSent,
 		redirectTo
 	};

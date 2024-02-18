@@ -25,8 +25,6 @@
 	const signOut = async () => {
 		return fetch('/user/session', {
 			method: 'delete'
-		}).then(async () => {
-			await invalidateAll();
 		});
 	};
 

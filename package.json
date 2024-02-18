@@ -11,6 +11,7 @@
 		"format": "prettier --write .",
 		"db-migrate": "drizzle-kit generate:pg --config drizzle.config.ts",
 		"db-push": "drizzle-kit push:pg --config drizzle.config.ts",
+		"db-check": "drizzle-kit check:pg --config drizzle.config.ts",
 		"db-drop": "drizzle-kit drop --config drizzle.config.ts"
 	},
 	"devDependencies": {
@@ -40,7 +41,8 @@
 	"dependencies": {
 		"@faker-js/faker": "^8.3.1",
 		"@fortawesome/fontawesome-free": "^6.5.1",
-		"@lucia-auth/adapter-postgresql": "^2.0.2",
+		"@lucia-auth/adapter-drizzle": "^1.0.2",
+		"@lucia-auth/adapter-postgresql": "^3.1.0",
 		"@typescript-eslint/eslint-plugin": "^6.15.0",
 		"@typescript-eslint/parser": "^6.15.0",
 		"d3-scale": "^4.0.2",
@@ -49,9 +51,10 @@
 		"fxa-common-password-list": "^0.0.4",
 		"html-to-text": "^9.0.5",
 		"layercake": "^8.0.2",
-		"lucia": "^2.7.4",
+		"lucia": "^3.0.1",
 		"mjml": "^4.14.1",
 		"nodemailer": "^6.9.7",
+		"oslo": "^1.1.1",
 		"postgres": "^3.4.3",
 		"svelte-sonner": "^0.3.17",
 		"toad-scheduler": "^3.0.0",

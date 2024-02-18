@@ -3,15 +3,14 @@ import type { PageServerLoad } from './$types';
 import { createLoginRedirectURL } from '$lib/utils';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
-	const session = await locals.auth.validate();
-	if (!session) {
+	if (locals.user === null) {
 		redirect(302, createLoginRedirectURL(url));
 	}
-	if (!session.user.isEmailVerified) {
+	if (!locals.user.isEmailVerified) {
 		redirect(302, createLoginRedirectURL(url, '/user/email-verification'));
 	}
 
 	return {
-		email: session.user.email
+		email: locals.user.id
 	};
 };
