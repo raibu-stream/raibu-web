@@ -3,7 +3,7 @@
 	import FormError from './FormError.svelte';
 	import PasswordInput from './PasswordInput.svelte';
 	import commonPasswordList from 'fxa-common-password-list';
-	import { handleApiResponse } from '$lib/utils.js';
+	import { handleApiResponse, password as zPassword } from '$lib/utils.js';
 	import { modal } from '../../stores';
 
 	export let resetPasswordToken: string | null;
@@ -14,16 +14,19 @@
 	let passwordError: string | undefined;
 	let request: Promise<unknown> | undefined;
 
+	const checkPassword = (password: string) => {
+		let parsedPassword = zPassword.safeParse(password);
+		if (!parsedPassword.success) {
+			return parsedPassword.error.format()._errors[0];
+		}
+	};
+
 	const handleSubmit = async () => {
 		passwordError = undefined;
 		apiError = undefined;
 
-		if (password === '') {
-			passwordError = 'Password is required';
-			return;
-		}
-		if (commonPasswordList.test(password)) {
-			passwordError = 'Password is too common';
+		passwordError = checkPassword(password);
+		if (passwordError !== undefined) {
 			return;
 		}
 

@@ -1,29 +1,22 @@
 import { error } from '@sveltejs/kit';
 import { verifyPasswordResetToken } from '$lib/models/passwordResetToken';
 import { auth, createSession, updateUserPassword } from '$lib/models/db';
-import commonPasswordList from 'fxa-common-password-list';
 import type { RequestEvent, RequestHandler } from './$types';
-import { checkPasswordLength } from '$lib/utils';
+import { z } from 'zod';
+import { password } from '$lib/utils';
+import { fromZodError } from 'zod-validation-error';
+
+const postInputSchema = z.object({
+	newPassword: password,
+	token: z.string().min(1)
+})
 
 export const POST: RequestHandler = async ({ request }: RequestEvent) => {
-	const formData = await request.json();
-	const newPassword = formData.newPassword;
-	const token = formData.token;
-
-	if (
-		typeof newPassword !== 'string' ||
-		checkPasswordLength(newPassword) ||
-		commonPasswordList.test(newPassword)
-	) {
-		error(400, {
-			message: 'New password is invalid'
-		});
+	const zodResult = postInputSchema.safeParse(await request.json());
+	if (!zodResult.success) {
+		error(400, fromZodError(zodResult.error).toString())
 	}
-	if (typeof token !== 'string') {
-		error(400, {
-			message: 'Token is invalid'
-		});
-	}
+	const { token, newPassword } = zodResult.data;
 
 	let user = await verifyPasswordResetToken(token);
 	await updateUserPassword(user.id, newPassword);

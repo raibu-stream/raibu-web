@@ -1,4 +1,5 @@
-export const emailRegex = /^[\S\s]+@[\S\s]+$/;
+import { z } from "zod";
+import { test as commonPasswordTest } from 'fxa-common-password-list';
 
 export const EMAIL_VERIFICATION_VERIFY_TIMEOUT_DISCRIMINATOR = 'emailverifyverify'
 
@@ -24,20 +25,20 @@ export const handleApiResponse = async (res: Response, onSuccess?: () => void) =
 	}
 };
 
-const MINIMUM_PASSWORD_LENGTH = 8;
-export const checkPasswordLength = (toCheck: string) => {
-	const length = toCheck.length;
-	if (length === 0) {
-		return undefined;
-	}
-	if (length < MINIMUM_PASSWORD_LENGTH) {
-		return `Must be at least ${MINIMUM_PASSWORD_LENGTH} characters`;
-	}
-	if (length > 255) {
-		return 'Must be below 255 characters';
-	}
-	return undefined;
-};
+const emailRegex = /^[\S\s]+@[\S\s]+$/;
+
+export const loginEmail = z.string().trim().toLowerCase().min(1, "Email is required");
+export const loginPassword = z.string().min(1, "Password is required");
+
+export const password = loginPassword
+	.min(8, "Must be at least 8 characters long.")
+	.max(255, "Must be below 255 characters.")
+	.refine((pass) => !commonPasswordTest(pass), {
+		message: "Password is too common"
+	});
+export const email = loginEmail
+	.max(255, "Must be below 255 characters.")
+	.regex(emailRegex, "Must be a valid email");
 
 export const createLoginRedirectURL = (url: URL, to: string = '/?login=true') => {
 	const path = encodeURIComponent(url.pathname + url.search);

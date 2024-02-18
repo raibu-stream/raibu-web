@@ -3,8 +3,11 @@
 	import { fly } from 'svelte/transition';
 	import FormError from './FormError.svelte';
 	import PasswordInput from './PasswordInput.svelte';
-	import { emailRegex } from '$lib/utils.js';
-	import { handleApiResponse } from '$lib/utils.js';
+	import {
+		handleApiResponse,
+		loginPassword as zPassword,
+		loginEmail as zEmail
+	} from '$lib/utils.js';
 	import { modal } from '../../stores';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
@@ -25,17 +28,32 @@
 
 	$: if ($modal) $modal.title = forgetPassword ? 'Reset your password' : 'Log in';
 
+	const checkPassword = (password: string) => {
+		let parsedPassword = zPassword.safeParse(password);
+		if (!parsedPassword.success) {
+			return parsedPassword.error.format()._errors[0];
+		}
+	};
+
+	const checkEmail = (email: string) => {
+		let parsedEmail = zEmail.safeParse(email);
+		if (!parsedEmail.success) {
+			return parsedEmail.error.format()._errors[0];
+		}
+	};
+
 	const handleSubmit = async () => {
 		emailError = undefined;
 		passwordError = undefined;
 		apiError = undefined;
 
-		if (password === '') {
-			passwordError = 'Password is required';
+		emailError = checkEmail(email);
+		if (emailError !== undefined) {
 			return;
 		}
-		if (email === '') {
-			emailError = 'Email is required';
+
+		passwordError = checkPassword(password);
+		if (passwordError !== undefined) {
 			return;
 		}
 
@@ -59,12 +77,8 @@
 		passwordError = undefined;
 		apiError = undefined;
 
-		if (email === '') {
-			emailError = 'Email is required';
-			return;
-		}
-		if (!emailRegex.test(email)) {
-			emailError = 'Must be valid email';
+		emailError = checkEmail(email);
+		if (emailError !== undefined) {
 			return;
 		}
 

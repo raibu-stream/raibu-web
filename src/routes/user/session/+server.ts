@@ -8,12 +8,16 @@ import * as schema from '$lib/models/schema';
 import { TimeSpan, createDate, isWithinExpirationDate } from "oslo";
 import { arbitraryHandleError } from '../../../hooks.server';
 import { incrementOrCreateTimeout } from '$lib/models/timeout';
+import { z } from 'zod';
+import { fromZodError } from 'zod-validation-error';
+import { loginEmail, loginPassword } from '$lib/utils';
+
+const postInputSchema = z.object({
+	email: loginEmail,
+	password: loginPassword
+})
 
 export const POST: RequestHandler = async ({ request, locals, getClientAddress }: RequestEvent) => {
-	const formData = await request.json();
-	let email = formData.email;
-	const password = formData.password;
-
 	const timeout = await db.query.timeOut.findFirst({
 		where: and(eq(timeOut.timerId, getClientAddress() + 'session'), gt(timeOut.attempts, 10))
 	});
@@ -22,18 +26,11 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 		error(400, "You've tried logging in too many times. Try again in 1 minute.");
 	}
 
-	if (typeof email !== 'string') {
-		error(400, {
-			message: 'Invalid email'
-		});
+	const zodResult = postInputSchema.safeParse(await request.json());
+	if (!zodResult.success) {
+		error(400, fromZodError(zodResult.error).toString())
 	}
-	if (typeof password !== 'string') {
-		error(400, {
-			message: 'Invalid password'
-		});
-	}
-
-	email = email.toLowerCase().trim();
+	const { email, password } = zodResult.data;
 
 	const sessionCookie = await signInUser(email, password);
 	if (sessionCookie === 'Password is invalid' || sessionCookie === 'User does not exist') {

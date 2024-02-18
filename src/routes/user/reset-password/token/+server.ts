@@ -5,10 +5,19 @@ import type { RequestEvent, RequestHandler } from './$types';
 import { eq } from 'drizzle-orm';
 import * as schema from '$lib/models/schema';
 import { arbitraryHandleError, handleError } from '../../../../hooks.server';
+import { z } from 'zod';
+import { fromZodError } from 'zod-validation-error';
+
+const postInputSchema = z.object({
+	email: z.string().trim().toLowerCase().min(1),
+})
 
 export const POST: RequestHandler = async ({ request }: RequestEvent) => {
-	const formData = await request.json();
-	const email = formData.email;
+	const zodResult = postInputSchema.safeParse(await request.json());
+	if (!zodResult.success) {
+		error(400, fromZodError(zodResult.error).toString())
+	}
+	const { email } = zodResult.data;
 
 	const user = await db.query.user.findFirst({
 		where: eq(schema.user.id, email)

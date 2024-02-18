@@ -11,27 +11,24 @@ import {
 import { eq } from 'drizzle-orm';
 import type { User } from 'lucia';
 import { newEmailVerificationCode } from '$lib/models/emailVerificationCode';
+import { z } from 'zod';
+import { fromZodError } from 'zod-validation-error';
 
+const postInputSchema = z.object({
+	email: z.string().trim().toLowerCase().min(1).max(255),
+	password: z.string().trim().min(1).max(255)
+})
 
 export const POST: RequestHandler = async ({ request, locals }: RequestEvent) => {
 	if (locals.user === null || !locals.user?.isAdmin) {
 		error(401, 'You are not an admin');
 	}
 
-	const formData = await request.json();
-	const email = formData.email;
-	const password = formData.password;
-
-	if (typeof email !== 'string' || email === '') {
-		error(400, {
-			message: 'Invalid email'
-		});
+	const zodResult = postInputSchema.safeParse(await request.json());
+	if (!zodResult.success) {
+		error(400, fromZodError(zodResult.error).toString())
 	}
-	if (typeof password !== 'string' || password === '') {
-		error(400, {
-			message: 'Invalid password'
-		});
-	}
+	const { email, password } = zodResult.data;
 
 	const user = await createUser(email, password);
 	if (user === undefined) {
@@ -47,23 +44,26 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 	});
 };
 
+const patchInputSchema = z.object({
+	userId: z.string().trim().min(1).max(255),
+	update: z.object({
+		isAdmin: z.boolean(),
+		isEmailVerified: z.boolean(),
+		isLocked: z.boolean(),
+		id: z.string().trim().min(1).max(255)
+	}).partial()
+})
+
 export const PATCH: RequestHandler = async ({ locals, request }) => {
 	if (locals.user === null || !locals.user?.isAdmin) {
 		error(401, 'You are not an admin');
 	}
 
-	const formData = await request.json();
-	const rawUpdate = formData.update;
-	const userId = formData.userId;
-
-	if (!(typeof userId === 'string')) error(400, 'Provide a user ID');
-
-	const update: Partial<User> = {};
-	if (typeof rawUpdate.isAdmin === 'boolean') update.isAdmin = rawUpdate.isAdmin;
-	if (typeof rawUpdate.isEmailVerified === 'boolean')
-		update.isEmailVerified = rawUpdate.isEmailVerified;
-	if (typeof rawUpdate.isLocked === 'boolean') update.isLocked = rawUpdate.isLocked;
-	if (typeof rawUpdate.id === 'string') update.id = rawUpdate.id;
+	const zodResult = patchInputSchema.safeParse(await request.json());
+	if (!zodResult.success) {
+		error(400, fromZodError(zodResult.error).toString())
+	}
+	const { userId, update } = zodResult.data;
 
 	await db.update(user).set(update).where(eq(user.id, userId));
 	await auth.invalidateUserSessions(userId);
@@ -73,14 +73,20 @@ export const PATCH: RequestHandler = async ({ locals, request }) => {
 	});
 };
 
+const deleteInputSchema = z.object({
+	userId: z.string().trim().min(1).max(255)
+})
+
 export const DELETE: RequestHandler = async ({ locals, request }) => {
 	if (locals.user === null || !locals.user?.isAdmin) {
 		error(401, 'You are not an admin');
 	}
 
-	const formData = await request.json();
-	const userId = formData.userId;
-	if (typeof userId !== 'string') throw 'Provide a user ID';
+	const zodResult = deleteInputSchema.safeParse(await request.json());
+	if (!zodResult.success) {
+		error(400, fromZodError(zodResult.error).toString())
+	}
+	const { userId } = zodResult.data;
 
 	await db.delete(user).where(eq(user.id, userId));
 

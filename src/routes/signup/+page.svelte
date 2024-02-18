@@ -1,11 +1,9 @@
 <script lang="ts">
 	import PasswordInput from '$lib/components/PasswordInput.svelte';
-	import commonPasswordList from 'fxa-common-password-list';
 	import FormError from '$lib/components/FormError.svelte';
 	import { dev } from '$app/environment';
-	import { goto, invalidate, invalidateAll } from '$app/navigation';
-	import { emailRegex } from '$lib/utils.js';
-	import { handleApiResponse, checkPasswordLength } from '$lib/utils.js';
+	import { goto } from '$app/navigation';
+	import { handleApiResponse, password as zPassword, email as zEmail } from '$lib/utils.js';
 
 	let request: Promise<unknown> | undefined;
 	let apiError: string | undefined;
@@ -16,28 +14,30 @@
 	let passwordError: string | undefined;
 	let emailError: string | undefined;
 
+	const checkPassword = (password: string) => {
+		let parsedPassword = zPassword.safeParse(password);
+		if (!parsedPassword.success) {
+			return parsedPassword.error.format()._errors[0];
+		}
+	};
+
+	const checkEmail = (email: string) => {
+		let parsedEmail = zEmail.safeParse(email);
+		if (!parsedEmail.success) {
+			return parsedEmail.error.format()._errors[0];
+		}
+	};
+
 	const handleSubmit = () => {
 		apiError = undefined;
 
-		if (password === '') {
-			passwordError = 'Password is required';
-			return;
-		}
-		if (email === '') {
-			emailError = 'Email is required';
+		emailError = checkEmail(email);
+		if (emailError !== undefined) {
 			return;
 		}
 
-		if (checkPasswordLength(password) !== undefined) {
-			return;
-		}
-
-		if (!emailRegex.test(email)) {
-			emailError = 'Must be valid email';
-			return;
-		}
-		if (commonPasswordList.test(password)) {
-			passwordError = 'Password is too common';
+		passwordError = checkPassword(password);
+		if (passwordError !== undefined) {
 			return;
 		}
 
@@ -79,7 +79,7 @@
 				<PasswordInput
 					new
 					bind:password
-					on:input={() => (passwordError = checkPasswordLength(password))}
+					on:input={() => (passwordError = checkPassword(password))}
 				/>
 				{#if passwordError !== undefined}
 					<FormError class="mt-2">{passwordError}</FormError>
