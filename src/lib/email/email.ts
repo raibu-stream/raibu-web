@@ -8,6 +8,7 @@ import {
 } from '$env/static/private';
 import mjml2html from 'mjml';
 import type { SvelteComponent } from 'svelte';
+import { arbitraryHandleError } from '../../hooks.server';
 
 const mailer = createTransport({
 	host: RAIBU_EMAIL_HOST,
@@ -48,7 +49,7 @@ export const renderMjmlComponent = <Props extends Record<string, any>>(
 
 	const { html, errors } = mjml2html(stripSvelteClasses(mjml));
 
-	if (errors.length > 0) console.error(errors);
+	if (errors.length > 0) arbitraryHandleError(errors);
 
 	return html;
 };

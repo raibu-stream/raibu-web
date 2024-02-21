@@ -13,7 +13,8 @@ export default {
 			},
 			spacing: {
 				18: '4.5rem',
-				'section-width': '800px'
+				'section-width': '800px',
+				'section-breakout': '1000px'
 			},
 			backgroundImage: {
 				'raibu-pattern': "url('$lib/img/raibu-pattern.svg')"
