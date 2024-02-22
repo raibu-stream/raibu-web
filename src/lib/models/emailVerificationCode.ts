@@ -1,14 +1,14 @@
-import { generateRandomString, alphabet } from "oslo/crypto";
-import { TimeSpan, createDate, isWithinExpirationDate } from "oslo";
+import { generateRandomString, alphabet } from 'oslo/crypto';
+import { TimeSpan, createDate, isWithinExpirationDate } from 'oslo';
 import VerifyEmail from '$lib/email/VerifyEmail.svelte';
 import { renderMjmlComponent, sendEmail } from '$lib/email/email';
 import { error } from '@sveltejs/kit';
-import { auth, db } from './db';
+import { db } from './db';
 import type { User } from 'lucia';
 import { and, eq, type InferSelectModel } from 'drizzle-orm';
 import { emailVerificationCode } from './schema';
-import { incrementOrCreateTimeout } from "./timeout";
-import { EMAIL_VERIFICATION_VERIFY_TIMEOUT_DISCRIMINATOR } from "$lib/utils";
+import { incrementOrCreateTimeout } from './timeout';
+import { EMAIL_VERIFICATION_VERIFY_TIMEOUT_DISCRIMINATOR } from '$lib/utils';
 
 const ONE_MINUTE_IN_MS = 1000 * 60;
 
@@ -41,7 +41,7 @@ export const newEmailVerificationCode = async (user: User): Promise<EmailVerific
 				.values({
 					code: randomCode,
 					user: user.id,
-					expires: createDate(new TimeSpan(30, "m"))
+					expires: createDate(new TimeSpan(30, 'm'))
 				})
 				.returning()
 		)[0];
@@ -50,7 +50,7 @@ export const newEmailVerificationCode = async (user: User): Promise<EmailVerific
 	const emailHtml = renderMjmlComponent(VerifyEmail, {
 		verifyCode: code.code
 	});
-	sendEmail(emailHtml, 'Your email verification code', user.id);
+	await sendEmail(emailHtml, 'Your email verification code', user.id);
 
 	return code;
 };
@@ -69,14 +69,14 @@ export const verifyEmailVerificationCode = async (verifyMe: string, user: User) 
 		where: condition
 	});
 	if (code === undefined) {
-		incrementOrCreateTimeout(user.id + EMAIL_VERIFICATION_VERIFY_TIMEOUT_DISCRIMINATOR)
+		await incrementOrCreateTimeout(user.id + EMAIL_VERIFICATION_VERIFY_TIMEOUT_DISCRIMINATOR);
 		error(400, 'Code is expired or does not exist');
 	}
 
 	await db.delete(emailVerificationCode).where(condition);
 
 	if (!isWithinExpirationDate(code.expires)) {
-		incrementOrCreateTimeout(user.id + EMAIL_VERIFICATION_VERIFY_TIMEOUT_DISCRIMINATOR)
+		await incrementOrCreateTimeout(user.id + EMAIL_VERIFICATION_VERIFY_TIMEOUT_DISCRIMINATOR);
 		error(400, 'Code is expired');
 	}
 };

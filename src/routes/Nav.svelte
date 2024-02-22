@@ -1,10 +1,8 @@
 <script lang="ts">
 	import LoginModal from '$lib/components/LoginModal.svelte';
 	import { slide } from 'svelte/transition';
-	import { invalidateAll } from '$app/navigation';
 	import { dropdown, modal } from '../stores';
 	import UserDropdown from './UserDropdown.svelte';
-	import { onMount } from 'svelte';
 
 	export let loggedIn: boolean;
 	export let email: string | undefined;
@@ -38,6 +36,7 @@
 		if (pxScrollFromTop < previousPxScrollFromTop && pxScrollFromTop > navHeight) {
 			isScrollingUp = true;
 		} else if (pxScrollFromTop < navHeight) {
+			isScrollingUp = isScrollingUp;
 		} else {
 			isScrollingUp = false;
 		}

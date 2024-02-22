@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
+	import Checkbox from '$lib/components/Checkbox.svelte';
 	import FormError from '$lib/components/FormError.svelte';
 	import PasswordInput from '$lib/components/PasswordInput.svelte';
-	import { checkPasswordLength, handleApiResponse } from '$lib/utils';
+	import { handleApiResponse, loginPassword as zPassword, email as zEmail } from '$lib/utils';
+	import type { Readable } from 'svelte/store';
 	import { modal } from '../../../stores';
 
 	let request: Promise<unknown> | undefined;
@@ -14,24 +16,44 @@
 	let passwordError: string | undefined;
 	let emailError: string | undefined;
 
+	let shouldSendVerificationEmail: Readable<boolean>;
+
+	const checkPassword = (password: string) => {
+		let parsedPassword = zPassword.safeParse(password);
+		if (!parsedPassword.success) {
+			return parsedPassword.error.format()._errors[0];
+		}
+	};
+
+	const checkEmail = (email: string) => {
+		let parsedEmail = zEmail.safeParse(email);
+		if (!parsedEmail.success) {
+			return parsedEmail.error.format()._errors[0];
+		}
+	};
+
 	const handleSubmit = () => {
-		apiError = undefined;
-
-		if (password === '') {
-			passwordError = 'Password is required';
-			return;
-		}
-		if (email === '') {
-			emailError = 'Email is required';
-			return;
-		}
-
 		emailError = undefined;
 		passwordError = undefined;
+		apiError = undefined;
+
+		emailError = checkEmail(email);
+		if (emailError !== undefined) {
+			return;
+		}
+
+		passwordError = checkPassword(password);
+		if (passwordError !== undefined) {
+			return;
+		}
 
 		request = fetch('/admin/users/', {
 			method: 'post',
-			body: JSON.stringify({ email, password })
+			body: JSON.stringify({
+				email,
+				password,
+				shouldSendVerificationEmail: $shouldSendVerificationEmail
+			})
 		}).then(async (res) => {
 			apiError = await handleApiResponse(res, () => {
 				$modal = undefined;
@@ -57,15 +79,15 @@
 		{/if}
 	</div>
 	<label for="password">Password</label>
-	<div class="mb-10 mt-2">
-		<PasswordInput
-			new
-			bind:password
-			on:input={() => (passwordError = checkPasswordLength(password))}
-		/>
+	<div class="mb-8 mt-2">
+		<PasswordInput new bind:password />
 		{#if passwordError !== undefined}
 			<FormError class="mt-2">{passwordError}</FormError>
 		{/if}
+	</div>
+	<div class="mb-10 flex items-center gap-3">
+		<Checkbox bind:isChecked={shouldSendVerificationEmail} />
+		<label for="password" class="text-sm">Send verification email</label>
 	</div>
 	<button class="button w-full max-w-md !text-lg">
 		{#await request}

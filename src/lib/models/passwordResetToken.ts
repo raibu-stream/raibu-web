@@ -1,13 +1,13 @@
-import { generateId } from "lucia";
-import { TimeSpan, createDate, isWithinExpirationDate } from "oslo";
+import { generateId } from 'lucia';
+import { TimeSpan, createDate, isWithinExpirationDate } from 'oslo';
 import ResetPasswordEmail from '$lib/email/ResetPasswordEmail.svelte';
 import { renderMjmlComponent } from '$lib/email/email';
 import { PUBLIC_RAIBU_URL } from '$env/static/public';
 import { sendEmail } from '$lib/email/email';
 import { error } from '@sveltejs/kit';
-import { auth, db } from './db';
+import { db } from './db';
 import type { User } from 'lucia';
-import { passwordResetToken, user } from './schema';
+import { passwordResetToken } from './schema';
 import { eq, type InferSelectModel } from 'drizzle-orm';
 
 const ONE_HOUR_IN_MS = 1000 * 60 * 60;
@@ -42,7 +42,7 @@ export const newPasswordResetToken = async (user: User): Promise<PasswordResetTo
 			.values({
 				token: randomString,
 				user: user.id,
-				expires: createDate(new TimeSpan(4, "h"))
+				expires: createDate(new TimeSpan(4, 'h'))
 			})
 			.returning()
 	)[0];
@@ -50,7 +50,7 @@ export const newPasswordResetToken = async (user: User): Promise<PasswordResetTo
 	const emailHtml = renderMjmlComponent(ResetPasswordEmail, {
 		resetLink: `${PUBLIC_RAIBU_URL}/?password-reset=${token.token}`
 	});
-	sendEmail(emailHtml, 'Reset your password', user.id);
+	await sendEmail(emailHtml, 'Reset your password', user.id);
 
 	return token;
 };
@@ -65,7 +65,10 @@ export const verifyPasswordResetToken = async (verifyMe: string): Promise<User> 
 	const condition = eq(passwordResetToken.token, verifyMe);
 
 	return db.transaction(async (tx) => {
-		const token = await tx.query.passwordResetToken.findFirst({ where: condition, with: { user: true } });
+		const token = await tx.query.passwordResetToken.findFirst({
+			where: condition,
+			with: { user: true }
+		});
 		if (token === undefined) {
 			error(400, 'Invalid or expired password reset link');
 		}
@@ -77,5 +80,5 @@ export const verifyPasswordResetToken = async (verifyMe: string): Promise<User> 
 		}
 
 		return token.user;
-	})
+	});
 };

@@ -9,11 +9,11 @@ export default {
 				jp: ['"Noto Sans JP"', ...defaultTheme.fontFamily.sans]
 			},
 			screens: {
-				'section-width': '800px'
+				section: '800px'
 			},
 			spacing: {
 				18: '4.5rem',
-				'section-width': '800px',
+				section: '800px',
 				'section-breakout': '1000px'
 			},
 			backgroundImage: {

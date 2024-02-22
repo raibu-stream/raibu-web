@@ -1,11 +1,11 @@
-import { auth, createSession, db, signInUser } from '$lib/models/db';
+import { auth, db, signInUser } from '$lib/models/db';
 import { error } from '@sveltejs/kit';
 import { newTooManyLoginsToken } from '$lib/models/tooManyLoginsToken';
 import type { RequestEvent, RequestHandler } from './$types';
 import { timeOut } from '$lib/models/schema';
-import { and, eq, gt, sql } from 'drizzle-orm';
+import { and, eq, gt } from 'drizzle-orm';
 import * as schema from '$lib/models/schema';
-import { TimeSpan, createDate, isWithinExpirationDate } from "oslo";
+import { isWithinExpirationDate } from 'oslo';
 import { arbitraryHandleError } from '../../../hooks.server';
 import { incrementOrCreateTimeout } from '$lib/models/timeout';
 import { z } from 'zod';
@@ -15,7 +15,7 @@ import { loginEmail, loginPassword } from '$lib/utils';
 const postInputSchema = z.object({
 	email: loginEmail,
 	password: loginPassword
-})
+});
 
 export const POST: RequestHandler = async ({ request, locals, getClientAddress }: RequestEvent) => {
 	const timeout = await db.query.timeOut.findFirst({
@@ -28,14 +28,15 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 
 	const zodResult = postInputSchema.safeParse(await request.json());
 	if (!zodResult.success) {
-		error(400, fromZodError(zodResult.error).toString())
+		error(400, fromZodError(zodResult.error).toString());
 	}
 	const { email, password } = zodResult.data;
 
 	const sessionCookie = await signInUser(email, password);
 	if (sessionCookie === 'Password is invalid' || sessionCookie === 'User does not exist') {
 		if (sessionCookie === 'Password is invalid') await wrongPassword(email);
-		if (sessionCookie === 'User does not exist') await incrementOrCreateTimeout(getClientAddress() + 'session')
+		if (sessionCookie === 'User does not exist')
+			await incrementOrCreateTimeout(getClientAddress() + 'session');
 
 		error(400, {
 			message: 'Incorrect email or password'
@@ -43,7 +44,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 	}
 
 	if (sessionCookie === 'User is locked') {
-		newTooManyLoginsToken(email);
+		newTooManyLoginsToken(email).catch(arbitraryHandleError);
 		error(400, {
 			message:
 				'Too many failed login attempts. Your account has been locked. Check your email to unlock it.'
@@ -53,7 +54,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 	await db.delete(timeOut).where(eq(timeOut.timerId, email + 'session'));
 
 	if (locals.session !== null) {
-		auth.invalidateSession(locals.session.id)
+		await auth.invalidateSession(locals.session.id);
 	}
 
 	return new Response(undefined, {
@@ -82,7 +83,7 @@ const wrongPassword = async (email: string) => {
 		return;
 	}
 
-	const timeout = (await incrementOrCreateTimeout(email + 'session'));
+	const timeout = await incrementOrCreateTimeout(email + 'session');
 
 	if (timeout.attempts! >= 4 && isWithinExpirationDate(timeout.expires)) {
 		await db.update(schema.user).set({ isLocked: true }).where(eq(schema.user.id, email));

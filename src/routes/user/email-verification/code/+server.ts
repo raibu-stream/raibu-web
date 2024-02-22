@@ -4,9 +4,9 @@ import type { RequestEvent, RequestHandler } from './$types';
 import { db } from '$lib/models/db';
 import { eq } from 'drizzle-orm';
 import { timeOut } from '$lib/models/schema';
-import { TimeSpan, createDate } from "oslo";
+import { TimeSpan, createDate } from 'oslo';
 
-const TIMEOUT_DISCRIMINATOR = "emailverifycode"
+const TIMEOUT_DISCRIMINATOR = 'emailverifycode';
 
 export const POST: RequestHandler = async ({ locals }: RequestEvent) => {
 	if (locals.user === null) {
@@ -29,7 +29,7 @@ export const POST: RequestHandler = async ({ locals }: RequestEvent) => {
 
 	await db.insert(timeOut).values({
 		timerId: locals.user.id + TIMEOUT_DISCRIMINATOR,
-		expires: createDate(new TimeSpan(1, "m"))
+		expires: createDate(new TimeSpan(1, 'm'))
 	});
 
 	return new Response(JSON.stringify(undefined), {

@@ -12,7 +12,8 @@ module.exports = {
 	parserOptions: {
 		sourceType: 'module',
 		ecmaVersion: 2020,
-		extraFileExtensions: ['.svelte']
+		extraFileExtensions: ['.svelte'],
+		project: ['./tsconfig.json']
 	},
 	env: {
 		browser: true,
@@ -29,9 +30,21 @@ module.exports = {
 			parserOptions: {
 				parser: '@typescript-eslint/parser'
 			}
+		},
+		{
+			extends: ['plugin:@typescript-eslint/disable-type-checked'],
+			files: ['./*']
+		},
+		{
+			files: '*',
+			excludedFiles: ['*.ts'],
+			rules: {
+				'@typescript-eslint/no-floating-promises': 'off'
+			}
 		}
 	],
 	rules: {
-		'@typescript-eslint/no-explicit-any': 'off'
+		'@typescript-eslint/no-explicit-any': 'off',
+		'@typescript-eslint/no-floating-promises': 'error'
 	}
 };

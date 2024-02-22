@@ -1,7 +1,7 @@
 import { Lucia } from 'lucia';
-import { Argon2id } from "oslo/password";
+import { Argon2id } from 'oslo/password';
 import { dev } from '$app/environment';
-import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle";
+import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle';
 import { RAIBU_DB_URL, RAIBU_ADMIN_PASS } from '$env/static/private';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
@@ -11,6 +11,7 @@ import * as relations from './relations';
 import { ToadScheduler, SimpleIntervalJob, AsyncTask } from 'toad-scheduler';
 import { eq, lt, sql, type InferSelectModel } from 'drizzle-orm';
 import { faker } from '@faker-js/faker';
+import { arbitraryHandleError } from '../../hooks.server';
 
 // You should use npm run db-push in dev
 if (!dev) {
@@ -47,7 +48,7 @@ export const auth = new Lucia(adapter, {
 
 export type Auth = typeof auth;
 
-declare module "lucia" {
+declare module 'lucia' {
 	interface Register {
 		Lucia: typeof auth;
 		DatabaseSessionAttributes: DatabaseSessionAttributes;
@@ -55,17 +56,16 @@ declare module "lucia" {
 	}
 }
 
-interface DatabaseSessionAttributes {
-}
+interface DatabaseSessionAttributes {}
 
-type DatabaseUserAttributes = Omit<InferSelectModel<typeof schema.user>, 'id'>
+type DatabaseUserAttributes = Omit<InferSelectModel<typeof schema.user>, 'id'>;
 
 export const updateUserPassword = async (email: string, password: string) => {
 	const hashedPassword = await new Argon2id().hash(password);
 	const condition = eq(schema.user.id, email);
 
 	return db.transaction(async (tx) => {
-		let user = await tx.query.user.findFirst({
+		const user = await tx.query.user.findFirst({
 			where: condition
 		});
 
@@ -75,14 +75,18 @@ export const updateUserPassword = async (email: string, password: string) => {
 
 		await db.update(schema.user).set({ hashedPassword }).where(condition);
 		await auth.invalidateUserSessions(user.id);
-	})
-}
+	});
+};
 
-export const createUser = async (email: string, password: string, attributes?: Partial<DatabaseUserAttributes>) => {
+export const createUser = async (
+	email: string,
+	password: string,
+	attributes?: Partial<DatabaseUserAttributes>
+) => {
 	const hashedPassword = await new Argon2id().hash(password);
 
 	return db.transaction(async (tx) => {
-		let maybeUser = await tx.query.user.findFirst({
+		const maybeUser = await tx.query.user.findFirst({
 			where: eq(schema.user.id, email)
 		});
 
@@ -90,21 +94,26 @@ export const createUser = async (email: string, password: string, attributes?: P
 			return;
 		}
 
-		return (await tx.insert(schema.user).values({
-			id: email,
-			hashedPassword,
-			...attributes
-		}).returning())[0];
-	})
-}
+		return (
+			await tx
+				.insert(schema.user)
+				.values({
+					id: email,
+					hashedPassword,
+					...attributes
+				})
+				.returning()
+		)[0];
+	});
+};
 
 export const createSession = async (email: string) => {
 	const session = await auth.createSession(email, {});
 	return auth.createSessionCookie(session.id);
-}
+};
 
 export const signInUser = async (email: string, password: string) => {
-	let user = await db.query.user.findFirst({
+	const user = await db.query.user.findFirst({
 		where: eq(schema.user.id, email)
 	});
 	if (user === undefined) {
@@ -112,19 +121,19 @@ export const signInUser = async (email: string, password: string) => {
 		// are the same with invalid username vs invalid password.
 		await new Argon2id().hash(password);
 		return 'User does not exist';
-	};
+	}
 
 	if (user.isLocked) {
-		return 'User is locked'
+		return 'User is locked';
 	}
 
 	const isPasswordValid = await new Argon2id().verify(user.hashedPassword, password);
 	if (!isPasswordValid) {
 		return 'Password is invalid';
-	};
+	}
 
 	return createSession(user.id);
-}
+};
 
 await createUser('contact@raibu.stream', RAIBU_ADMIN_PASS, {
 	isEmailVerified: true,
@@ -156,15 +165,11 @@ const ttlTask = new AsyncTask('db ttl', async () => {
 		db
 			.delete(schema.emailVerificationCode)
 			.where(lt(schema.emailVerificationCode.expires, sql`now()`)),
-		db
-			.delete(schema.passwordResetToken)
-			.where(lt(schema.passwordResetToken.expires, sql`now()`)),
-		db
-			.delete(schema.tooManyLoginsToken)
-			.where(lt(schema.tooManyLoginsToken.expires, sql`now()`)),
+		db.delete(schema.passwordResetToken).where(lt(schema.passwordResetToken.expires, sql`now()`)),
+		db.delete(schema.tooManyLoginsToken).where(lt(schema.tooManyLoginsToken.expires, sql`now()`)),
 		db.delete(schema.timeOut).where(lt(schema.timeOut.expires, sql`now()`)),
 		auth.deleteExpiredSessions()
-	]);
+	]).catch(arbitraryHandleError);
 });
 const ttlJob = new SimpleIntervalJob({ minutes: 1 }, ttlTask);
 scheduler.addSimpleIntervalJob(ttlJob);

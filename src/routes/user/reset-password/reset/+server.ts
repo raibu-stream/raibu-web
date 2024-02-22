@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { verifyPasswordResetToken } from '$lib/models/passwordResetToken';
-import { auth, createSession, updateUserPassword } from '$lib/models/db';
+import { createSession, updateUserPassword } from '$lib/models/db';
 import type { RequestEvent, RequestHandler } from './$types';
 import { z } from 'zod';
 import { password } from '$lib/utils';
@@ -9,16 +9,16 @@ import { fromZodError } from 'zod-validation-error';
 const postInputSchema = z.object({
 	newPassword: password,
 	token: z.string().min(1)
-})
+});
 
 export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 	const zodResult = postInputSchema.safeParse(await request.json());
 	if (!zodResult.success) {
-		error(400, fromZodError(zodResult.error).toString())
+		error(400, fromZodError(zodResult.error).toString());
 	}
 	const { token, newPassword } = zodResult.data;
 
-	let user = await verifyPasswordResetToken(token);
+	const user = await verifyPasswordResetToken(token);
 	await updateUserPassword(user.id, newPassword);
 	const sessionCookie = await createSession(user.id);
 

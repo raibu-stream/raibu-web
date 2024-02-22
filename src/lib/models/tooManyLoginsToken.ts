@@ -1,11 +1,11 @@
-import { generateId } from "lucia";
-import { TimeSpan, createDate, isWithinExpirationDate } from "oslo";
+import { generateId } from 'lucia';
+import { TimeSpan, createDate, isWithinExpirationDate } from 'oslo';
 import TooManyLoginsEmail from '$lib/email/TooManyLoginsEmail.svelte';
 import { renderMjmlComponent } from '$lib/email/email';
 import { PUBLIC_RAIBU_URL } from '$env/static/public';
 import { sendEmail } from '$lib/email/email';
 import { error } from '@sveltejs/kit';
-import { auth, db } from './db';
+import { db } from './db';
 import type { User } from 'lucia';
 import { tooManyLoginsToken } from './schema';
 import { eq, type InferSelectModel } from 'drizzle-orm';
@@ -42,7 +42,7 @@ export const newTooManyLoginsToken = async (email: string): Promise<PasswordRese
 			.values({
 				token: randomString,
 				user: email,
-				expires: createDate(new TimeSpan(4, "h"))
+				expires: createDate(new TimeSpan(4, 'h'))
 			})
 			.returning()
 	)[0];
@@ -50,7 +50,7 @@ export const newTooManyLoginsToken = async (email: string): Promise<PasswordRese
 	const emailHtml = renderMjmlComponent(TooManyLoginsEmail, {
 		unlockLink: `${PUBLIC_RAIBU_URL}/user/too-many-logins/${token.token}`
 	});
-	sendEmail(emailHtml, 'Unlock your account', email);
+	await sendEmail(emailHtml, 'Unlock your account', email);
 
 	return token;
 };
@@ -65,7 +65,10 @@ export const verifyTooManyLoginsToken = async (verifyMe: string): Promise<User> 
 	const condition = eq(tooManyLoginsToken.token, verifyMe);
 
 	return db.transaction(async (tx) => {
-		const token = await tx.query.tooManyLoginsToken.findFirst({ where: condition, with: { user: true } });
+		const token = await tx.query.tooManyLoginsToken.findFirst({
+			where: condition,
+			with: { user: true }
+		});
 		if (token === undefined) {
 			error(400, 'Invalid or expired token');
 		}
@@ -77,5 +80,5 @@ export const verifyTooManyLoginsToken = async (verifyMe: string): Promise<User> 
 		}
 
 		return token.user;
-	})
+	});
 };

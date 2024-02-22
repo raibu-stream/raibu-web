@@ -1,7 +1,8 @@
 import { dev } from '$app/environment';
 import { auth, db } from '$lib/models/db';
 import { errorLog, requestLog } from '$lib/models/schema';
-import { TimeSpan, createDate } from "oslo";
+import { FRIENDLY_ERROR_MESSAGE } from '$lib/utils';
+import { TimeSpan, createDate } from 'oslo';
 
 export const handle = async ({ event, resolve }) => {
 	const sessionId = event.cookies.get(auth.sessionCookieName);
@@ -15,14 +16,14 @@ export const handle = async ({ event, resolve }) => {
 	if (session !== null && session.fresh) {
 		const sessionCookie = auth.createSessionCookie(session.id);
 		event.cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: ".",
+			path: '.',
 			...sessionCookie.attributes
 		});
 	}
 	if (session === null) {
 		const sessionCookie = auth.createBlankSessionCookie();
 		event.cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: ".",
+			path: '.',
 			...sessionCookie.attributes
 		});
 	}
@@ -34,13 +35,15 @@ export const handle = async ({ event, resolve }) => {
 	const durationInNs = process.hrtime.bigint() - startTime;
 
 	if (event.route.id !== null) {
-		db.insert(requestLog).values({
-			routeId: event.route.id!,
-			requestMethod: event.request.method,
-			latencyInNs: durationInNs,
-			expires: createDate(new TimeSpan(30, "d")),
-			user: user?.id
-		}).catch((err) => arbitraryHandleError(err));
+		db.insert(requestLog)
+			.values({
+				routeId: event.route.id!,
+				requestMethod: event.request.method,
+				latencyInNs: durationInNs,
+				expires: createDate(new TimeSpan(30, 'd')),
+				user: user?.id
+			})
+			.catch((err) => arbitraryHandleError(err));
 	}
 
 	return response;
@@ -57,22 +60,30 @@ export const handleError = async ({ error, status }) => {
 		};
 	}
 
-	return await arbitraryHandleError(error);
+	return await arbitraryHandleError(error, false);
 };
 
-export const arbitraryHandleError = async (error: unknown) => {
+export const arbitraryHandleError = async (error: unknown, devPrint: boolean = true) => {
+	if (devPrint) {
+		console.error(error);
+	}
+
 	const errorId = crypto.randomUUID();
 
-	await db.insert(errorLog)
+	await db
+		.insert(errorLog)
 		.values({
-			error: typeof error !== 'string' ? JSON.stringify(error) : error,
+			error:
+				typeof error !== 'string'
+					? JSON.stringify(error, Object.getOwnPropertyNames(error))
+					: error,
 			errorId,
-			expires: createDate(new TimeSpan(30, "d"))
+			expires: createDate(new TimeSpan(30, 'd'))
 		})
 		.catch((e) => console.error(e));
 
 	return {
-		message: 'An unexpected error occurred.',
+		message: FRIENDLY_ERROR_MESSAGE,
 		errorId
 	};
 };

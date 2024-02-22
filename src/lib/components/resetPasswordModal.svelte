@@ -2,7 +2,6 @@
 	import { goto } from '$app/navigation';
 	import FormError from './FormError.svelte';
 	import PasswordInput from './PasswordInput.svelte';
-	import commonPasswordList from 'fxa-common-password-list';
 	import { handleApiResponse, password as zPassword } from '$lib/utils.js';
 	import { modal } from '../../stores';
 

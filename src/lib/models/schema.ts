@@ -1,4 +1,3 @@
-import { relations } from 'drizzle-orm';
 import {
 	pgTable,
 	bigint,
@@ -7,8 +6,7 @@ import {
 	primaryKey,
 	text,
 	timestamp,
-	smallint,
-	date
+	smallint
 } from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
@@ -33,9 +31,8 @@ export const session = pgTable('user_session', {
 		.notNull()
 		.references(() => user.id, { onDelete: 'cascade' }),
 	expiresAt: timestamp('expires_at', {
-		withTimezone: true,
-	}).notNull(),
-
+		withTimezone: true
+	}).notNull()
 });
 
 export const emailVerificationCode = pgTable(

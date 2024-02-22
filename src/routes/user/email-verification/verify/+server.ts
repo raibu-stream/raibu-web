@@ -10,8 +10,8 @@ import { z } from 'zod';
 import { fromZodError } from 'zod-validation-error';
 
 const postInputSchema = z.object({
-	code: z.string().min(0),
-})
+	code: z.string().min(0)
+});
 
 export const POST: RequestHandler = async ({ request, locals }: RequestEvent) => {
 	if (locals.user === null) {
@@ -27,7 +27,7 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 
 	const zodResult = postInputSchema.safeParse(await request.json());
 	if (!zodResult.success) {
-		error(400, fromZodError(zodResult.error).toString())
+		error(400, fromZodError(zodResult.error).toString());
 	}
 	const { code } = zodResult.data;
 

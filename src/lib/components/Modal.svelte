@@ -11,11 +11,13 @@
 		transition:fade={{ duration: 200, easing: quintOut }}
 	>
 		<section
-			class="section z-10 max-w-[450px] !scale-100 !shadow-lg"
+			class="z-10 w-full max-w-[450px] border border-neutral-300 bg-secondary-800 p-6 text-left shadow-lg section:rounded"
 			style:max-width="{$modal.maxWidthPx}px"
 		>
 			<div class="flex items-start justify-between">
-				<h3 class="!text-2xl font-medium">{$modal.title}</h3>
+				<h3 class="mb-6 border-b border-neutral-300 text-2xl font-medium tracking-tight">
+					{$modal.title}
+				</h3>
 				<button
 					on:click={() => ($modal = undefined)}
 					class="text-2xl transition-colors duration-100 hover:text-primary-200"

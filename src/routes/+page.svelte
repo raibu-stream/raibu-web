@@ -12,7 +12,7 @@
 	<Background />
 </header>
 <section id="About" class="z-10 -mt-18 flex w-full justify-center bg-neutral-800 py-12">
-	<div class="max-w-section-width px-4 text-left">
+	<div class="max-w-section px-4 text-left">
 		<h3 class="mb-4 text-4xl font-bold uppercase tracking-tight">About Us</h3>
 		<p class="mb-4 text-xl italic text-neutral-200">
 			Lorem ipsum, dolor sit amet consectetur adipisicing elit. Accusamus sequi, voluptatem atque

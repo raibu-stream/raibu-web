@@ -8,7 +8,8 @@ import {
 } from '$env/static/private';
 import mjml2html from 'mjml';
 import type { SvelteComponent } from 'svelte';
-import { arbitraryHandleError } from '../../hooks.server';
+import { error } from '@sveltejs/kit';
+import { FRIENDLY_ERROR_MESSAGE } from '$lib/utils';
 
 const mailer = createTransport({
 	host: RAIBU_EMAIL_HOST,
@@ -19,10 +20,10 @@ const mailer = createTransport({
 	}
 } as TransportOptions);
 
-export const sendEmail = (html: string, subject: string, recipient: string) => {
+export const sendEmail = async (html: string, subject: string, recipient: string) => {
 	const plainText = toPlainText(html);
 
-	mailer.sendMail({
+	await mailer.sendMail({
 		from: `Raibu <${RAIBU_EMAIL_USER}>`,
 		to: recipient,
 		subject: subject,
@@ -49,7 +50,7 @@ export const renderMjmlComponent = <Props extends Record<string, any>>(
 
 	const { html, errors } = mjml2html(stripSvelteClasses(mjml));
 
-	if (errors.length > 0) arbitraryHandleError(errors);
+	if (errors.length > 0) error(500, FRIENDLY_ERROR_MESSAGE);
 
 	return html;
 };

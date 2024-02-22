@@ -1,23 +1,18 @@
 import { error, type RequestEvent } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { auth, createUser, db } from '$lib/models/db';
-import {
-	emailVerificationCode,
-	passwordResetToken,
-	requestLog,
-	tooManyLoginsToken,
-	user
-} from '$lib/models/schema';
+import { user } from '$lib/models/schema';
 import { eq } from 'drizzle-orm';
-import type { User } from 'lucia';
 import { newEmailVerificationCode } from '$lib/models/emailVerificationCode';
 import { z } from 'zod';
 import { fromZodError } from 'zod-validation-error';
+import { email, loginPassword } from '$lib/utils';
 
 const postInputSchema = z.object({
-	email: z.string().trim().toLowerCase().min(1).max(255),
-	password: z.string().trim().min(1).max(255)
-})
+	email: email,
+	password: loginPassword,
+	shouldSendVerificationEmail: z.boolean()
+});
 
 export const POST: RequestHandler = async ({ request, locals }: RequestEvent) => {
 	if (locals.user === null || !locals.user?.isAdmin) {
@@ -26,9 +21,9 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 
 	const zodResult = postInputSchema.safeParse(await request.json());
 	if (!zodResult.success) {
-		error(400, fromZodError(zodResult.error).toString())
+		error(400, fromZodError(zodResult.error).toString());
 	}
-	const { email, password } = zodResult.data;
+	const { email, password, shouldSendVerificationEmail } = zodResult.data;
 
 	const user = await createUser(email, password);
 	if (user === undefined) {
@@ -37,7 +32,9 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 		});
 	}
 
-	await newEmailVerificationCode(user);
+	if (shouldSendVerificationEmail) {
+		await newEmailVerificationCode(user);
+	}
 
 	return new Response(JSON.stringify(undefined), {
 		status: 200
@@ -46,13 +43,15 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 
 const patchInputSchema = z.object({
 	userId: z.string().trim().min(1).max(255),
-	update: z.object({
-		isAdmin: z.boolean(),
-		isEmailVerified: z.boolean(),
-		isLocked: z.boolean(),
-		id: z.string().trim().min(1).max(255)
-	}).partial()
-})
+	update: z
+		.object({
+			isAdmin: z.boolean(),
+			isEmailVerified: z.boolean(),
+			isLocked: z.boolean(),
+			id: z.string().trim().min(1).max(255)
+		})
+		.partial()
+});
 
 export const PATCH: RequestHandler = async ({ locals, request }) => {
 	if (locals.user === null || !locals.user?.isAdmin) {
@@ -61,7 +60,7 @@ export const PATCH: RequestHandler = async ({ locals, request }) => {
 
 	const zodResult = patchInputSchema.safeParse(await request.json());
 	if (!zodResult.success) {
-		error(400, fromZodError(zodResult.error).toString())
+		error(400, fromZodError(zodResult.error).toString());
 	}
 	const { userId, update } = zodResult.data;
 
@@ -75,7 +74,7 @@ export const PATCH: RequestHandler = async ({ locals, request }) => {
 
 const deleteInputSchema = z.object({
 	userId: z.string().trim().min(1).max(255)
-})
+});
 
 export const DELETE: RequestHandler = async ({ locals, request }) => {
 	if (locals.user === null || !locals.user?.isAdmin) {
@@ -84,7 +83,7 @@ export const DELETE: RequestHandler = async ({ locals, request }) => {
 
 	const zodResult = deleteInputSchema.safeParse(await request.json());
 	if (!zodResult.success) {
-		error(400, fromZodError(zodResult.error).toString())
+		error(400, fromZodError(zodResult.error).toString());
 	}
 	const { userId } = zodResult.data;
 

@@ -7,7 +7,7 @@
 	let streamCreatorVisible = true;
 </script>
 
-<ul class="w-full max-w-[800px]">
+<ul class="relative -top-28 w-full scale-90 text-sm">
 	{#each streams as stream (stream.id)}
 		<li
 			class="mb-4 flex h-36 w-full justify-between rounded-lg bg-secondary-700 p-4"
@@ -22,7 +22,7 @@
 					Online
 				</span><br />
 				<span class="inline-flex items-center gap-2 text-sm">
-					<i class="fa-solid fa-circle text-sm text-danger"></i>
+					<i class="fa-solid fa-circle text-danger"></i>
 					Offline
 				</span>
 			</span>

@@ -1,116 +1,68 @@
 <script lang="ts">
-	import CopyMe from '$lib/components/CopyMe.svelte';
 	import Streams from './Streams.svelte';
 	import type { PageServerData } from './$types';
+	import PasswordInput from '$lib/components/PasswordInput.svelte';
 
 	export let data: PageServerData;
-
-	let streamkey = 'stream_key';
 </script>
 
-<div class="my-8">
-	<h2 class="text-2xl font-bold tracking-tight">
-		<span class="text-primary-200">ellitedev's</span> RTMP private server
-	</h2>
-	<small class="italic tracking-wide">Logged in as {data.email}</small>
+<div class="my-10 w-full max-w-section-breakout">
+	<h2 class="text-left text-4xl font-bold tracking-tight">Account</h2>
 </div>
 
-<section class="section">
-	<small>Server location: <em>Nuremberg - Germany</em></small>
-	<h3 class="mt-1">Pushing To The Server</h3>
-	<p class="mb-4">
-		In OBS, Set <span class="value">Stream > Service</span> to <span class="value">Custom...</span>
-	</p>
-	<ul class="mb-2 flex flex-col gap-1">
-		<li>
-			<code>
-				<CopyMe>rtmp://ellite.dev/</CopyMe>
-			</code>
-		</li>
-		<li>
-			<code> <CopyMe>rtsp://ellite.dev/</CopyMe> </code>
-		</li>
-		<li>
-			<code>
-				<CopyMe>srt://ellite.dev:8890?streamid=publish:<em>{streamkey}</em>&pkt_size=1316</CopyMe>
-			</code>
-		</li>
-	</ul>
-	<p>
-		You can stream using any <code class="value">{streamkey}</code> you want. If your stream isn't
-		working, try using a different <code class="value">{streamkey}</code>
-		In OBS, both RTMP and RTSP use the <code class="value">{streamkey}</code> field.
-	</p>
-	<p>
-		SRT does not, so include it within the URL, like shown above. I <strong>highly</strong> suggest
-		using
-		<code class="value">RTMP</code> to stream using OBS. It's given me the least amount of issues.
-	</p>
+<section class="section mb-6 flex items-center gap-4">
+	<button
+		class="flex h-14 w-14 items-center justify-center rounded-full border border-transparent bg-primary-400 text-2xl font-semibold uppercase leading-none text-neutral-100 transition-colors duration-100"
+	>
+		{data.email[0]}
+	</button>
+	<div class="flex flex-col">
+		<span>{data.email}</span>
+		<small class="text-neutral-200">Tier name here</small>
+	</div>
 </section>
 
-<section class="section">
-	<h3>Reading From Server</h3>
-	<ul class="mb-2 flex flex-col gap-1">
-		<li>
-			<code>
-				<CopyMe>rtmp://ellite.dev:1935/<em>{streamkey}</em></CopyMe>
-			</code>
-		</li>
-		<li>
-			<code><CopyMe>rtsp://ellite.dev:8554/<em>{streamkey}</em></CopyMe></code>
-		</li>
-		<li>
-			<code><CopyMe>srt://ellite.dev:8890?streamid=read:<em>{streamkey}</em></CopyMe></code>
-		</li>
-		<li>
-			<code><CopyMe>https://hls.ellite.dev/<em>{streamkey}</em></CopyMe></code>
-		</li>
-	</ul>
-	<p>
-		I suggest using <span class="value">RTSP</span> to read the stream. If you notice a lot of
-		stuttering or lag, try using <span class="value">RTMP</span>.
-		<span class="value">RTSPT</span> DOES NOT WORK!!!
-	</p>
-	<p>
-		If that doesn't help,
-		<span class="value">HLS</span> might be your solution, but it'll have way more latency.
-	</p>
-</section>
-<section class="section">
-	<h3>House Rules</h3>
-	<p>
-		Please exercise common curtesy and stream with reasonable settings, <strong>
-			bandwidth isn't free!!
-		</strong>
-	</p>
-
-	<br />
-	<ul>
-		<p>Please follow these settings:</p>
-		<li>
-			<p>
-				Video: <span class="value">720p</span>, Fractional FPS Value
-				<span class="value">237/4</span>
-				(59.25fps),
-				<span class="value">3000kbps</span>, <span class="value">Max&nbsp;B-frames:&nbsp;0</span>
-			</p>
-		</li>
-		<li>
-			<p>
-				Audio: <span class="value">320kbps</span>, <span class="value">44.1kHz</span>,
-				<span class="value">stereo</span>
-			</p>
-		</li>
-	</ul>
+<section class="section mb-6">
+	<div class="mb-6">
+		<h3 class="mb-1 border-b-0 text-3xl font-bold tracking-tight">Account Settings</h3>
+		<small class="text-neutral-200">Here you can change your account information</small>
+	</div>
+	<form>
+		<label for="email">Email</label>
+		<div class="mb-6 mt-2">
+			<input type="email" id="email" class="input w-1/2" />
+		</div>
+		<fieldset class="flex justify-evenly gap-4">
+			<legend class="mb-3 text-xl font-semibold">Change Password</legend>
+			<div class="grow">
+				<label for="password">Old Password</label>
+				<div class="mb-12 mt-2">
+					<PasswordInput />
+				</div>
+			</div>
+			<div class="grow">
+				<label for="password">New Password</label>
+				<div class="mb-12 mt-2">
+					<PasswordInput new />
+				</div>
+			</div>
+		</fieldset>
+		<button class="button float-right px-8 text-base">Update</button>
+	</form>
 </section>
 
-<Streams></Streams>
+<section class="flex w-full max-w-section flex-col items-center">
+	<div class="section h-52">
+		<div class="mb-6">
+			<h3 class="mb-1 border-b-0 text-3xl font-bold tracking-tight">Streams</h3>
+			<small class="text-neutral-200">Here you can create and manage your streams</small>
+		</div>
+	</div>
+	<Streams />
+</section>
 
 <style lang="postcss">
-	p {
-		@apply mb-2;
-	}
-	.value {
-		@apply select-all rounded bg-secondary-700 px-1 text-primary-200;
+	.section {
+		@apply w-full max-w-screen-section bg-secondary-800 p-6 text-left shadow-lg section:rounded;
 	}
 </style>
