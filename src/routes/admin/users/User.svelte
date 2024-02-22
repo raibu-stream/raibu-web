@@ -5,7 +5,6 @@
 	import type { PageData } from './$types';
 	import { invalidateAll } from '$app/navigation';
 	import { handleApiResponse } from '$lib/utils.js';
-	import { dropdown } from '../../../stores';
 	import { toast } from 'svelte-sonner';
 	import type { User } from 'lucia';
 	import { writable } from 'svelte/store';
@@ -15,8 +14,6 @@
 
 	// eslint-disable-next-line no-undef
 	const patch = (update: Partial<User>) => {
-		$dropdown = undefined;
-
 		toast.promise(
 			fetch('/admin/users', {
 				method: 'PATCH',
@@ -39,8 +36,6 @@
 	};
 
 	const deleteUser = () => {
-		$dropdown = undefined;
-
 		toast.promise(
 			fetch('/admin/users', {
 				method: 'DELETE',
