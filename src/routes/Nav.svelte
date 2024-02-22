@@ -1,6 +1,5 @@
 <script lang="ts">
-	import LoginModal from '$lib/components/LoginModal.svelte';
-	import { modal } from '../stores';
+	import { showLoginModal } from '../stores';
 	import { createDropdownMenu, melt } from '@melt-ui/svelte';
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import DropdownItem from '$lib/components/DropdownItem.svelte';
@@ -11,10 +10,7 @@
 	export let email: string | undefined;
 
 	let login = () => {
-		$modal = {
-			component: LoginModal,
-			title: 'Login'
-		};
+		$showLoginModal = true;
 	};
 
 	const signOut = async () => {

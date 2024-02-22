@@ -8,30 +8,25 @@
 	import LoginModal from '$lib/components/LoginModal.svelte';
 	import ResetPasswordModal from '$lib/components/resetPasswordModal.svelte';
 	import type { LayoutServerData } from './$types';
-	import Modal from '$lib/components/Modal.svelte';
 	import Toaster from '$lib/components/Toaster.svelte';
-	import { modal } from '../stores';
+	import { showLoginModal } from '../stores';
+	import { writable } from 'svelte/store';
 
 	export let data: LayoutServerData;
 
+	let showResetPasswordModal = writable(false);
+
 	if (data.resetPasswordToken !== null) {
-		$modal = {
-			component: ResetPasswordModal,
-			props: { resetPasswordToken: data.resetPasswordToken },
-			title: 'Reset your password'
-		};
+		showResetPasswordModal.set(true);
 	} else if (data.loginModal === 'true') {
-		$modal = {
-			component: LoginModal,
-			props: data.redirectTo !== null ? { redirectTo: data.redirectTo } : undefined,
-			title: 'Login'
-		};
+		showLoginModal.set(true);
 	}
 </script>
 
 <div class="overflow-x-clip bg-neutral-800 text-center text-neutral-100">
 	<Toaster />
-	<Modal />
+	<LoginModal redirectTo={data.redirectTo !== null ? data.redirectTo : undefined} />
+	<ResetPasswordModal resetPasswordToken={data.resetPasswordToken} open={showResetPasswordModal} />
 	<div class="flex min-h-screen flex-col overflow-visible">
 		{#key data.loggedIn}
 			<Nav isLoggedIn={data.loggedIn} email={data.email} />

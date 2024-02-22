@@ -10,8 +10,12 @@
 		meltLabel
 	} from '$lib/utils';
 	import type { Readable } from 'svelte/store';
-	import { modal } from '../../../stores';
 	import { melt } from '@melt-ui/svelte';
+	import Modal from '$lib/components/Modal.svelte';
+
+	export let trigger: any = undefined;
+
+	let open: any;
 
 	let request: Promise<unknown> | undefined;
 	let apiError: string | undefined;
@@ -62,49 +66,51 @@
 			})
 		}).then(async (res) => {
 			apiError = await handleApiResponse(res, () => {
-				$modal = undefined;
+				open.set(false);
 				invalidateAll();
 			});
 		});
 	};
 </script>
 
-<form on:submit|preventDefault={handleSubmit} novalidate class="px-2">
-	<label for="email" use:melt={$meltLabel}>Email</label>
-	<div class="mb-8 mt-2">
-		<input
-			class="input w-full"
-			type="email"
-			required
-			id="email"
-			autocomplete="email"
-			bind:value={email}
-		/>
-		{#if emailError !== undefined}
-			<FormError class="mt-2">{emailError}</FormError>
+<Modal titleString="Create User" bind:trigger bind:open>
+	<form on:submit|preventDefault={handleSubmit} novalidate class="px-2">
+		<label for="email" use:melt={$meltLabel}>Email</label>
+		<div class="mb-8 mt-2">
+			<input
+				class="input w-full"
+				type="email"
+				required
+				id="email"
+				autocomplete="email"
+				bind:value={email}
+			/>
+			{#if emailError !== undefined}
+				<FormError class="mt-2">{emailError}</FormError>
+			{/if}
+		</div>
+		<label for="password" use:melt={$meltLabel}>Password</label>
+		<div class="mb-8 mt-2">
+			<PasswordInput new bind:password />
+			{#if passwordError !== undefined}
+				<FormError class="mt-2">{passwordError}</FormError>
+			{/if}
+		</div>
+		<div class="mb-10 flex items-center gap-3">
+			<Checkbox bind:isChecked={shouldSendVerificationEmail} />
+			<label for="password" class="text-sm" use:melt={$meltLabel}>Send verification email</label>
+		</div>
+		<button class="button w-full max-w-md !text-lg">
+			{#await request}
+				<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>
+				<span class="sr-only">Loading</span>
+				<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
+			{:then _}
+				Create user
+			{/await}
+		</button>
+		{#if apiError !== undefined}
+			<FormError class="mt-4">{apiError}</FormError>
 		{/if}
-	</div>
-	<label for="password" use:melt={$meltLabel}>Password</label>
-	<div class="mb-8 mt-2">
-		<PasswordInput new bind:password />
-		{#if passwordError !== undefined}
-			<FormError class="mt-2">{passwordError}</FormError>
-		{/if}
-	</div>
-	<div class="mb-10 flex items-center gap-3">
-		<Checkbox bind:isChecked={shouldSendVerificationEmail} />
-		<label for="password" class="text-sm" use:melt={$meltLabel}>Send verification email</label>
-	</div>
-	<button class="button w-full max-w-md !text-lg">
-		{#await request}
-			<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>
-			<span class="sr-only">Loading</span>
-			<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
-		{:then _}
-			Create user
-		{/await}
-	</button>
-	{#if apiError !== undefined}
-		<FormError class="mt-4">{apiError}</FormError>
-	{/if}
-</form>
+	</form>
+</Modal>

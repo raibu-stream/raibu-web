@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { melt } from '@melt-ui/svelte';
+
 	export let headings: string[];
-	export let add: (() => void) | undefined = undefined;
+	export let add: any | undefined = undefined;
 </script>
 
 <section class="rounded bg-secondary-700 text-sm">
@@ -21,7 +23,7 @@
 				{/each}
 				{#if add}
 					<th>
-						<button on:click={add} class="pr-5 text-base">
+						<button class="pr-5 text-base" use:melt={$add}>
 							<i class="fa-solid fa-plus"></i>
 							<span class="sr-only">add</span>
 						</button>

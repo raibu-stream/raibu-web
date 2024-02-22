@@ -4,10 +4,13 @@
 	import Pagination from '$lib/components/Pagination.svelte';
 	import Table from '$lib/components/Table.svelte';
 	import { writable } from 'svelte/store';
-	import { modal } from '../../../stores.js';
 	import ErrorModal from './ErrorModal.svelte';
 	import { browser } from '$app/environment';
+	import { melt } from '@melt-ui/svelte';
 	export let data;
+
+	let modalTrigger: any;
+	let errorText = '';
 
 	let searchString = '';
 	let searchStringRaw = '';
@@ -39,6 +42,8 @@
 	</div>
 </form>
 
+<ErrorModal {errorText} bind:trigger={modalTrigger} />
+
 <Table {headings}>
 	{#each data.errors as error}
 		<tr class="h-12 border-t-2 border-neutral-300">
@@ -46,20 +51,16 @@
 				{error.errorId}
 			</td>
 			<td>
-				<button
-					class="w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-left"
-					on:click={() => {
-						$modal = {
-							component: ErrorModal,
-							props: { errorText: error.error },
-							maxWidthPx: 700,
-							title: 'Error'
-						};
-					}}
-				>
-					<span aria-hidden="true">{error.error}</span>
-					<span class="sr-only">View error</span>
-				</button>
+				{#if modalTrigger}
+					<button
+						class="w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-left"
+						use:melt={$modalTrigger}
+						on:m-click={() => (errorText = error.error)}
+					>
+						<span aria-hidden="true">{error.error}</span>
+						<span class="sr-only">View error</span>
+					</button>
+				{/if}
 			</td>
 			<td>
 				{error.errorDate.toLocaleString()}

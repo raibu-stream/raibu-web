@@ -4,13 +4,14 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import Table from '$lib/components/Table.svelte';
-	import { modal } from '../../../stores.js';
 	import AddUserModal from './AddUserModal.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { writable } from 'svelte/store';
 	import { browser } from '$app/environment';
 
 	export let data;
+
+	let modalTrigger: any;
 
 	let searchString = '';
 	let searchStringRaw = '';
@@ -42,15 +43,9 @@
 	</div>
 </form>
 
-<Table
-	{headings}
-	add={() => {
-		$modal = {
-			component: AddUserModal,
-			title: 'Add User'
-		};
-	}}
->
+<AddUserModal bind:trigger={modalTrigger} />
+
+<Table {headings} add={modalTrigger}>
 	{#each data.users as user (user.id)}
 		<User {user} />
 	{/each}
