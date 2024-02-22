@@ -33,7 +33,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		where: searchCondition
 	});
 
-	if (users.length === 0 && pageIndex !== 0 && searchString === null) {
+	if (users.length === 0 && pageIndex !== 0) {
 		redirect(
 			302,
 			`/admin/users${searchString !== null && usersCount !== 0 ? `?search=${searchString}` : ''}`

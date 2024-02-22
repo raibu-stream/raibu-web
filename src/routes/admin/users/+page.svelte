@@ -6,15 +6,29 @@
 	import Table from '$lib/components/Table.svelte';
 	import { modal } from '../../../stores.js';
 	import AddUserModal from './AddUserModal.svelte';
+	import Pagination from '$lib/components/Pagination.svelte';
+	import { writable } from 'svelte/store';
+	import { browser } from '$app/environment';
 
 	export let data;
 
 	let searchString = '';
-	$: currentPage = Number($page.url.searchParams.get('page') || 0);
+	let searchStringRaw = '';
+	const currentPage = writable(Number($page.url.searchParams.get('page') || 0) + 1);
+	$: currentPage.set(Number($page.url.searchParams.get('page') || 0) + 1);
 	let headings = ['Email', 'Is Email Verified', 'Is locked', 'Is Admin', ''];
 
+	currentPage.subscribe((val) => {
+		if (browser) {
+			goto(
+				`/admin/users?page=${val - 1}${searchString !== '' ? `&search=${encodeURIComponent(searchString)}` : ''}`
+			);
+		}
+	});
+
 	const handleSearch = () => {
-		goto(`/admin/users?page=${currentPage}&search=${encodeURIComponent(searchString)}`);
+		searchString = searchStringRaw;
+		goto(`/admin/users?page=${$currentPage - 1}&search=${encodeURIComponent(searchString)}`);
 	};
 </script>
 
@@ -24,7 +38,7 @@
 			<i class="fa-solid fa-magnifying-glass text-neutral-200" aria-hidden="true"></i>
 			<span class="sr-only">search</span>
 		</button>
-		<input class="grow" type="text" placeholder="Search" bind:value={searchString} />
+		<input class="grow" type="text" placeholder="Search" bind:value={searchStringRaw} />
 	</div>
 </form>
 
@@ -37,33 +51,13 @@
 		};
 	}}
 >
-	{#each data.users as user}
+	{#each data.users as user (user.id)}
 		<User {user} />
 	{/each}
 	<svelte:fragment slot="footer">
 		<span>Total of {data.totalUsers} users</span>
-		<span>
-			{currentPage + 1} of {Math.ceil(data.totalUsers / 15)}
-			<button
-				on:click={() => {
-					goto(`/admin/users?page=${currentPage - 1}`);
-				}}
-				class="ml-4 disabled:text-neutral-300"
-				disabled={currentPage <= 0}
-			>
-				<i class="fa-solid fa-angle-left" aria-hidden="true"></i>
-				<span class="sr-only">previous page</span>
-			</button>
-			<button
-				on:click={() => {
-					goto(`/admin/users?page=${currentPage + 1}`);
-				}}
-				class="ml-2 disabled:text-neutral-300"
-				disabled={currentPage + 1 >= Math.ceil(data.totalUsers / 15)}
-			>
-				<i class="fa-solid fa-angle-right" aria-hidden="true"></i>
-				<span class="sr-only">next page</span>
-			</button>
-		</span>
+		{#key data.totalUsers}
+			<Pagination total={data.totalUsers} perPage={15} {currentPage} />
+		{/key}
 	</svelte:fragment>
 </Table>

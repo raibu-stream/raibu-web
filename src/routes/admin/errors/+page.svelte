@@ -1,17 +1,31 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import Pagination from '$lib/components/Pagination.svelte';
 	import Table from '$lib/components/Table.svelte';
+	import { writable } from 'svelte/store';
 	import { modal } from '../../../stores.js';
 	import ErrorModal from './ErrorModal.svelte';
+	import { browser } from '$app/environment';
 	export let data;
 
 	let searchString = '';
-	$: currentPage = Number($page.url.searchParams.get('page') || 0);
+	let searchStringRaw = '';
+	const currentPage = writable(Number($page.url.searchParams.get('page') || 0) + 1);
+	$: currentPage.set(Number($page.url.searchParams.get('page') || 0) + 1);
 	let headings = ['ID', 'Error', 'Date'];
 
+	currentPage.subscribe((val) => {
+		if (browser) {
+			goto(
+				`/admin/errors?page=${val - 1}${searchString !== '' ? `&search=${encodeURIComponent(searchString)}` : ''}`
+			);
+		}
+	});
+
 	const handleSearch = () => {
-		goto(`/admin/errors?page=${currentPage}&search=${encodeURIComponent(searchString)}`);
+		searchString = searchStringRaw;
+		goto(`/admin/errors?page=${$currentPage - 1}&search=${encodeURIComponent(searchString)}`);
 	};
 </script>
 
@@ -21,7 +35,7 @@
 			<i class="fa-solid fa-magnifying-glass text-neutral-200" aria-hidden="true"></i>
 			<span class="sr-only">search</span>
 		</button>
-		<input class="grow" type="text" placeholder="Search" bind:value={searchString} />
+		<input class="grow" type="text" placeholder="Search" bind:value={searchStringRaw} />
 	</div>
 </form>
 
@@ -54,29 +68,9 @@
 	{/each}
 	<svelte:fragment slot="footer">
 		<span aria-hidden="true"></span>
-		<span>
-			{currentPage + 1} of {Math.ceil(data.totalErrors / 15)}
-			<button
-				on:click={() => {
-					goto(`/admin/errors?page=${currentPage - 1}`);
-				}}
-				class="ml-4 disabled:text-neutral-300"
-				disabled={currentPage <= 0}
-			>
-				<i class="fa-solid fa-angle-left" aria-hidden="true"></i>
-				<span class="sr-only">previous page</span>
-			</button>
-			<button
-				on:click={() => {
-					goto(`/admin/errors?page=${currentPage + 1}`);
-				}}
-				class="ml-2 disabled:text-neutral-300"
-				disabled={currentPage + 1 >= Math.ceil(data.totalErrors / 15)}
-			>
-				<i class="fa-solid fa-angle-right" aria-hidden="true"></i>
-				<span class="sr-only">next page</span>
-			</button>
-		</span>
+		{#key data.totalErrors}
+			<Pagination total={data.totalErrors} perPage={15} {currentPage} />
+		{/key}
 	</svelte:fragment>
 </Table>
 
