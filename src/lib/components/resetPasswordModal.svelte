@@ -2,8 +2,9 @@
 	import { goto } from '$app/navigation';
 	import FormError from './FormError.svelte';
 	import PasswordInput from './PasswordInput.svelte';
-	import { handleApiResponse, password as zPassword } from '$lib/utils.js';
+	import { handleApiResponse, meltLabel, password as zPassword } from '$lib/utils.js';
 	import { modal } from '../../stores';
+	import { melt } from '@melt-ui/svelte';
 
 	export let resetPasswordToken: string | null;
 
@@ -42,7 +43,7 @@
 </script>
 
 <form class="col-start-1 row-start-1 px-1" on:submit|preventDefault={handleSubmit} novalidate>
-	<label for="password">New password</label>
+	<label for="password" use:melt={$meltLabel}>New password</label>
 	<div class="mb-12 mt-2">
 		<PasswordInput bind:password new />
 		{#if passwordError !== undefined}

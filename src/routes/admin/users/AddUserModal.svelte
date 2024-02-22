@@ -3,9 +3,15 @@
 	import Checkbox from '$lib/components/Checkbox.svelte';
 	import FormError from '$lib/components/FormError.svelte';
 	import PasswordInput from '$lib/components/PasswordInput.svelte';
-	import { handleApiResponse, loginPassword as zPassword, email as zEmail } from '$lib/utils';
+	import {
+		handleApiResponse,
+		loginPassword as zPassword,
+		email as zEmail,
+		meltLabel
+	} from '$lib/utils';
 	import type { Readable } from 'svelte/store';
 	import { modal } from '../../../stores';
+	import { melt } from '@melt-ui/svelte';
 
 	let request: Promise<unknown> | undefined;
 	let apiError: string | undefined;
@@ -64,7 +70,7 @@
 </script>
 
 <form on:submit|preventDefault={handleSubmit} novalidate class="px-2">
-	<label for="email">Email</label>
+	<label for="email" use:melt={$meltLabel}>Email</label>
 	<div class="mb-8 mt-2">
 		<input
 			class="input w-full"
@@ -78,7 +84,7 @@
 			<FormError class="mt-2">{emailError}</FormError>
 		{/if}
 	</div>
-	<label for="password">Password</label>
+	<label for="password" use:melt={$meltLabel}>Password</label>
 	<div class="mb-8 mt-2">
 		<PasswordInput new bind:password />
 		{#if passwordError !== undefined}
@@ -87,7 +93,7 @@
 	</div>
 	<div class="mb-10 flex items-center gap-3">
 		<Checkbox bind:isChecked={shouldSendVerificationEmail} />
-		<label for="password" class="text-sm">Send verification email</label>
+		<label for="password" class="text-sm" use:melt={$meltLabel}>Send verification email</label>
 	</div>
 	<button class="button w-full max-w-md !text-lg">
 		{#await request}

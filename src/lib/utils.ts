@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { test as commonPasswordTest } from 'fxa-common-password-list';
+import { createLabel } from '@melt-ui/svelte';
 
 export const EMAIL_VERIFICATION_VERIFY_TIMEOUT_DISCRIMINATOR = 'emailverifyverify';
 export const FRIENDLY_ERROR_MESSAGE =
@@ -51,3 +52,10 @@ export const createLoginRedirectURL = (url: URL, to: string = '/?login=true') =>
 	const path = encodeURIComponent(url.pathname + url.search);
 	return `${to}${to.includes('?') ? '&' : '?'}redirect-to=${path}`;
 };
+
+
+
+const {
+	elements: { root },
+} = createLabel();
+export const meltLabel = root;

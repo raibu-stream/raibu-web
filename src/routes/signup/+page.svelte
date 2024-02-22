@@ -3,7 +3,13 @@
 	import FormError from '$lib/components/FormError.svelte';
 	import { dev } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { handleApiResponse, password as zPassword, email as zEmail } from '$lib/utils.js';
+	import {
+		handleApiResponse,
+		password as zPassword,
+		email as zEmail,
+		meltLabel
+	} from '$lib/utils.js';
+	import { melt } from '@melt-ui/svelte';
 
 	let request: Promise<unknown> | undefined;
 	let apiError: string | undefined;
@@ -59,7 +65,7 @@
 	<section class="w-full max-w-[400px] px-6 py-8 sm:max-w-[450px] sm:px-16">
 		<h2 class="mb-6 border-b border-neutral-300 text-2xl font-bold tracking-tight">Sign up</h2>
 		<form on:submit|preventDefault={handleSubmit} novalidate>
-			<label for="email">Email</label>
+			<label for="email" use:melt={$meltLabel}>Email</label>
 			<div class="mb-8 mt-2">
 				<input
 					class="input w-full"
@@ -74,7 +80,7 @@
 					<FormError class="mt-2">{emailError}</FormError>
 				{/if}
 			</div>
-			<label for="password">Password</label>
+			<label for="password" use:melt={$meltLabel}>Password</label>
 			<div class="mb-12 mt-2">
 				<PasswordInput
 					new

@@ -6,11 +6,13 @@
 	import {
 		handleApiResponse,
 		loginPassword as zPassword,
-		loginEmail as zEmail
+		loginEmail as zEmail,
+		meltLabel
 	} from '$lib/utils.js';
 	import { modal } from '../../stores';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
+	import { melt } from '@melt-ui/svelte';
 
 	export let redirectTo: string | undefined = undefined;
 
@@ -108,7 +110,7 @@
 		transition:fly={{ x: -500, opacity: 0, duration: 350 }}
 	>
 		<div class="flex items-center justify-between">
-			<label for="email">Email</label>
+			<label for="email" use:melt={$meltLabel}>Email</label>
 			<small>
 				New to Raibu?
 				<button type="button" on:click={() => ($modal = undefined)}>
@@ -124,7 +126,7 @@
 		</div>
 
 		<div class="flex items-center justify-between">
-			<label for="password">Password</label>
+			<label for="password" use:melt={$meltLabel}>Password</label>
 			<small>
 				<button
 					type="button"
@@ -184,7 +186,7 @@
 					transition:fly={{ x: -500, opacity: 0, duration: 350 }}
 					class="col-start-1 row-start-1 px-1"
 				>
-					<label for="email">Email</label>
+					<label for="email" use:melt={$meltLabel}>Email</label>
 					<div class="mb-2 mt-2">
 						<input class="input w-full" type="email" required id="email" bind:value={email} />
 						{#if emailError !== undefined}

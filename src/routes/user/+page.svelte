@@ -2,6 +2,8 @@
 	import Streams from './Streams.svelte';
 	import type { PageServerData } from './$types';
 	import PasswordInput from '$lib/components/PasswordInput.svelte';
+	import { meltLabel } from '$lib/utils';
+	import { melt } from '@melt-ui/svelte';
 
 	export let data: PageServerData;
 </script>
@@ -28,20 +30,20 @@
 		<small class="text-neutral-200">Here you can change your account information</small>
 	</div>
 	<form>
-		<label for="email">Email</label>
+		<label for="email" use:melt={$meltLabel}>Email</label>
 		<div class="mb-6 mt-2">
 			<input type="email" id="email" class="input w-1/2" />
 		</div>
 		<fieldset class="flex justify-evenly gap-4">
 			<legend class="mb-3 text-xl font-semibold">Change Password</legend>
 			<div class="grow">
-				<label for="password">Old Password</label>
+				<label for="password" use:melt={$meltLabel}>Old Password</label>
 				<div class="mb-12 mt-2">
 					<PasswordInput />
 				</div>
 			</div>
 			<div class="grow">
-				<label for="password">New Password</label>
+				<label for="password" use:melt={$meltLabel}>New Password</label>
 				<div class="mb-12 mt-2">
 					<PasswordInput new />
 				</div>
