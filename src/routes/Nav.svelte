@@ -2,7 +2,11 @@
 	import LoginModal from '$lib/components/LoginModal.svelte';
 	import { slide } from 'svelte/transition';
 	import { dropdown, modal } from '../stores';
-	import UserDropdown from './UserDropdown.svelte';
+	import { createDropdownMenu, melt } from '@melt-ui/svelte';
+	import Dropdown from '$lib/components/Dropdown.svelte';
+	import DropdownItem from '$lib/components/DropdownItem.svelte';
+	import DropdownSeparator from '$lib/components/DropdownSeparator.svelte';
+	import { invalidateAll } from '$app/navigation';
 
 	export let loggedIn: boolean;
 	export let email: string | undefined;
@@ -21,9 +25,10 @@
 	};
 
 	const signOut = async () => {
-		return fetch('/user/session', {
+		await fetch('/user/session', {
 			method: 'delete'
 		});
+		await invalidateAll();
 	};
 
 	const onScroll = (pxScrollFromTop: number) => {
@@ -61,6 +66,10 @@
 		pxScrollFromTop;
 		didScroll = true;
 	}
+
+	const {
+		elements: { menu, item, trigger, separator }
+	} = createDropdownMenu();
 </script>
 
 <svelte:window bind:scrollY={pxScrollFromTop} />
@@ -81,19 +90,7 @@
 			<li class="relative mt-auto" bind:this={userDropdown}>
 				<button
 					class="flex h-10 w-10 items-center justify-center rounded-full border border-transparent bg-primary-400 text-xl font-semibold uppercase leading-none text-neutral-100 transition-colors duration-100"
-					on:click={(event) => {
-						event.stopPropagation();
-						if ($dropdown === undefined || $dropdown.id !== 'userNavDropdown') {
-							$dropdown = {
-								from: userDropdown,
-								component: UserDropdown,
-								offset: { top: 10 },
-								id: 'userNavDropdown'
-							};
-						} else if ($dropdown.id === 'userNavDropdown') {
-							$dropdown = undefined;
-						}
-					}}
+					use:melt={$trigger}
 				>
 					{email[0]}
 				</button>
@@ -170,3 +167,14 @@
 		</ul>
 	{/if}
 </nav>
+
+<Dropdown {menu}>
+	<DropdownItem {item}>
+		<i class="fa-solid fa-gauge" aria-hidden="true" slot="icon"></i>
+		<a href="/user" class="flex h-full w-full items-center">Dashboard</a>
+	</DropdownItem>
+	<DropdownSeparator {separator} />
+	<DropdownItem {item} on:click={async () => await signOut()}>
+		<i class="fa-solid fa-right-from-bracket" aria-hidden="true" slot="icon"></i>Sign out
+	</DropdownItem>
+</Dropdown>

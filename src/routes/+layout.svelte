@@ -8,7 +8,6 @@
 	import LoginModal from '$lib/components/LoginModal.svelte';
 	import ResetPasswordModal from '$lib/components/resetPasswordModal.svelte';
 	import type { LayoutServerData } from './$types';
-	import Dropdown from '$lib/components/Dropdown.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import Toaster from '$lib/components/Toaster.svelte';
 	import { modal } from '../stores';
@@ -31,7 +30,6 @@
 </script>
 
 <div class="overflow-x-clip bg-neutral-800 text-center text-neutral-100">
-	<Dropdown />
 	<Toaster />
 	<Modal />
 	<div class="flex min-h-screen flex-col overflow-visible">
