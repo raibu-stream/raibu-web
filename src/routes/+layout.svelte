@@ -34,7 +34,7 @@
 	<Modal />
 	<div class="flex min-h-screen flex-col overflow-visible">
 		{#key data.loggedIn}
-			<Nav loggedIn={data.loggedIn} email={data.email} />
+			<Nav isLoggedIn={data.loggedIn} email={data.email} />
 		{/key}
 		<main class="relative flex w-full grow flex-col items-center overflow-visible">
 			<slot />

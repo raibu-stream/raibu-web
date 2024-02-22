@@ -1,6 +1,5 @@
 <script lang="ts">
 	import LoginModal from '$lib/components/LoginModal.svelte';
-	import { slide } from 'svelte/transition';
 	import { modal } from '../stores';
 	import { createDropdownMenu, melt } from '@melt-ui/svelte';
 	import Dropdown from '$lib/components/Dropdown.svelte';
@@ -8,16 +7,10 @@
 	import DropdownSeparator from '$lib/components/DropdownSeparator.svelte';
 	import { invalidateAll } from '$app/navigation';
 
-	export let loggedIn: boolean;
+	export let isLoggedIn: boolean;
 	export let email: string | undefined;
 
-	let userDropdown: HTMLElement;
-
-	let mobileNavOpen = false;
-
-	let toggleMobileNavOpen = () => (mobileNavOpen = !mobileNavOpen);
 	let login = () => {
-		mobileNavOpen = false;
 		$modal = {
 			component: LoginModal,
 			title: 'Login'
@@ -70,13 +63,27 @@
 	const {
 		elements: { menu, item, trigger, separator }
 	} = createDropdownMenu();
+
+	import { createDialog } from '@melt-ui/svelte';
+	import { fade, fly } from 'svelte/transition';
+	import Separator from '$lib/components/Separator.svelte';
+
+	const {
+		elements: {
+			trigger: drawerNavTrigger,
+			overlay: drawerNavOverlay,
+			content: drawerNavContent,
+			close: drawerNavClose
+		},
+		states: { open: drawerNavOpen }
+	} = createDialog();
 </script>
 
 <svelte:window bind:scrollY={pxScrollFromTop} />
 
 <nav
-	class="sticky -top-18 z-20 flex h-18 items-center gap-4 border-b border-neutral-300 bg-neutral-800 px-6 transition-all"
-	class:!top-0={isScrollingUp || mobileNavOpen}
+	class="sticky -top-18 z-40 flex h-18 items-center gap-4 border-b border-neutral-300 bg-neutral-800 px-6 transition-all"
+	class:!top-0={isScrollingUp || $drawerNavOpen}
 	bind:clientHeight={navHeight}
 >
 	<h1>
@@ -86,8 +93,8 @@
 		<li><a class="link" href="/">Home</a></li>
 		<li><a class="link" href="/#About">About</a></li>
 		<li><a class="link" href="/#Team">Team</a></li>
-		{#if loggedIn && email !== undefined}
-			<li class="relative mt-auto" bind:this={userDropdown}>
+		{#if isLoggedIn && email !== undefined}
+			<li class="relative mt-auto">
 				<button
 					class="flex h-10 w-10 items-center justify-center rounded-full border border-transparent bg-primary-400 text-xl font-semibold uppercase leading-none text-neutral-100 transition-colors duration-100"
 					use:melt={$trigger}
@@ -104,69 +111,82 @@
 			</li>
 		{/if}
 	</ul>
-	<button on:click={toggleMobileNavOpen} class="ml-auto text-xl sm:hidden">
-		<i class="fa-solid fa-bars text-neutral-100" aria-hidden="true"></i>
-		<span class="sr-only">Open menu</span>
-	</button>
-
-	{#if mobileNavOpen}
-		<ul
-			transition:slide={{ duration: 300, axis: 'x' }}
-			class="fixed right-0 top-0 -z-10 flex h-screen w-5/6 flex-col bg-neutral-800 p-4 pt-18 text-left text-lg font-semibold"
-		>
-			<div class="relative -top-px -mx-4 mb-6 border-t border-neutral-300"></div>
-			{#if loggedIn && email !== undefined}
-				<li class="mb-4 border-b border-neutral-300 pb-4">
-					<button on:click={toggleMobileNavOpen} class="w-full">
-						<a href="/user">
-							<div
-								class="flex h-14 w-14 items-center justify-center rounded-full border-2 border-primary-200 text-2xl font-semibold uppercase leading-none text-primary-200 transition-colors duration-200 ease-in-out"
-							>
-								{email[0]}
-							</div>
-						</a>
-						<p class="mt-2 w-3/4 overflow-hidden text-ellipsis whitespace-nowrap text-left text-sm">
-							{email}
-						</p>
-					</button>
-					<button
-						class="link flex w-full items-center gap-2 text-sm text-neutral-200"
-						on:click={signOut}
-					>
-						<i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
-						Sign out
-					</button>
-				</li>
-			{/if}
-			<li class="pb-4">
-				<button on:click={toggleMobileNavOpen}>
-					<a class="link" href="/">Home</a>
-				</button>
-			</li>
-			<li class="pb-4">
-				<button on:click={toggleMobileNavOpen}>
-					<a class="link" href="/#About">About</a>
-				</button>
-			</li>
-			<li class="pb-4">
-				<button on:click={toggleMobileNavOpen}>
-					<a class="link" href="/#Team">Team</a>
-				</button>
-			</li>
-			{#if loggedIn && email !== undefined}
-				<li class="link fixed bottom-4 mt-auto text-sm"></li>
-			{:else}
-				<hr class="mb-6 border-neutral-300" />
-				<li class="flex gap-3">
-					<button class="button button-invert !text-xs" on:click={toggleMobileNavOpen}>
-						<a class="link" href="/signup">Sign up</a>
-					</button>
-					<button class="button !text-xs" on:click={login}>Log in</button>
-				</li>
-			{/if}
-		</ul>
+	{#if $drawerNavOpen}
+		<button class="ml-auto text-xl sm:hidden" use:melt={$drawerNavClose}>
+			<i class="fa-solid fa-bars text-neutral-100" aria-hidden="true"></i>
+			<span class="sr-only">close menu</span>
+		</button>
+	{:else}
+		<button class="ml-auto text-xl sm:hidden" use:melt={$drawerNavTrigger}>
+			<i class="fa-solid fa-bars text-neutral-100" aria-hidden="true"></i>
+			<span class="sr-only">Open menu</span>
+		</button>
 	{/if}
 </nav>
+
+{#if $drawerNavOpen}
+	<div
+		use:melt={$drawerNavOverlay}
+		class="fixed inset-0 z-20 bg-neutral-900/50"
+		transition:fade={{ duration: 150 }}
+	/>
+	<nav
+		use:melt={$drawerNavContent}
+		class="fixed right-0 top-0 z-30 flex h-screen w-full max-w-[300px] flex-col bg-neutral-800 p-4 pt-18 text-left text-lg font-semibold"
+		transition:fly={{
+			x: 300,
+			duration: 300,
+			opacity: 1
+		}}
+	>
+		<div class="relative -top-px -mx-4 mb-6 border-t border-neutral-300"></div>
+		{#if isLoggedIn && email !== undefined}
+			<div class="pb-4">
+				<button use:melt={$drawerNavClose} class="w-full">
+					<a href="/user">
+						<div
+							class="flex h-14 w-14 items-center justify-center rounded-full border-2 border-primary-200 text-2xl font-semibold uppercase leading-none text-primary-200 transition-colors duration-200 ease-in-out"
+						>
+							{email[0]}
+						</div>
+					</a>
+					<p class="mt-2 w-3/4 overflow-hidden text-ellipsis whitespace-nowrap text-left text-sm">
+						{email}
+					</p>
+				</button>
+				<button
+					class="link flex w-full items-center gap-2 text-sm text-neutral-200"
+					on:click={signOut}
+				>
+					<i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+					Sign out
+				</button>
+			</div>
+			<Separator orientation="horizontal" class="mb-4 h-px bg-neutral-300" />
+		{/if}
+		<button class="pb-4 text-left" use:melt={$drawerNavClose}>
+			<a class="link" href="/">Home</a>
+		</button>
+		<button class="pb-4 text-left" use:melt={$drawerNavClose}>
+			<a class="link" href="/#About">About</a>
+		</button>
+		<button class="pb-4 text-left" use:melt={$drawerNavClose}>
+			<a class="link" href="/#Team">Team</a>
+		</button>
+		{#if isLoggedIn && email !== undefined}
+			<div class="link fixed bottom-4 mt-auto text-sm"></div>
+		{:else}
+			<Separator orientation="horizontal" class="mb-6 h-px bg-neutral-300" />
+			<div class="flex gap-3">
+				<button class="button button-invert !text-xs" use:melt={$drawerNavClose}>
+					<a class="link" href="/signup">Sign up</a>
+				</button>
+				<button class="button !text-xs" use:melt={$drawerNavClose} on:m-click={login}>Log in</button
+				>
+			</div>
+		{/if}
+	</nav>
+{/if}
 
 <Dropdown {menu}>
 	<DropdownItem {item}>
