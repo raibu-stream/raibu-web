@@ -4,7 +4,7 @@ import type { RequestEvent, RequestHandler } from './$types';
 import { db } from '$lib/models/db';
 import { eq } from 'drizzle-orm';
 import { timeOut } from '$lib/models/schema';
-import { TimeSpan, createDate } from 'oslo';
+import { TimeSpan, createDate, isWithinExpirationDate } from 'oslo';
 
 const TIMEOUT_DISCRIMINATOR = 'emailverifycode';
 
@@ -15,22 +15,31 @@ export const POST: RequestHandler = async ({ locals }: RequestEvent) => {
 		});
 	}
 
+	const condition = eq(timeOut.timerId, locals.user.id + TIMEOUT_DISCRIMINATOR);
+
 	const timeout = await db.query.timeOut.findFirst({
-		where: eq(timeOut.timerId, locals.user.id + TIMEOUT_DISCRIMINATOR)
+		where: condition
 	});
 	if (timeout !== undefined) {
-		error(400, { message: `You cannot send another email for the next minute` });
+		if (isWithinExpirationDate(timeout.expires)) {
+			error(400, `You cannot send another email for the next minute`);
+		} else {
+			await db.delete(timeOut).where(condition);
+		}
 	}
 	if (locals.user.isEmailVerified) {
-		error(400, { message: 'You are already verified' });
+		error(400, 'You are already verified');
 	}
 
 	await newEmailVerificationCode(locals.user);
 
-	await db.insert(timeOut).values({
-		timerId: locals.user.id + TIMEOUT_DISCRIMINATOR,
-		expires: createDate(new TimeSpan(1, 'm'))
-	});
+	await db
+		.insert(timeOut)
+		.values({
+			timerId: locals.user.id + TIMEOUT_DISCRIMINATOR,
+			expires: createDate(new TimeSpan(1, 'm'))
+		})
+		.onConflictDoNothing();
 
 	return new Response(JSON.stringify(undefined), {
 		status: 200

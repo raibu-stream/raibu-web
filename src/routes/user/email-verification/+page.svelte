@@ -5,6 +5,7 @@
 	import { handleApiResponse } from '$lib/utils.js';
 	import { goto } from '$app/navigation';
 	import type { PageServerData } from './$types';
+	import type { Readable } from 'svelte/store';
 
 	export let data: PageServerData;
 
@@ -15,10 +16,10 @@
 		'Your verification email has been sent successfully. Please check your spam folder. It will expire in 30 minutes.';
 
 	let apiError = data.isPreSent ? apiSuccessfulMessage : undefined;
-	let resendRequest: Promise<unknown>;
+	let resendRequest: Promise<unknown> | undefined;
 	let verifyRequest: Promise<unknown>;
 
-	let code: string;
+	let code: Readable<string>;
 	let isCodeReady: boolean;
 
 	if (data.isPreSent) {
@@ -40,6 +41,7 @@
 
 					if (timer === 0) {
 						clearInterval(timerInterval);
+						resendRequest = undefined;
 						timerInterval = undefined;
 						return;
 					}
@@ -60,7 +62,7 @@
 
 		verifyRequest = fetch('/user/email-verification/verify', {
 			method: 'post',
-			body: JSON.stringify({ code: code })
+			body: JSON.stringify({ code: $code })
 		}).then(async (res) => {
 			apiError = await handleApiResponse(res, async () => {
 				if (data.redirectTo !== null) {
@@ -102,7 +104,7 @@
 			>
 				Resend email
 			</button>
-			{#if timerInterval}
+			{#if resendRequest !== undefined}
 				<span transition:slide>
 					{#await resendRequest}
 						<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>

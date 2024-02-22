@@ -53,9 +53,7 @@ export const createLoginRedirectURL = (url: URL, to: string = '/?login=true') =>
 	return `${to}${to.includes('?') ? '&' : '?'}redirect-to=${path}`;
 };
 
-
-
 const {
-	elements: { root },
+	elements: { root }
 } = createLabel();
 export const meltLabel = root;

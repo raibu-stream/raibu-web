@@ -1,59 +1,27 @@
 <script lang="ts">
-	let inputs: HTMLInputElement[] = [];
+	import { createPinInput, melt } from '@melt-ui/svelte';
 
-	const onKeydown = (
-		event: KeyboardEvent & { currentTarget: EventTarget & HTMLInputElement },
-		index: number
-	) => {
-		if (event.keyCode === 8 && event.currentTarget.value === '' && index > 0) {
-			inputs[index - 1].focus();
-		}
-	};
+	export let length = 6;
 
-	const onInput = (eventUnknown: unknown, index: number) => {
-		const event = eventUnknown as InputEvent & {
-			currentTarget: EventTarget & HTMLInputElement;
-		};
-		if (event.data === null || event.data === '') {
-			event.currentTarget.value = '';
-			value = inputs.map((input) => input.value).join('');
-			isFull = inputs.every((input) => input.value !== '');
-			return;
-		}
-		const [first, ...rest] = event.data;
-		event.currentTarget.value = first;
+	const {
+		elements: { root, input },
+		states: { valueStr }
+	} = createPinInput();
 
-		if (first !== undefined && first !== null && index !== 5) {
-			inputs[index + 1].focus();
-			rest.slice(0, 5 - index).forEach((character: string, restIndex: number, rest: string[]) => {
-				inputs[index + 1 + restIndex].value = character;
-				if (rest.length - 1 === restIndex) {
-					let focusIndex = index + 2 + restIndex >= 5 ? 5 : index + 2 + restIndex;
-					inputs[focusIndex].focus();
-				}
-			});
-		}
-
-		value = inputs.map((input) => input.value).join('');
-		isFull = inputs.every((input) => input.value !== '');
-	};
-
-	export let value = '';
+	export let value = valueStr;
 	export let isFull = false;
+	$: isFull = $value.length === length;
 </script>
 
-<fieldset class="flex gap-3 text-xl sm:gap-4 sm:text-2xl">
+<fieldset class="flex gap-3 text-xl sm:gap-4 sm:text-2xl" use:melt={$root}>
 	<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
-	{#each { length: 6 } as _, index}
+	{#each { length } as _}
 		<input
 			name="code"
-			class="h-12 w-10 rounded-xl bg-secondary-800 text-center sm:h-16 sm:w-14"
-			type="text"
+			class="h-12 w-10 rounded-xl bg-secondary-800 text-center placeholder:text-neutral-200 sm:h-16 sm:w-14"
 			inputmode="numeric"
 			autocomplete="off"
-			bind:this={inputs[index]}
-			on:input={(event) => onInput(event, index)}
-			on:keydown={(event) => onKeydown(event, index)}
+			use:melt={$input()}
 		/>
 	{/each}
 </fieldset>

@@ -8,24 +8,27 @@ export const incrementOrCreateTimeout = async (
 	id: string,
 	expires: Date = createDate(new TimeSpan(1, 'm'))
 ) => {
-	const timeout = await db.query.timeOut.findFirst({
-		where: eq(timeOut.timerId, id)
-	});
+	return db.transaction(async (tx) => {
+		const timeout = await tx.query.timeOut.findFirst({
+			where: eq(timeOut.timerId, id)
+		});
 
-	if (timeout !== undefined) {
-		if (!isWithinExpirationDate(timeout.expires)) {
-			await db.delete(timeOut).where(eq(timeOut.timerId, id));
+		if (timeout !== undefined) {
+			if (!isWithinExpirationDate(timeout.expires)) {
+				await tx.delete(timeOut).where(eq(timeOut.timerId, id));
+			} else {
+				return (
+					await tx
+						.update(timeOut)
+						.set({ attempts: sql`${timeOut.attempts} + 1` })
+						.where(eq(timeOut.timerId, id))
+						.returning()
+				)[0];
+			}
 		}
+
 		return (
-			await db
-				.update(timeOut)
-				.set({ attempts: sql`${timeOut.attempts} + 1` })
-				.where(eq(timeOut.timerId, id))
-				.returning()
-		)[0];
-	} else {
-		return (
-			await db
+			await tx
 				.insert(timeOut)
 				.values({
 					timerId: id,
@@ -34,5 +37,5 @@ export const incrementOrCreateTimeout = async (
 				})
 				.returning()
 		)[0];
-	}
+	});
 };
