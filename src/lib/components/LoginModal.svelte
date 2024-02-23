@@ -64,9 +64,9 @@
 		}).then(async (res) => {
 			apiError = await handleApiResponse(res, () => {
 				if (redirectTo !== undefined) {
-					goto(`/${redirectTo.slice(1)}`);
+					goto(`/${redirectTo.slice(1)}`, { invalidateAll: true });
 				} else {
-					goto('/user');
+					goto('/user', { invalidateAll: true });
 				}
 				showLoginModal.set(false);
 			});
