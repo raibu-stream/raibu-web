@@ -5,7 +5,8 @@ module.exports = {
 		'eslint:recommended',
 		'plugin:svelte/recommended',
 		'prettier',
-		'plugin:@typescript-eslint/recommended'
+		'plugin:@typescript-eslint/recommended',
+		'plugin:tailwindcss/recommended'
 	],
 	parser: '@typescript-eslint/parser',
 	plugins: ['@typescript-eslint', 'prettier'],
@@ -45,6 +46,7 @@ module.exports = {
 	],
 	rules: {
 		'@typescript-eslint/no-explicit-any': 'off',
-		'@typescript-eslint/no-floating-promises': 'error'
+		'@typescript-eslint/no-floating-promises': 'error',
+		'tailwindcss/no-custom-classname': 'off'
 	}
 };

@@ -23,6 +23,7 @@
 	options={{
 		type: 'loop',
 		padding: '1rem',
+		snap: false,
 		perPage: 1,
 		gap: '1.5rem',
 		perMove: 1,
