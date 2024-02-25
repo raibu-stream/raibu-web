@@ -104,3 +104,10 @@ export const timeOut = pgTable('time_out', {
 	expires: timestamp('expires').notNull(),
 	attempts: smallint('attempts')
 });
+
+export const siteConfig = pgTable('site_config', {
+	id: text('id').primaryKey(),
+	value: varchar('value', {
+		length: 255
+	})
+});

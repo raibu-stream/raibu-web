@@ -57,3 +57,6 @@ const {
 	elements: { root }
 } = createLabel();
 export const meltLabel = root;
+
+export const topAlertId = 'topAlert';
+export const disableSignupId = 'disableSignup';

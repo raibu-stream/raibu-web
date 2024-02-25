@@ -5,9 +5,15 @@
 	import DropdownItem from '$lib/components/DropdownItem.svelte';
 	import DropdownSeparator from '$lib/components/DropdownSeparator.svelte';
 	import { invalidateAll } from '$app/navigation';
+	import { createDialog } from '@melt-ui/svelte';
+	import { fade, fly } from 'svelte/transition';
+	import Separator from '$lib/components/Separator.svelte';
+	import { toast } from 'svelte-sonner';
+	import TopAlert from '$lib/components/TopAlert.svelte';
 
 	export let isLoggedIn: boolean;
 	export let email: string | undefined;
+	export let topAlert: string | undefined;
 
 	let login = () => {
 		$showLoginModal = true;
@@ -17,6 +23,7 @@
 		await fetch('/user/session', {
 			method: 'delete'
 		});
+		toast.success('Logged out');
 		await invalidateAll();
 	};
 
@@ -59,10 +66,6 @@
 	const {
 		elements: { menu, item, trigger, separator }
 	} = createDropdownMenu();
-
-	import { createDialog } from '@melt-ui/svelte';
-	import { fade, fly } from 'svelte/transition';
-	import Separator from '$lib/components/Separator.svelte';
 
 	const {
 		elements: {
@@ -119,6 +122,9 @@
 		</button>
 	{/if}
 </nav>
+{#if topAlert !== undefined}
+	<TopAlert visible={!(isScrollingUp || $drawerNavOpen)} topAlert={JSON.parse(topAlert)} />
+{/if}
 
 {#if $drawerNavOpen}
 	<div

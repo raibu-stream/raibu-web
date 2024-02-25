@@ -21,7 +21,6 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 	const timeout = await db.query.timeOut.findFirst({
 		where: and(eq(timeOut.timerId, getClientAddress() + 'session'), gt(timeOut.attempts, 10))
 	});
-
 	if (timeout !== undefined && isWithinExpirationDate(timeout.expires) && timeout.attempts! >= 4) {
 		error(400, "You've tried logging in too many times. Try again in 1 minute.");
 	}

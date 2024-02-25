@@ -11,8 +11,10 @@
 	} from '$lib/utils.js';
 	import { melt } from '@melt-ui/svelte';
 
+	export let data;
+
 	let request: Promise<unknown> | undefined;
-	let apiError: string | undefined;
+	let apiError: string | undefined = data.signupDisabledMessage;
 
 	let password = '';
 	let email = '';
@@ -102,9 +104,6 @@
 			</button>
 			{#if apiError !== undefined}
 				<FormError class="mt-4">{apiError}</FormError>
-			{/if}
-			{#if !dev}
-				<FormError class="mt-4">We are currently not accepting registrations</FormError>
 			{/if}
 		</form>
 	</section>

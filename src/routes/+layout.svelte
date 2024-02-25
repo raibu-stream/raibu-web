@@ -29,7 +29,7 @@
 	<ResetPasswordModal resetPasswordToken={data.resetPasswordToken} open={showResetPasswordModal} />
 	<div class="flex min-h-screen flex-col overflow-visible">
 		{#key data.loggedIn}
-			<Nav isLoggedIn={data.loggedIn} email={data.email} />
+			<Nav isLoggedIn={data.loggedIn} email={data.email} topAlert={data.topAlert} />
 		{/key}
 		<main class="relative flex w-full grow flex-col items-center overflow-visible">
 			<slot />

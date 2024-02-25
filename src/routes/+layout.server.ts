@@ -1,4 +1,8 @@
+import { db } from '$lib/models/db';
+import { eq } from 'drizzle-orm';
 import type { LayoutServerLoad } from './$types';
+import { siteConfig } from '$lib/models/schema';
+import { topAlertId } from '$lib/utils';
 
 export const load: LayoutServerLoad = async ({ locals, url }) => {
 	const login = url.searchParams.get('login');
@@ -10,6 +14,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 		resetPasswordToken: resetPasswordToken,
 		loginModal: login,
 		redirectTo,
-		email: locals.user?.id
+		email: locals.user?.id,
+		topAlert: (await db.query.siteConfig.findFirst({ where: eq(siteConfig.id, topAlertId) }))?.value ?? undefined
 	};
 };
