@@ -53,7 +53,7 @@
 			<td>
 				{#if modalTrigger}
 					<button
-						class="w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-left"
+						class="w-full truncate text-left"
 						use:melt={$modalTrigger}
 						on:m-click={() => (errorText = error.error)}
 					>
@@ -77,6 +77,6 @@
 
 <style lang="postcss">
 	td {
-		@apply max-w-[10rem] overflow-hidden overflow-ellipsis whitespace-nowrap pr-4;
+		@apply max-w-[10rem] truncate pr-4;
 	}
 </style>

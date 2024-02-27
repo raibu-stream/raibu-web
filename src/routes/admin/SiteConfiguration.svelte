@@ -5,7 +5,7 @@
 	import { slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import { toast } from 'svelte-sonner';
-	import { v4 as uuidv4 } from 'uuid';
+	import { v4 as uuidV4 } from 'uuid';
 	import FormError from '$lib/components/FormError.svelte';
 	import type { PageData } from './$types';
 	import { invalidateAll } from '$app/navigation';
@@ -119,7 +119,7 @@
 						updateConfig(
 							topAlertId,
 							JSON.stringify({
-								id: alertId === '' ? uuidv4() : alertId,
+								id: alertId === '' ? uuidV4() : alertId,
 								message: alertMessage
 							}),
 							invalidateAll

@@ -6,7 +6,8 @@ import {
 	primaryKey,
 	text,
 	timestamp,
-	smallint
+	smallint,
+	integer
 } from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
@@ -16,6 +17,7 @@ export const user = pgTable('user', {
 	hashedPassword: varchar('hashed_password', {
 		length: 255
 	}).notNull(),
+	tier: text('tier').references(() => tier.id),
 	isEmailVerified: boolean('is_email_verified').notNull().default(false),
 	isLocked: boolean('is_locked').notNull().default(false),
 	isAdmin: boolean('is_admin').notNull().default(false)
@@ -110,4 +112,12 @@ export const siteConfig = pgTable('site_config', {
 	value: varchar('value', {
 		length: 255
 	})
+});
+
+export const tier = pgTable('tier', {
+	id: text('id').primaryKey(),
+	name: text('name'),
+	allottedConcurrentStreams: integer('allotted_concurrent_streams').notNull(),
+	allottedConcurrentViewers: integer('allotted_concurrent_viewers').notNull(),
+	allottedBitrateInKbps: integer('allotted_bitrate').notNull(),
 });

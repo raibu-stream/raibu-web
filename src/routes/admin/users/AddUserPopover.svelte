@@ -11,7 +11,7 @@
 	} from '$lib/utils';
 	import type { Readable } from 'svelte/store';
 	import { melt } from '@melt-ui/svelte';
-	import Modal from '$lib/components/Modal.svelte';
+	import Popover from '$lib/components/Popover.svelte';
 
 	export let trigger: any = undefined;
 
@@ -73,12 +73,12 @@
 	};
 </script>
 
-<Modal titleString="Create User" bind:trigger bind:open>
-	<form on:submit|preventDefault={handleSubmit} novalidate class="px-2">
+<Popover titleString="Create User" bind:trigger bind:open>
+	<form on:submit|preventDefault={handleSubmit} novalidate class="px-2 text-sm">
 		<label for="email" use:melt={$meltLabel}>Email</label>
-		<div class="mb-8 mt-2">
+		<div class="mb-6 mt-2">
 			<input
-				class="input w-full"
+				class="input w-full p-2"
 				type="email"
 				required
 				id="email"
@@ -90,17 +90,17 @@
 			{/if}
 		</div>
 		<label for="password" use:melt={$meltLabel}>Password</label>
-		<div class="mb-8 mt-2">
-			<PasswordInput new bind:password />
+		<div class="mb-6 mt-2">
+			<PasswordInput class="p-2" new bind:password />
 			{#if passwordError !== undefined}
 				<FormError class="mt-2">{passwordError}</FormError>
 			{/if}
 		</div>
 		<div class="mb-10 flex items-center gap-3">
-			<Checkbox bind:isChecked={shouldSendVerificationEmail} />
+			<Checkbox class="size-6" bind:isChecked={shouldSendVerificationEmail} />
 			<label for="password" class="text-sm" use:melt={$meltLabel}>Send verification email</label>
 		</div>
-		<button class="button w-full max-w-md !text-lg">
+		<button class="button w-full max-w-md">
 			{#await request}
 				<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>
 				<span class="sr-only">Loading</span>
@@ -113,4 +113,4 @@
 			<FormError class="mt-4">{apiError}</FormError>
 		{/if}
 	</form>
-</Modal>
+</Popover>

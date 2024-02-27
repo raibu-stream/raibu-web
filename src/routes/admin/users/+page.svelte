@@ -4,7 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import Table from '$lib/components/Table.svelte';
-	import AddUserModal from './AddUserModal.svelte';
+	import AddUserPopover from './AddUserPopover.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { writable } from 'svelte/store';
 	import { browser } from '$app/environment';
@@ -43,7 +43,7 @@
 	</div>
 </form>
 
-<AddUserModal bind:trigger={modalTrigger} />
+<AddUserPopover bind:trigger={modalTrigger} />
 
 <Table {headings} add={modalTrigger}>
 	{#each data.users as user (user.id)}

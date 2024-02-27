@@ -1,20 +1,27 @@
 {
-	"version": "5",
-	"dialect": "pg",
-	"entries": [
-		{
-			"idx": 0,
-			"version": "5",
-			"when": 1708231132616,
-			"tag": "0000_nebulous_kulan_gath",
-			"breakpoints": true
-		},
-		{
-			"idx": 1,
-			"version": "5",
-			"when": 1708832418841,
-			"tag": "0001_crazy_xorn",
-			"breakpoints": true
-		}
-	]
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1708231132616,
+      "tag": "0000_nebulous_kulan_gath",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1708832418841,
+      "tag": "0001_crazy_xorn",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1708846604353,
+      "tag": "0002_bouncy_mongu",
+      "breakpoints": true
+    }
+  ]
 }

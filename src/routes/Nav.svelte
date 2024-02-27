@@ -123,7 +123,7 @@
 	{/if}
 </nav>
 {#if topAlert !== undefined}
-	<TopAlert visible={!(isScrollingUp || $drawerNavOpen)} topAlert={JSON.parse(topAlert)} />
+	<TopAlert topAlert={JSON.parse(topAlert)} />
 {/if}
 
 {#if $drawerNavOpen}
@@ -152,7 +152,7 @@
 							{email[0]}
 						</div>
 					</a>
-					<p class="mt-2 w-3/4 overflow-hidden text-ellipsis whitespace-nowrap text-left text-sm">
+					<p class="mt-2 w-3/4 truncate text-left text-sm">
 						{email}
 					</p>
 				</button>

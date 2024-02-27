@@ -4,6 +4,8 @@
 	import PasswordInput from '$lib/components/PasswordInput.svelte';
 	import { meltLabel } from '$lib/utils';
 	import { melt } from '@melt-ui/svelte';
+	import Modal from '$lib/components/Modal.svelte';
+	import { goto } from '$app/navigation';
 
 	export let data: PageServerData;
 </script>
@@ -20,7 +22,18 @@
 	</button>
 	<div class="flex flex-col">
 		<span>{data.email}</span>
-		<small class="text-neutral-200">Tier name here</small>
+		<small class="text-neutral-200">
+			{#if data.tier !== undefined}
+				{#if data.tier.name !== null}
+					{data.tier.name}
+				{:else}
+					{data.tier.allottedConcurrentStreams} streams with {data.tier.allottedConcurrentViewers} viewers
+					@ {data.tier.allottedBitrateInKbps} kbps
+				{/if}
+			{:else}
+				No tier selected. <a class="underline" href="/user/subscribe">Let's change that.</a>
+			{/if}
+		</small>
 	</div>
 </section>
 
@@ -62,6 +75,22 @@
 	</div>
 	<Streams />
 </section>
+
+<Modal
+	titleString="You have no tier selected!"
+	type="alertdialog"
+	defaultOpen={data.tier === undefined}
+	maxWidthPx={600}
+	let:close
+>
+	<p class="mb-8">Subscribe to a tier to start streaming!</p>
+	<div class="flex justify-end gap-3">
+		<button class="button" use:melt={close} on:m-click={() => goto('/user/subscribe')}>
+			Go to checkout
+		</button>
+		<button class="button button-invert" use:melt={close}>Later</button>
+	</div>
+</Modal>
 
 <style lang="postcss">
 	.section {

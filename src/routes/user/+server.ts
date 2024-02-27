@@ -1,6 +1,5 @@
 import { error } from '@sveltejs/kit';
 import { createSession, createUser, db } from '$lib/models/db';
-import { dev } from '$app/environment';
 import { newEmailVerificationCode } from '$lib/models/emailVerificationCode';
 import { disableSignupId, email, password } from '$lib/utils.js';
 import type { RequestEvent, RequestHandler } from './$types';

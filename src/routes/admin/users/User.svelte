@@ -141,6 +141,6 @@
 
 <style lang="postcss">
 	td {
-		@apply max-w-[10rem] overflow-hidden overflow-ellipsis whitespace-nowrap pr-4;
+		@apply max-w-[10rem] truncate pr-4;
 	}
 </style>

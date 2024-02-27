@@ -34,6 +34,7 @@ const adapter = new DrizzlePostgreSQLAdapter(db, schema.session, schema.user);
 export const auth = new Lucia(adapter, {
 	getUserAttributes: (data) => {
 		return {
+			tier: data.tier !== null ? db.query.tier.findFirst({ where: eq(schema.tier, data.tier) }) : undefined,
 			isEmailVerified: data.isEmailVerified,
 			isLocked: data.isLocked,
 			isAdmin: data.isAdmin
@@ -56,7 +57,7 @@ declare module 'lucia' {
 	}
 }
 
-interface DatabaseSessionAttributes {}
+interface DatabaseSessionAttributes { }
 
 type DatabaseUserAttributes = Omit<InferSelectModel<typeof schema.user>, 'id'>;
 

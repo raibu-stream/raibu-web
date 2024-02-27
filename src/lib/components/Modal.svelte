@@ -6,6 +6,7 @@
 
 	export let titleString: string;
 	export let type: 'dialog' | 'alertdialog' = 'dialog';
+	export let defaultOpen = true;
 	export let maxWidthPx = 450;
 	export let isOpen: Writable<boolean> | undefined = undefined;
 
@@ -14,7 +15,8 @@
 		states: { open }
 	} = createDialog({
 		role: type,
-		open: isOpen
+		open: isOpen,
+		defaultOpen
 	});
 </script>
 
@@ -49,7 +51,7 @@
 				</button>
 			</div>
 			<div class="grid grid-cols-1 grid-rows-1 overflow-hidden">
-				<slot />
+				<slot close={$close} />
 			</div>
 		</section>
 	</aside>

@@ -11,6 +11,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	}
 
 	return {
-		email: locals.user.id
+		email: locals.user.id,
+		tier: await locals.user.tier
 	};
 };

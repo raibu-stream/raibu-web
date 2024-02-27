@@ -1,15 +1,16 @@
 <script lang="ts">
 	let hidePassword = true;
 	let hiderIsHovered = false;
+	let classNames = '';
 
 	export let password = '';
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	export let onInput = (_: Event) => undefined;
 	let isNew = false;
-	export { isNew as new };
+	export { isNew as new, classNames as class };
 </script>
 
-<div class="input flex w-full gap-4">
+<div class="input flex w-full gap-4 {classNames}">
 	<input
 		class="grow"
 		type={!hidePassword || hiderIsHovered ? 'text' : 'password'}
