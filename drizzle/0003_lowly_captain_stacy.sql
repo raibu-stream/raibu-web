@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD COLUMN "signup_date" timestamp DEFAULT now() NOT NULL;

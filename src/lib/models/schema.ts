@@ -20,7 +20,8 @@ export const user = pgTable('user', {
 	tier: text('tier').references(() => tier.id),
 	isEmailVerified: boolean('is_email_verified').notNull().default(false),
 	isLocked: boolean('is_locked').notNull().default(false),
-	isAdmin: boolean('is_admin').notNull().default(false)
+	isAdmin: boolean('is_admin').notNull().default(false),
+	signupDate: timestamp('signup_date').defaultNow().notNull()
 });
 
 export const session = pgTable('user_session', {

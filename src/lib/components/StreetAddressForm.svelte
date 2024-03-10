@@ -38,7 +38,7 @@
 	let address2 = '';
 	let address2Error: string | undefined = undefined;
 
-	const onSubmit = () => {
+	const resetErrors = () => {
 		firstNameError = undefined;
 		lastNameError = undefined;
 		cityError = undefined;
@@ -46,6 +46,10 @@
 		zoneError = undefined;
 		address1Error = undefined;
 		address2Error = undefined;
+	};
+
+	const onSubmit = () => {
+		resetErrors();
 
 		let result = address(countries).safeParse({
 			firstName,
@@ -84,6 +88,7 @@
 			zone.set({
 				value: ''
 			});
+			resetErrors();
 		})
 	);
 </script>
@@ -108,7 +113,7 @@
 			class="flex w-full flex-col gap-4 sm:flex-row"
 			transition:slide={{ duration: 250, easing: quintOut }}
 		>
-			{#each line as field}
+			{#each line as field (field)}
 				<div
 					class="min-w-0 flex-1"
 					transition:slide={{ axis: 'x', duration: 250, easing: quintOut }}

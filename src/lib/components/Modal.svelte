@@ -6,7 +6,7 @@
 
 	export let titleString: string;
 	export let type: 'dialog' | 'alertdialog' = 'dialog';
-	export let defaultOpen = true;
+	export let defaultOpen = false;
 	export let maxWidthPx = 450;
 	export let isOpen: Writable<boolean> | undefined = undefined;
 

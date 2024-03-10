@@ -1,7 +1,10 @@
 <script lang="ts">
+	import TickedSlider from '$lib/components/TickedSlider.svelte';
 	import StreetAddressForm from '$lib/components/StreetAddressForm.svelte';
 
 	export let data;
+
+	let sliderValue: number;
 </script>
 
 <div class="relative flex w-full grow justify-center overflow-visible">
@@ -10,6 +13,11 @@
 		<h3>Build Your Tier</h3>
 
 		<StreetAddressForm countries={data.countries} />
+		<TickedSlider
+			ticks={[80, 125, 200, 300, 500, 600, 800]}
+			bind:value={sliderValue}
+			class="max-w-xl"
+		/>
 	</section>
 	<section class="ml-auto min-w-4 overflow-visible border-l border-neutral-300 p-6">
 		<h3>Order Summary</h3>
