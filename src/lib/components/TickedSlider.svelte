@@ -25,14 +25,18 @@
 	</span>
 
 	{#each $ticks as tick, i}
-		<div use:melt={tick} class="flex flex-col items-center justify-start gap-1 pt-5">
-			<div class="mt-2 h-3 w-0.5 rounded-full rounded-t-none bg-neutral-200/50"></div>
-			<span class="text-xs">{tickValues[i]}</span>
+		<div use:melt={tick} class="relative flex flex-col items-center justify-start gap-1 pt-2">
+			<div
+				class="h-3 w-0.5 rounded-full bg-neutral-200/50"
+				class:rounded-tl-none={i !== 0}
+				class:rounded-tr-none={i !== $ticks.length - 1}
+			></div>
+			<span class="absolute -bottom-4 text-xs">{tickValues[i]}</span>
 		</div>
 	{/each}
 
 	<span
 		use:melt={$thumbs[0]}
-		class="h-5 w-5 rounded-full bg-primary-200 outline-none focus:ring-4 focus:!ring-neutral-300"
+		class="h-5 w-5 rounded-full bg-primary-200 outline-none !ring-primary-200/25 focus:ring-4"
 	/>
 </span>
