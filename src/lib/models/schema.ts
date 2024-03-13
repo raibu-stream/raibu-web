@@ -120,5 +120,5 @@ export const tier = pgTable('tier', {
 	name: text('name'),
 	allottedConcurrentStreams: integer('allotted_concurrent_streams').notNull(),
 	allottedConcurrentViewers: integer('allotted_concurrent_viewers').notNull(),
-	allottedBitrateInKbps: integer('allotted_bitrate').notNull(),
+	allottedBitrateInKbps: integer('allotted_bitrate').notNull()
 });

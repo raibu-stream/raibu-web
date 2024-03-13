@@ -51,34 +51,85 @@ export const email = loginEmail.regex(emailRegex, 'Must be a valid email');
 export const address = (countries: Country[]) => {
 	const validCountryCodes = countries.map((country) => country.code);
 
-	return z.object({
-		firstName: z.string().min(1, "This is required").max(140, "Cannot be more than 140 characters"),
-		lastName: z.string().min(1, "This is required").max(140, "Cannot be more than 140 characters"),
-		country: z.string().length(2).refine((country) => validCountryCodes.includes(country), "Not a valid country"),
-		address1: z.string().min(1, "This is required").max(300, "Cannot be more than 300 characters"),
-		address2: z.string().min(1, "This is required").max(300, "Cannot be more than 300 characters").optional(),
-		city: z.string().min(1, "This is required").max(120, "Cannot be more than 120 characters").optional(),
-		zone: z.string().min(1, "This is required").max(300, "Cannot be more than 300 characters").optional(),
-		postalCode: z.string().min(1, "This is required").max(60, "Cannot be more than 60 characters").optional(),
-	}).superRefine((address, ctx) => {
-		const country = countries.find((country) => country.code === address.country)!;
+	return z
+		.object({
+			firstName: z
+				.string()
+				.min(1, 'This is required')
+				.max(140, 'Cannot be more than 140 characters'),
+			lastName: z
+				.string()
+				.min(1, 'This is required')
+				.max(140, 'Cannot be more than 140 characters'),
+			country: z
+				.string()
+				.length(2)
+				.refine((country) => validCountryCodes.includes(country), 'Not a valid country'),
+			address1: z
+				.string()
+				.min(1, 'This is required')
+				.max(300, 'Cannot be more than 300 characters'),
+			address2: z
+				.string()
+				.min(1, 'This is required')
+				.max(300, 'Cannot be more than 300 characters')
+				.optional(),
+			city: z
+				.string()
+				.min(1, 'This is required')
+				.max(120, 'Cannot be more than 120 characters')
+				.optional(),
+			zone: z
+				.string()
+				.min(1, 'This is required')
+				.max(300, 'Cannot be more than 300 characters')
+				.optional(),
+			postalCode: z
+				.string()
+				.min(1, 'This is required')
+				.max(60, 'Cannot be more than 60 characters')
+				.optional()
+		})
+		.superRefine((address, ctx) => {
+			const country = countries.find((country) => country.code === address.country)!;
 
-		if ((address.city === undefined && country.formatting.edit.includes('{city}')) || address.city !== undefined && !country.formatting.edit.includes('{city}')) ctx.addIssue({
-			code: z.ZodIssueCode.custom,
-			message: address.city === undefined ? 'This is required' : `City can't be defined because ${country.name} doesn't use it for addressing`,
-			path: ['city']
+			if (
+				(address.city === undefined && country.formatting.edit.includes('{city}')) ||
+				(address.city !== undefined && !country.formatting.edit.includes('{city}'))
+			)
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message:
+						address.city === undefined
+							? 'This is required'
+							: `City can't be defined because ${country.name} doesn't use it for addressing`,
+					path: ['city']
+				});
+			if (
+				(address.zone === undefined && country.formatting.edit.includes('{province}')) ||
+				(address.zone !== undefined && !country.formatting.edit.includes('{province}'))
+			)
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message:
+						address.zone === undefined
+							? 'This is required'
+							: `Zone can't be defined because ${country.name} doesn't use it for addressing`,
+					path: ['zone']
+				});
+			if (
+				(address.postalCode === undefined && country.formatting.edit.includes('{zip}')) ||
+				(address.postalCode !== undefined && !country.formatting.edit.includes('{zip}'))
+			)
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message:
+						address.postalCode === undefined
+							? 'This is required'
+							: `PostalCode can't be defined because ${country.name} doesn't use it for addressing`,
+					path: ['postalCode']
+				});
 		});
-		if ((address.zone === undefined && country.formatting.edit.includes('{province}')) || address.zone !== undefined && !country.formatting.edit.includes('{province}')) ctx.addIssue({
-			code: z.ZodIssueCode.custom,
-			message: address.zone === undefined ? 'This is required' : `Zone can't be defined because ${country.name} doesn't use it for addressing`,
-			path: ['zone']
-		});
-		if ((address.postalCode === undefined && country.formatting.edit.includes('{zip}')) || address.postalCode !== undefined && !country.formatting.edit.includes('{zip}')) ctx.addIssue({
-			code: z.ZodIssueCode.custom,
-			message: address.postalCode === undefined ? 'This is required' : `PostalCode can't be defined because ${country.name} doesn't use it for addressing`,
-			path: ['postalCode']
-		});
-	})
 };
 
 export const createLoginRedirectURL = (url: URL, to: string = '/?login=true') => {

@@ -62,6 +62,7 @@
 		<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>
 		<span class="sr-only">Loading</span>
 	</div>
+	<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 {:then _}
 	<ul class="flex flex-col gap-4">
 		<ConfigCard
@@ -137,6 +138,7 @@
 								disabled={!enabled}
 								bind:value={alertMessage}
 							/>
+							<small class="text-neutral-200">Hint: you can use markdown style links</small>
 							{#if alertMessageError !== undefined}
 								<FormError class="mt-2">{alertMessageError}</FormError>
 							{/if}

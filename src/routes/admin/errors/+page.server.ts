@@ -17,7 +17,10 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	const searchCondition =
 		searchString !== null
-			? or(ilike(errorLog.errorDate, `%${searchString}%`), ilike(errorLog.error, `%${searchString}%`))
+			? or(
+					ilike(errorLog.errorDate, `%${searchString}%`),
+					ilike(errorLog.error, `%${searchString}%`)
+				)
 			: undefined;
 
 	// TODO: count() is slow :(

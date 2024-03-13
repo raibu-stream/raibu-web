@@ -1,7 +1,6 @@
 <script lang="ts">
 	import PasswordInput from '$lib/components/PasswordInput.svelte';
 	import FormError from '$lib/components/FormError.svelte';
-	import { dev } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import {
 		handleApiResponse,

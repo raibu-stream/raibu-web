@@ -46,6 +46,7 @@ module.exports = {
 	],
 	rules: {
 		'@typescript-eslint/no-explicit-any': 'off',
+		'svelte/no-unused-svelte-ignore': 'off',
 		'@typescript-eslint/no-floating-promises': 'error',
 		'tailwindcss/no-custom-classname': 'off'
 	}

@@ -14,7 +14,9 @@ const postInputSchema = z.object({
 });
 
 export const POST: RequestHandler = async ({ request }: RequestEvent) => {
-	const signupDisabledMessage = (await db.query.siteConfig.findFirst({ where: eq(siteConfig.id, disableSignupId) }))?.value ?? undefined;
+	const signupDisabledMessage =
+		(await db.query.siteConfig.findFirst({ where: eq(siteConfig.id, disableSignupId) }))?.value ??
+		undefined;
 	if (signupDisabledMessage !== undefined) {
 		error(400, signupDisabledMessage);
 	}

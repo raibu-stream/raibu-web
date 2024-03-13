@@ -5,7 +5,9 @@ import { db } from '$lib/models/db';
 import { disableSignupId } from '$lib/utils';
 
 export const load: PageServerLoad = async () => {
-    return {
-        signupDisabledMessage: (await db.query.siteConfig.findFirst({ where: eq(siteConfig.id, disableSignupId) }))?.value ?? undefined
-    };
+	return {
+		signupDisabledMessage:
+			(await db.query.siteConfig.findFirst({ where: eq(siteConfig.id, disableSignupId) }))?.value ??
+			undefined
+	};
 };
