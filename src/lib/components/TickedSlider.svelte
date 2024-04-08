@@ -27,7 +27,7 @@
 	{#each $ticks as tick, i}
 		<div use:melt={tick} class="relative flex flex-col items-center justify-start gap-1 pt-2">
 			<div
-				class="h-3 w-0.5 rounded-full bg-neutral-200/50"
+				class="h-3 w-0.5 rounded-full bg-neutral-300/10"
 				class:rounded-tl-none={i !== 0}
 				class:rounded-tr-none={i !== $ticks.length - 1}
 			></div>
