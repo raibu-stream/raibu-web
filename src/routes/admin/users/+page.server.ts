@@ -29,7 +29,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const users = await db.query.user.findMany({
 		offset: pageIndex * 15,
 		limit: 15,
-		orderBy: (user, { desc }) => desc(user.id),
+		orderBy: (user, { desc }) => desc(user.signupDate),
 		where: searchCondition
 	});
 

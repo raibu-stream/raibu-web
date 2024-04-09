@@ -1,4 +1,4 @@
-import { auth, db, signInUser } from '$lib/models/db';
+import { auth, createSession, db, verifyPassword } from '$lib/models/db';
 import { error } from '@sveltejs/kit';
 import { newTooManyLoginsToken } from '$lib/models/tooManyLoginsToken';
 import type { RequestEvent, RequestHandler } from './$types';
@@ -31,10 +31,10 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 	}
 	const { email, password } = zodResult.data;
 
-	const sessionCookie = await signInUser(email, password);
-	if (sessionCookie === 'Password is invalid' || sessionCookie === 'User does not exist') {
-		if (sessionCookie === 'Password is invalid') await wrongPassword(email);
-		if (sessionCookie === 'User does not exist')
+	const isPasswordValid = await verifyPassword(email, password);
+	if (isPasswordValid === 'Password is invalid' || isPasswordValid === 'User does not exist') {
+		if (isPasswordValid === 'Password is invalid') await wrongPassword(email);
+		if (isPasswordValid === 'User does not exist')
 			await incrementOrCreateTimeout(getClientAddress() + 'session');
 
 		error(400, {
@@ -42,7 +42,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 		});
 	}
 
-	if (sessionCookie === 'User is locked') {
+	if (isPasswordValid === 'User is locked') {
 		newTooManyLoginsToken(email).catch(arbitraryHandleError);
 		error(400, {
 			message:
@@ -56,6 +56,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 		await auth.invalidateSession(locals.session.id);
 	}
 
+	const sessionCookie = await createSession(isPasswordValid.id);
 	return new Response(undefined, {
 		status: 200,
 		headers: {

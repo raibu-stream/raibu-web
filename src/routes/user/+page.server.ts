@@ -1,6 +1,9 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { createLoginRedirectURL } from '$lib/utils';
+import { db } from '$lib/models/db';
+import { eq } from 'drizzle-orm';
+import { tier } from '$lib/models/schema';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	if (locals.user === null) {
@@ -12,6 +15,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	return {
 		email: locals.user.id,
-		tier: await locals.user.tier
+		tier: await db.query.tier.findFirst({
+			where: locals.user.tier !== null ? eq(tier.id, locals.user.tier) : undefined
+		})
 	};
 };

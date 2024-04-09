@@ -64,7 +64,7 @@ export const handleError = async ({ error, status }) => {
 };
 
 export const arbitraryHandleError = async (error: unknown, devPrint: boolean = true) => {
-	if (devPrint) {
+	if (devPrint && dev) {
 		console.error(error);
 	}
 
