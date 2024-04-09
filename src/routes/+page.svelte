@@ -1,7 +1,10 @@
 <script lang="ts">
 	import Background from './home/Background.svelte';
 	import TeamCarousel from './home/TeamCarousel.svelte';
+	import SvelteSeo from 'svelte-seo';
 </script>
+
+<SvelteSeo title="Raibu | Low-latency Affordable Streaming" />
 
 <header
 	class="relative flex min-h-screen w-full items-center overflow-hidden border-b border-neutral-300 bg-neutral-900 text-center"

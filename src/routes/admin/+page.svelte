@@ -1,8 +1,11 @@
 <script>
 	import SiteConfiguration from './SiteConfiguration.svelte';
+	import SvelteSeo from 'svelte-seo';
 
 	export let data;
 </script>
+
+<SvelteSeo title="Admin | Raibu" />
 
 <section class="section mb-6 items-center gap-4">
 	<div class="mb-6">

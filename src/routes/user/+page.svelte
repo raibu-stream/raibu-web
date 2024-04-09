@@ -6,9 +6,12 @@
 	import { melt } from '@melt-ui/svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import { goto } from '$app/navigation';
+	import SvelteSeo from 'svelte-seo';
 
 	export let data: PageServerData;
 </script>
+
+<SvelteSeo title="Dashboard | Raibu" />
 
 <div class="my-10 w-full max-w-section-breakout">
 	<h2 class="text-left text-4xl font-bold tracking-tight">Account</h2>
@@ -45,23 +48,32 @@
 	<form>
 		<label for="email" use:melt={$meltLabel}>Email</label>
 		<div class="mb-6 mt-2">
-			<input type="email" id="email" class="input w-1/2" />
+			<input type="email" id="email" class="input w-full sm:w-1/2" />
 		</div>
-		<fieldset class="flex justify-evenly gap-4">
-			<legend class="mb-3 text-xl font-semibold">Change Password</legend>
+		<button class="button float-right px-8 text-base">Update</button>
+	</form>
+</section>
+
+<section class="section mb-6">
+	<div class="mb-6">
+		<h3 class="mb-1 border-b-0 text-3xl font-bold tracking-tight">Change Password</h3>
+		<small class="text-neutral-200">Here you can change your password</small>
+	</div>
+	<form>
+		<div class="mb-6 flex flex-col gap-2 sm:flex-row">
 			<div class="grow">
 				<label for="password" use:melt={$meltLabel}>Old Password</label>
-				<div class="mb-12 mt-2">
+				<div class="mt-2">
 					<PasswordInput />
 				</div>
 			</div>
 			<div class="grow">
 				<label for="password" use:melt={$meltLabel}>New Password</label>
-				<div class="mb-12 mt-2">
+				<div class="mt-2">
 					<PasswordInput new />
 				</div>
 			</div>
-		</fieldset>
+		</div>
 		<button class="button float-right px-8 text-base">Update</button>
 	</form>
 </section>

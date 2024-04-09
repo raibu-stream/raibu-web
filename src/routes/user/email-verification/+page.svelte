@@ -6,6 +6,7 @@
 	import { goto } from '$app/navigation';
 	import type { PageServerData } from './$types';
 	import type { Readable } from 'svelte/store';
+	import SvelteSeo from 'svelte-seo';
 
 	export let data: PageServerData;
 
@@ -74,6 +75,8 @@
 		});
 	};
 </script>
+
+<SvelteSeo title="Verify Your Email | Raibu" />
 
 <div class="flex w-full grow items-center justify-center">
 	<div class="flex max-w-lg flex-col items-center gap-2 p-2">

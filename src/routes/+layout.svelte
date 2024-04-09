@@ -9,6 +9,7 @@
 	import ResetPasswordModal from '$lib/components/resetPasswordModal.svelte';
 	import type { LayoutServerData } from './$types';
 	import Toaster from '$lib/components/Toaster.svelte';
+	import SvelteSeo from 'svelte-seo';
 	import { showLoginModal } from '../stores';
 	import { writable } from 'svelte/store';
 
@@ -22,6 +23,13 @@
 		showLoginModal.set(true);
 	}
 </script>
+
+<SvelteSeo
+	title="Raibu | Low-latency Affordable Streaming"
+	description="Low-latency affordable streaming for VRChat, personal websites, and businesses"
+	canonical="https://raibu.stream/"
+	keywords="streaming, vrchat, rtmp, subscription"
+/>
 
 <div class="overflow-x-clip bg-neutral-800 text-center text-neutral-100">
 	<Toaster />

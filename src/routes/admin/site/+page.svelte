@@ -2,6 +2,7 @@
 	import LineChart from '$lib/components/LineChart.svelte';
 	import { LayerCake, Svg } from 'layercake';
 	import { scaleTime } from 'd3-scale';
+	import SvelteSeo from 'svelte-seo';
 
 	export let data;
 
@@ -14,6 +15,8 @@
 		return withMs;
 	};
 </script>
+
+<SvelteSeo title="Site Performance | Raibu" />
 
 {#await data.logs.pageRoutes}
 	loading

@@ -9,6 +9,7 @@
 		meltLabel
 	} from '$lib/utils.js';
 	import { melt } from '@melt-ui/svelte';
+	import SvelteSeo from 'svelte-seo';
 
 	export let data;
 
@@ -61,6 +62,8 @@
 		});
 	};
 </script>
+
+<SvelteSeo title="Signup | Raibu" />
 
 <div class="static flex w-full grow justify-center text-left sm:justify-normal">
 	<section class="w-full max-w-[400px] px-6 py-8 sm:max-w-[450px] sm:px-16">

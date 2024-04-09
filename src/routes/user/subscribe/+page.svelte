@@ -3,11 +3,14 @@
 	import RadioGroup from '$lib/components/RadioGroup.svelte';
 	import RadioButton from '$lib/components/RadioButton.svelte';
 	import StreetAddressForm from '$lib/components/StreetAddressForm.svelte';
+	import SvelteSeo from 'svelte-seo';
 
 	export let data;
 
 	let sliderValue: number;
 </script>
+
+<SvelteSeo title="Checkout | Raibu" />
 
 <div class="relative flex w-full grow justify-center overflow-visible">
 	<section class="ml-auto">

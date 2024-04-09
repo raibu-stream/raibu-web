@@ -7,6 +7,8 @@
 	import ErrorModal from './ErrorModal.svelte';
 	import { browser } from '$app/environment';
 	import { melt } from '@melt-ui/svelte';
+	import SvelteSeo from 'svelte-seo';
+
 	export let data;
 
 	let modalTrigger: any;
@@ -31,6 +33,8 @@
 		goto(`/admin/errors?page=${$currentPage - 1}&search=${encodeURIComponent(searchString)}`);
 	};
 </script>
+
+<SvelteSeo title="Errors | Raibu" />
 
 <form on:submit|preventDefault={handleSearch} novalidate>
 	<div class="input mb-2 flex max-w-xs items-center gap-2 p-2 px-3 text-left text-sm">

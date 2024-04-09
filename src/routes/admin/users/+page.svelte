@@ -8,6 +8,7 @@
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { writable } from 'svelte/store';
 	import { browser } from '$app/environment';
+	import SvelteSeo from 'svelte-seo';
 
 	export let data;
 
@@ -32,6 +33,8 @@
 		goto(`/admin/users?page=${$currentPage - 1}&search=${encodeURIComponent(searchString)}`);
 	};
 </script>
+
+<SvelteSeo title="Users | Raibu" />
 
 <form on:submit|preventDefault={handleSearch} novalidate>
 	<div class="input mb-2 flex max-w-xs items-center gap-2 p-2 px-3 text-left text-sm">
