@@ -83,7 +83,7 @@
 				if (err.message !== undefined) {
 					hostedFieldsError = err.message;
 				} else {
-					hostedFieldsError = 'An unknown error occured. You have not been charged.';
+					hostedFieldsError = 'An unknown error occurred. You have not been charged.';
 				}
 
 				return;
@@ -154,6 +154,8 @@
 	let hostedFieldsCvvError: string | undefined;
 	let hostedFieldsNameError: string | undefined;
 	let hostedFieldsRequest: Promise<unknown> | undefined;
+	let hostedFieldsCardType: string | undefined;
+	let hostedFieldsCvvName: string = 'Security code';
 
 	let buttonsReadiness: 'Loading' | 'Ready' | 'Failed' = 'Loading';
 	let buttonsError: string | undefined;
@@ -191,7 +193,8 @@
 						},
 						cvv: {
 							selector: '#card-cvv-field-container',
-							placeholder: ''
+							placeholder: '',
+							maskInput: true
 						},
 						expirationDate: {
 							selector: '#card-expiry-field-container',
@@ -232,6 +235,18 @@
 							event.fields.expirationDate.isValid
 						) {
 							hostedFieldsExprError = undefined;
+						}
+					});
+
+					hostedFieldsRes.on('cardTypeChange', (event) => {
+						console.log(event.cards);
+
+						if (event.cards.length === 1) {
+							hostedFieldsCardType = event.cards[0].type;
+							hostedFieldsCvvName = event.cards[0].code.name;
+						} else {
+							hostedFieldsCardType = undefined;
+							hostedFieldsCvvName = 'Security code';
 						}
 					});
 
@@ -317,7 +332,24 @@
 			<form on:submit|preventDefault={onSubmitCard} class="text-left">
 				<label for="card-number-field-container">Card number</label>
 				<div class="mb-6 mt-2">
-					<div id="card-number-field-container" class="mb-2 h-11 rounded-sm bg-secondary-700"></div>
+					<div class="mb-2 flex items-center gap-4 rounded-sm bg-secondary-700 pr-4">
+						<div id="card-number-field-container" class="h-11 grow"></div>
+						<div class="w-4 text-xl" aria-hidden="true">
+							{#if hostedFieldsCardType === 'visa'}
+								<i class="fa-brands fa-cc-visa"></i>
+							{:else if hostedFieldsCardType === 'master-card'}
+								<i class="fa-brands fa-cc-mastercard"></i>
+							{:else if hostedFieldsCardType === 'american-express'}
+								<i class="fa-brands fa-cc-amex"></i>
+							{:else if hostedFieldsCardType === 'diners-club'}
+								<i class="fa-brands fa-cc-diners-club"></i>
+							{:else if hostedFieldsCardType === 'discover'}
+								<i class="fa-brands fa-cc-discover"></i>
+							{:else if hostedFieldsCardType === 'jcb'}
+								<i class="fa-brands fa-cc-jcb"></i>
+							{/if}
+						</div>
+					</div>
 					{#if hostedFieldsNumberError !== undefined}
 						<FormError>{hostedFieldsNumberError}</FormError>
 					{/if}
@@ -334,7 +366,7 @@
 						{/if}
 					</div>
 					<div>
-						<label for="card-cvv-field-container">Security code</label>
+						<label for="card-cvv-field-container">{hostedFieldsCvvName}</label>
 						<div
 							id="card-cvv-field-container"
 							class="mb-2 mt-2 h-11 rounded-sm bg-secondary-700"
