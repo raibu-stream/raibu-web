@@ -1,7 +1,45 @@
 {
+  "id": "dd2b9a00-3581-48ff-972d-4b73c28031e8",
+  "prevId": "6693355d-cc8f-4f37-a6c7-8b967d5aa6c2",
   "version": "6",
   "dialect": "postgresql",
   "tables": {
+    "public.customer": {
+      "name": "customer",
+      "schema": "",
+      "columns": {
+        "braintree_customer_id": {
+          "name": "braintree_customer_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "customer_id_subscription_id_fk": {
+          "name": "customer_id_subscription_id_fk",
+          "tableFrom": "customer",
+          "tableTo": "subscription",
+          "columnsFrom": [
+            "id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "public.email_verification_code": {
       "name": "email_verification_code",
       "schema": "",
@@ -30,15 +68,15 @@
         "email_verification_code_user_user_email_fk": {
           "name": "email_verification_code_user_user_email_fk",
           "tableFrom": "email_verification_code",
+          "tableTo": "user",
           "columnsFrom": [
             "user"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "email"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
@@ -115,15 +153,15 @@
         "password_reset_token_user_user_email_fk": {
           "name": "password_reset_token_user_user_email_fk",
           "tableFrom": "password_reset_token",
+          "tableTo": "user",
           "columnsFrom": [
             "user"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "email"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -176,15 +214,15 @@
         "request_log_user_user_email_fk": {
           "name": "request_log_user_user_email_fk",
           "tableFrom": "request_log",
+          "tableTo": "user",
           "columnsFrom": [
             "user"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "email"
           ],
-          "onUpdate": "no action",
-          "onDelete": "set null"
+          "onDelete": "set null",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -218,15 +256,15 @@
         "user_session_user_user_email_fk": {
           "name": "user_session_user_user_email_fk",
           "tableFrom": "user_session",
+          "tableTo": "user",
           "columnsFrom": [
             "user"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "email"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -254,8 +292,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.tier": {
-      "name": "tier",
+    "public.subscription": {
+      "name": "subscription",
       "schema": "",
       "columns": {
         "id": {
@@ -264,26 +302,20 @@
           "primaryKey": true,
           "notNull": true
         },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "allotted_concurrent_streams": {
-          "name": "allotted_concurrent_streams",
+        "max_concurrent_streams": {
+          "name": "max_concurrent_streams",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
-        "allotted_concurrent_viewers": {
-          "name": "allotted_concurrent_viewers",
+        "max_concurrent_viewers": {
+          "name": "max_concurrent_viewers",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
-        "allotted_bitrate": {
-          "name": "allotted_bitrate",
+        "max_bitrate": {
+          "name": "max_bitrate",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -350,15 +382,15 @@
         "too_many_logins_token_user_user_email_fk": {
           "name": "too_many_logins_token_user_user_email_fk",
           "tableFrom": "too_many_logins_token",
+          "tableTo": "user",
           "columnsFrom": [
             "user"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "email"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -380,8 +412,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "tier": {
-          "name": "tier",
+        "customer": {
+          "name": "customer",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -417,18 +449,18 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "user_tier_tier_id_fk": {
-          "name": "user_tier_tier_id_fk",
+        "user_customer_customer_braintree_customer_id_fk": {
+          "name": "user_customer_customer_braintree_customer_id_fk",
           "tableFrom": "user",
+          "tableTo": "customer",
           "columnsFrom": [
-            "tier"
+            "customer"
           ],
-          "tableTo": "tier",
           "columnsTo": [
-            "id"
+            "braintree_customer_id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -438,10 +470,8 @@
   "enums": {},
   "schemas": {},
   "_meta": {
+    "columns": {},
     "schemas": {},
-    "tables": {},
-    "columns": {}
-  },
-  "id": "6693355d-cc8f-4f37-a6c7-8b967d5aa6c2",
-  "prevId": "20a0272c-5a1b-4e0e-94c8-9ff4255f38af"
+    "tables": {}
+  }
 }

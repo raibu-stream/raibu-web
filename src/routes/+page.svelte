@@ -14,6 +14,7 @@
 	</div>
 	<Background />
 </header>
+
 <section id="About" class="z-10 -mt-18 flex w-full justify-center bg-neutral-800 py-12">
 	<div class="max-w-section px-4 text-left">
 		<h3 class="mb-4 text-4xl font-bold uppercase tracking-tight">About Us</h3>
@@ -25,6 +26,7 @@
 		</p>
 	</div>
 </section>
+
 <section class="flex w-full justify-center bg-secondary-800 py-8 text-left">
 	<div class="w-full max-w-section-breakout px-4">
 		<h3 class="mb-4 text-4xl font-bold tracking-tight" id="team-carousel-heading">The Team</h3>

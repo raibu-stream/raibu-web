@@ -35,15 +35,20 @@ export const handle = async ({ event, resolve }) => {
 	const durationInNs = process.hrtime.bigint() - startTime;
 
 	if (event.route.id !== null) {
-		db.insert(requestLog)
-			.values({
-				routeId: event.route.id!,
-				requestMethod: event.request.method,
-				latencyInNs: durationInNs,
-				expires: createDate(new TimeSpan(30, 'd')),
-				user: user?.id
-			})
-			.catch((err) => arbitraryHandleError(err));
+		(async () => {
+			try {
+				await db.insert(requestLog)
+					.values({
+						routeId: event.route.id!,
+						requestMethod: event.request.method,
+						latencyInNs: durationInNs,
+						expires: createDate(new TimeSpan(30, 'd')),
+						user: user?.id
+					})
+			} catch (err) {
+				await arbitraryHandleError(err)
+			};
+		})().catch((err) => arbitraryHandleError(err))
 	}
 
 	return response;

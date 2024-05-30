@@ -34,10 +34,11 @@ const adapter = new DrizzlePostgreSQLAdapter(db, schema.session, schema.user);
 export const auth = new Lucia(adapter, {
 	getUserAttributes: (data) => {
 		return {
-			tier: data.tier,
+			customer: data.customer,
 			isEmailVerified: data.isEmailVerified,
 			isLocked: data.isLocked,
-			isAdmin: data.isAdmin
+			isAdmin: data.isAdmin,
+			signupDate: data.signupDate
 		};
 	},
 	sessionCookie: {

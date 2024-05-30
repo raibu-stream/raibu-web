@@ -1,22 +1,20 @@
 <script lang="ts">
 	import { createSlider, melt } from '@melt-ui/svelte';
+	import { writable, type Writable } from 'svelte/store';
 
 	let tickValues: (string | number)[];
 	let classNames = '';
 	export { classNames as class, tickValues as ticks };
-	export let value = tickValues[0];
+	export let value: Writable<number[]>;
 
 	const {
-		elements: { root, range, thumbs, ticks },
-		states: { value: valueRaw }
+		elements: { root, range, thumbs, ticks }
 	} = createSlider({
-		defaultValue: [0],
+		value,
 		min: 0,
 		max: tickValues.length - 1,
 		step: 1
 	});
-
-	$: value = tickValues[$valueRaw[0]];
 </script>
 
 <span use:melt={$root} class="relative flex h-5 items-center {classNames}">

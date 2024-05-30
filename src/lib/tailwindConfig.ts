@@ -1,6 +1,3 @@
-import resolveConfig from 'tailwindcss/resolveConfig';
-import tailwindConfigRaw from './../../tailwind.config';
+const data: any = import.meta.compileTime("./tailwindConfigInner.ts")
 
-const tailwindConfig = resolveConfig(tailwindConfigRaw).theme;
-
-export default tailwindConfig;
+export default data;

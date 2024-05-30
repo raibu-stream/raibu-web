@@ -10,6 +10,7 @@
 	import FormError from '$lib/components/FormError.svelte';
 	import { handleApiResponse, loginPassword, password as signupPassword } from '$lib/utils.js';
 	import { toast } from 'svelte-sonner';
+	import { getPreset } from '$lib/tier';
 
 	export let data: PageServerData;
 
@@ -76,11 +77,11 @@
 		<span>{data.email}</span>
 		<small class="text-neutral-200">
 			{#if data.tier !== undefined}
-				{#if data.tier.name !== null}
-					{data.tier.name}
+				{#if getPreset(data.tier) !== undefined}
+					{getPreset(data.tier)}
 				{:else}
-					{data.tier.allottedConcurrentStreams} streams with {data.tier.allottedConcurrentViewers} viewers
-					@ {data.tier.allottedBitrateInKbps} kbps
+					Custom tier: {data.tier.maxConcurrentStreams} streams with {data.tier
+						.maxConcurrentViewers} viewers @ {data.tier.maxBitrateInKbps} kbps
 				{/if}
 			{:else}
 				No tier selected. <a class="underline" href="/user/subscribe">Let's change that.</a>

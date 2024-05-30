@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { passwordResetToken, tier, tooManyLoginsToken, user } from './schema';
+import { customer, passwordResetToken, subscription, tooManyLoginsToken, user } from './schema';
 
 export const tooManyLoginsTokenRelations = relations(tooManyLoginsToken, ({ one }) => ({
 	user: one(user, {
@@ -16,8 +16,15 @@ export const passwordResetTokenRelations = relations(passwordResetToken, ({ one 
 }));
 
 export const userRelations = relations(user, ({ one }) => ({
-	tier: one(tier, {
-		fields: [user.tier],
-		references: [tier.id]
+	customer: one(customer, {
+		fields: [user.customer],
+		references: [customer.braintreeCustomerId]
+	})
+}));
+
+export const customerRelations = relations(customer, ({ one }) => ({
+	subscription: one(subscription, {
+		fields: [customer.subscription],
+		references: [subscription.id]
 	})
 }));

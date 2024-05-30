@@ -5,7 +5,7 @@ import type { Country } from '@shopify/address';
 
 export const EMAIL_VERIFICATION_VERIFY_TIMEOUT_DISCRIMINATOR = 'emailverifyverify';
 export const FRIENDLY_ERROR_MESSAGE =
-	"Oops. Something went wrong on our side. We're gonna look into this. But in the meantime, go ahead and try again.";
+	"Oops. Something went wrong on our side. Our amazing and very beautiful engineers have been notified. But in the meantime, go ahead and try again.";
 
 export const handleApiResponse = async (res: Response, onSuccess?: () => void) => {
 	if (res.statusText === 'OK') {
@@ -56,11 +56,11 @@ export const address = (countries: Country[]) => {
 			firstName: z
 				.string()
 				.min(1, 'This is required')
-				.max(140, 'Cannot be more than 140 characters'),
+				.max(255, 'Cannot be more than 255 characters'),
 			lastName: z
 				.string()
 				.min(1, 'This is required')
-				.max(140, 'Cannot be more than 140 characters'),
+				.max(255, 'Cannot be more than 255 characters'),
 			country: z
 				.string()
 				.length(2)
@@ -68,26 +68,28 @@ export const address = (countries: Country[]) => {
 			address1: z
 				.string()
 				.min(1, 'This is required')
-				.max(300, 'Cannot be more than 300 characters'),
+				.max(255, 'Cannot be more than 255 characters'),
 			address2: z
 				.string()
 				.min(1, 'This is required')
-				.max(300, 'Cannot be more than 300 characters')
+				.max(255, 'Cannot be more than 255 characters')
 				.optional(),
 			city: z
 				.string()
 				.min(1, 'This is required')
-				.max(120, 'Cannot be more than 120 characters')
+				.max(255, 'Cannot be more than 255 characters')
 				.optional(),
 			zone: z
 				.string()
 				.min(1, 'This is required')
-				.max(300, 'Cannot be more than 300 characters')
+				.max(255, 'Cannot be more than 255 characters')
 				.optional(),
 			postalCode: z
 				.string()
+				.trim()
 				.min(1, 'This is required')
-				.max(60, 'Cannot be more than 60 characters')
+				.min(4, 'Must be at least 4 characters')
+				.max(10, 'Cannot be more than 10 characters')
 				.optional()
 		})
 		.superRefine((address, ctx) => {

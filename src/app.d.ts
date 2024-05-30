@@ -1,3 +1,5 @@
+import { default as paypalGlobal } from 'paypal-checkout-components';
+
 /// <reference types="lucia" />
 declare global {
 	namespace App {
@@ -11,6 +13,8 @@ declare global {
 			errorId?: string;
 		}
 	}
+
+	const paypal: typeof paypalGlobal;
 }
 
-export {};
+export { };

@@ -67,7 +67,7 @@ export const sendPasswordResetAlert = async (recipient: string, ip: string) => {
 		const location = await res.json();
 		if (location.message !== undefined) throw location.message;
 
-		return `${location.country_name}${location.country_emoji !== '' ? ' ' + location.country_emoji : ''}${location.state_prov !== '' ? ', ' + location.state_prov : ''}${location.city !== '' ? ', ' + location.city : ''}`;
+		return `${location.country_name}${location.country_emoji !== '' ? ' ' + location.country_emoji : ''}${location.city !== '' ? ', ' + location.city : location.state_prov !== '' ? ', ' : ' '}${location.state_prov !== '' ? location.state_prov : ''}`;
 	}).catch(async (err) => {
 		await arbitraryHandleError(err);
 

@@ -1,4 +1,4 @@
-import defaultTheme from 'tailwindcss/defaultTheme';
+import defaultTheme from 'tailwindcss/defaultTheme.js';
 
 export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],

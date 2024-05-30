@@ -12,7 +12,6 @@
 			message.push(input.slice(0, link.index));
 			let display = link[2];
 			let href = link[3];
-			console.log('holy');
 			message.push({ display, href });
 			input = input.slice(link.index + href.length + display.length + 4);
 		}

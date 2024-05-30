@@ -10,8 +10,8 @@ if (connectionString === undefined) {
 export default {
 	schema: './src/lib/models/schema.ts',
 	out: './drizzle',
-	driver: 'pg',
+	dialect: "postgresql",
 	dbCredentials: {
-		connectionString
+		url: connectionString
 	}
 } satisfies Config;

@@ -17,7 +17,7 @@ export const user = pgTable('user', {
 	hashedPassword: varchar('hashed_password', {
 		length: 255
 	}).notNull(),
-	tier: text('tier').references(() => tier.id),
+	customer: text('customer').references(() => customer.braintreeCustomerId),
 	isEmailVerified: boolean('is_email_verified').notNull().default(false),
 	isLocked: boolean('is_locked').notNull().default(false),
 	isAdmin: boolean('is_admin').notNull().default(false),
@@ -115,10 +115,14 @@ export const siteConfig = pgTable('site_config', {
 	})
 });
 
-export const tier = pgTable('tier', {
+export const customer = pgTable('customer', {
+	braintreeCustomerId: text("braintree_customer_id").primaryKey(),
+	subscription: text('id').references(() => subscription.id, { onDelete: "cascade" })
+});
+
+export const subscription = pgTable('subscription', {
 	id: text('id').primaryKey(),
-	name: text('name'),
-	allottedConcurrentStreams: integer('allotted_concurrent_streams').notNull(),
-	allottedConcurrentViewers: integer('allotted_concurrent_viewers').notNull(),
-	allottedBitrateInKbps: integer('allotted_bitrate').notNull()
+	maxConcurrentStreams: integer('max_concurrent_streams').notNull(),
+	maxConcurrentViewers: integer('max_concurrent_viewers').notNull(),
+	maxBitrateInKbps: integer('max_bitrate').notNull(),
 });
