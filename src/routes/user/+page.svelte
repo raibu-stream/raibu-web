@@ -95,12 +95,12 @@
 		<h3 class="mb-1 border-b-0 text-3xl font-bold tracking-tight">Account Settings</h3>
 		<small class="text-neutral-200">Here you can change your account information</small>
 	</div>
-	<form>
+	<form class="flex flex-col">
 		<label for="email" use:melt={$meltLabel}>Email</label>
 		<div class="mb-6 mt-2">
 			<input type="email" id="email" class="input w-full sm:w-1/2" />
 		</div>
-		<button class="button float-right px-8 text-base">Update</button>
+		<button class="button ml-auto px-8 text-base">Update</button>
 	</form>
 </section>
 
@@ -109,7 +109,7 @@
 		<h3 class="mb-1 border-b-0 text-3xl font-bold tracking-tight">Change Password</h3>
 		<small class="text-neutral-200">Here you can change your password</small>
 	</div>
-	<form on:submit|preventDefault={handleResetPasswordSubmit} novalidate>
+	<form on:submit|preventDefault={handleResetPasswordSubmit} novalidate class="flex flex-col">
 		<div class="mb-6">
 			<div class="flex flex-col gap-2 sm:flex-row">
 				<div class="grow basis-0">
@@ -135,7 +135,7 @@
 				<FormError class="mt-2">{resetPasswordApiError}</FormError>
 			{/if}
 		</div>
-		<button class="button float-right px-8 text-base">
+		<button class="button float-right ml-auto px-8 text-base">
 			{#await resetPasswordRequest}
 				<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>
 				<span class="sr-only">Loading</span>

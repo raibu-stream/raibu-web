@@ -332,21 +332,39 @@
 			<form on:submit|preventDefault={onSubmitCard} class="text-left">
 				<label for="card-number-field-container">Card number</label>
 				<div class="mb-6 mt-2">
-					<div class="mb-2 flex items-center gap-4 rounded-sm bg-secondary-700 pr-4">
+					<div
+						class="input-container mb-2 flex items-center gap-4 rounded-sm bg-secondary-700 pr-6 outline-1 outline-neutral-100 has-[.braintree-hosted-fields-focused]:outline"
+					>
 						<div id="card-number-field-container" class="h-11 grow"></div>
 						<div class="w-4 text-xl" aria-hidden="true">
 							{#if hostedFieldsCardType === 'visa'}
-								<i class="fa-brands fa-cc-visa"></i>
+								<i
+									class="fa-brands fa-cc-visa"
+									transition:fade={{ easing: quintOut, duration: 250 }}
+								></i>
 							{:else if hostedFieldsCardType === 'master-card'}
-								<i class="fa-brands fa-cc-mastercard"></i>
+								<i
+									class="fa-brands fa-cc-mastercard"
+									transition:fade={{ easing: quintOut, duration: 250 }}
+								></i>
 							{:else if hostedFieldsCardType === 'american-express'}
-								<i class="fa-brands fa-cc-amex"></i>
+								<i
+									class="fa-brands fa-cc-amex"
+									transition:fade={{ easing: quintOut, duration: 250 }}
+								></i>
 							{:else if hostedFieldsCardType === 'diners-club'}
-								<i class="fa-brands fa-cc-diners-club"></i>
+								<i
+									class="fa-brands fa-cc-diners-club"
+									transition:fade={{ easing: quintOut, duration: 250 }}
+								></i>
 							{:else if hostedFieldsCardType === 'discover'}
-								<i class="fa-brands fa-cc-discover"></i>
+								<i
+									class="fa-brands fa-cc-discover"
+									transition:fade={{ easing: quintOut, duration: 250 }}
+								></i>
 							{:else if hostedFieldsCardType === 'jcb'}
-								<i class="fa-brands fa-cc-jcb"></i>
+								<i class="fa-brands fa-cc-jcb" transition:fade={{ easing: quintOut, duration: 250 }}
+								></i>
 							{/if}
 						</div>
 					</div>
@@ -422,7 +440,7 @@
 </div>
 
 <style>
-	:global(.braintree-hosted-fields-focused) {
+	:global(.braintree-hosted-fields-focused:not(.input-container .braintree-hosted-fields-focused)) {
 		@apply outline outline-1 outline-neutral-100;
 	}
 </style>

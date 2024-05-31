@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { showLoginModal } from '../stores';
-	import { createDropdownMenu, melt } from '@melt-ui/svelte';
+	import { createDropdownMenu, createTreeView, melt } from '@melt-ui/svelte';
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import DropdownItem from '$lib/components/DropdownItem.svelte';
 	import DropdownSeparator from '$lib/components/DropdownSeparator.svelte';
@@ -10,10 +10,12 @@
 	import Separator from '$lib/components/Separator.svelte';
 	import { toast } from 'svelte-sonner';
 	import TopAlert from '$lib/components/TopAlert.svelte';
+	import { page } from '$app/stores';
 
 	export let isLoggedIn: boolean;
 	export let email: string | undefined;
 	export let topAlert: string | undefined;
+	export let isAdmin: boolean;
 
 	let login = () => {
 		$showLoginModal = true;
@@ -76,6 +78,20 @@
 		},
 		states: { open: drawerNavOpen }
 	} = createDialog();
+
+	let defaultExpanded = [];
+	if ($page.url.pathname.startsWith('/admin')) {
+		defaultExpanded.push('admin');
+	}
+	if ($page.url.pathname.startsWith('/user')) {
+		defaultExpanded.push('user');
+	}
+	const {
+		elements: { tree, group, item: treeItem },
+		helpers: { isExpanded }
+	} = createTreeView({
+		defaultExpanded: []
+	});
 </script>
 
 <svelte:window bind:scrollY={pxScrollFromTop} />
@@ -91,7 +107,7 @@
 	<ul class="ml-auto hidden items-center gap-6 font-medium tracking-tight sm:flex">
 		<li><a class="link" href="/">Home</a></li>
 		<li><a class="link" href="/#About">About</a></li>
-		<li><a class="link" href="/#Team">Team</a></li>
+		<li><a class="link" href="/#team-carousel-heading">Team</a></li>
 		{#if isLoggedIn && email !== undefined}
 			<li class="relative mt-auto">
 				<button
@@ -143,7 +159,7 @@
 	>
 		<div class="relative -top-px -mx-4 mb-6 border-t border-neutral-300"></div>
 		{#if isLoggedIn && email !== undefined}
-			<div class="pb-4">
+			<div class="px-2 pb-4">
 				<button use:melt={$drawerNavClose} class="w-full">
 					<a href="/user">
 						<div
@@ -166,15 +182,86 @@
 			</div>
 			<Separator orientation="horizontal" class="mb-4 h-px bg-neutral-300" />
 		{/if}
-		<button class="pb-4 text-left" use:melt={$drawerNavClose}>
-			<a class="link" href="/">Home</a>
-		</button>
-		<button class="pb-4 text-left" use:melt={$drawerNavClose}>
-			<a class="link" href="/#About">About</a>
-		</button>
-		<button class="pb-4 text-left" use:melt={$drawerNavClose}>
-			<a class="link" href="/#Team">Team</a>
-		</button>
+		<ul {...$tree} class="px-2">
+			<li class="block pb-4 text-left" use:melt={$treeItem({ id: 'home' })}>
+				<button use:melt={$drawerNavClose}>
+					<a class="link" href="/">Home</a>
+				</button>
+			</li>
+			<li class="block pb-4 text-left" use:melt={$treeItem({ id: 'about' })}>
+				<button use:melt={$drawerNavClose}>
+					<a class="link" href="/#About">About</a>
+				</button>
+			</li>
+			<li class="block pb-4 text-left" use:melt={$treeItem({ id: 'team' })}>
+				<button use:melt={$drawerNavClose}>
+					<a class="link" href="/#team-carousel-heading">Team</a>
+				</button>
+			</li>
+			{#if email !== undefined}
+				<li class="block pb-4 text-left">
+					<button use:melt={$treeItem({ id: 'user', hasChildren: true })}>
+						User
+						{#if $isExpanded('user')}
+							<i class="fa-solid fa-chevron-down text-xs" aria-hidden="true"></i>
+						{:else}
+							<i class="fa-solid fa-chevron-up text-xs" aria-hidden="true"></i>
+						{/if}
+					</button>
+					<ul use:melt={$group({ id: 'user' })} class="pl-4 pt-2 text-base">
+						<li class="block pb-4 text-left" use:melt={$treeItem({ id: 'dashboard' })}>
+							<button use:melt={$drawerNavClose}>
+								<a class="link" href="/user">Dashboard</a>
+							</button>
+						</li>
+						<li class="block text-left" use:melt={$treeItem({ id: 'billing' })}>
+							<button use:melt={$drawerNavClose}>
+								<a class="link" href="/user/billing">Billing</a>
+							</button>
+						</li>
+					</ul>
+				</li>
+			{/if}
+			{#if isAdmin}
+				<li class="block pb-4 text-left">
+					<button use:melt={$treeItem({ id: 'admin', hasChildren: true })}>
+						Admin
+						{#if $isExpanded('admin')}
+							<i class="fa-solid fa-chevron-down text-xs" aria-hidden="true"></i>
+						{:else}
+							<i class="fa-solid fa-chevron-up text-xs" aria-hidden="true"></i>
+						{/if}
+					</button>
+					<ul use:melt={$group({ id: 'admin' })} class="pl-4 pt-2 text-base">
+						<li class="block pb-4 text-left" use:melt={$treeItem({ id: 'overview' })}>
+							<button use:melt={$drawerNavClose}>
+								<a class="link" href="/admin">Overview</a>
+							</button>
+						</li>
+						<li class="block pb-4 text-left" use:melt={$treeItem({ id: 'site performance' })}>
+							<button use:melt={$drawerNavClose}>
+								<a class="link" href="/admin/site">Site performance</a>
+							</button>
+						</li>
+						<li class="block pb-4 text-left" use:melt={$treeItem({ id: 'stream performance' })}>
+							<button use:melt={$drawerNavClose}>
+								<a class="link" href="/admin/stream">Stream performance</a>
+							</button>
+						</li>
+						<li class="block pb-4 text-left" use:melt={$treeItem({ id: 'users' })}>
+							<button use:melt={$drawerNavClose}>
+								<a class="link" href="/admin/users">Users</a>
+							</button>
+						</li>
+						<li class="block text-left" use:melt={$treeItem({ id: 'Errors' })}>
+							<button use:melt={$drawerNavClose}>
+								<a class="link" href="/admin/errors">Errors</a>
+							</button>
+						</li>
+					</ul>
+				</li>
+			{/if}
+		</ul>
 		{#if isLoggedIn && email !== undefined}
 			<div class="link fixed bottom-4 mt-auto text-sm"></div>
 		{:else}
@@ -194,6 +281,14 @@
 	<DropdownItem {item}>
 		<i class="fa-solid fa-gauge" aria-hidden="true" slot="icon"></i>
 		<a href="/user" class="flex h-full w-full items-center">Dashboard</a>
+	</DropdownItem>
+	<DropdownItem {item}>
+		<i class="fa-solid fa-file-invoice" aria-hidden="true" slot="icon"></i>
+		<a href="/user/billing" class="flex h-full w-full items-center">Billing</a>
+	</DropdownItem>
+	<DropdownItem {item}>
+		<i class="fa-solid fa-video" aria-hidden="true" slot="icon"></i>
+		<a href="/user/streams" class="flex h-full w-full items-center">Streams</a>
 	</DropdownItem>
 	<DropdownSeparator {separator} />
 	<DropdownItem {item} on:click={async () => await signOut()}>

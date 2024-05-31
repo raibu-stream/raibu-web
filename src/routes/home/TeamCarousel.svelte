@@ -37,7 +37,8 @@
 			450: {
 				perPage: 2
 			}
-		}
+		},
+		interval: 3500
 	}}
 	hasTrack={false}
 	aria-labelled-by="team-carousel-heading"
