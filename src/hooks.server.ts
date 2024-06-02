@@ -37,18 +37,17 @@ export const handle = async ({ event, resolve }) => {
 	if (event.route.id !== null) {
 		(async () => {
 			try {
-				await db.insert(requestLog)
-					.values({
-						routeId: event.route.id!,
-						requestMethod: event.request.method,
-						latencyInNs: durationInNs,
-						expires: createDate(new TimeSpan(30, 'd')),
-						user: user?.id
-					})
+				await db.insert(requestLog).values({
+					routeId: event.route.id!,
+					requestMethod: event.request.method,
+					latencyInNs: durationInNs,
+					expires: createDate(new TimeSpan(30, 'd')),
+					user: user?.id
+				});
 			} catch (err) {
-				await arbitraryHandleError(err)
-			};
-		})().catch((err) => arbitraryHandleError(err))
+				await arbitraryHandleError(err);
+			}
+		})().catch((err) => arbitraryHandleError(err));
 	}
 
 	return response;

@@ -266,8 +266,10 @@
 					});
 
 					const pricing = getPricing(tier);
+					// eslint-disable-next-line no-undef
 					paypal
 						.Buttons({
+							// eslint-disable-next-line no-undef
 							fundingSource: paypal.FUNDING.PAYPAL as any,
 							createBillingAgreement: () => {
 								clearErrors();
@@ -297,6 +299,7 @@
 					buttonsReadiness = 'Ready';
 				})
 				.catch((err) => {
+					console.error(err);
 					buttonsReadiness = 'Failed';
 				})
 		]);

@@ -1,3 +1,3 @@
-const data: any = import.meta.compileTime("./tailwindConfigInner.ts")
+const data: any = import.meta.compileTime('./tailwindConfigInner.ts');
 
 export default data;

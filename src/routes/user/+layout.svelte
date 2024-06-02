@@ -1,19 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 
-	let activeUrl: string;
-	let pageTitle: string;
 	$: activeUrl = $page.url.pathname;
-	$: {
-		switch (activeUrl) {
-			case '/user':
-				pageTitle = 'Dashboard';
-				break;
-			case '/user/billing':
-				pageTitle = 'Billing';
-				break;
-		}
-	}
+
+	export let data;
 </script>
 
 <div class="relative flex w-full grow gap-3 overflow-visible">
@@ -30,16 +20,29 @@
 						Dashboard
 					</a>
 				</li>
-				<li>
-					<a
-						class="rounded-r-md p-4 pl-16 pr-8 text-neutral-200 transition-colors hover:text-neutral-100"
-						class:!text-neutral-100={activeUrl === '/user/billing'}
-						class:bg-secondary-800={activeUrl === '/user/billing'}
-						href="/user/billing"
-					>
-						Billing
-					</a>
-				</li>
+				{#if data.isCustomer}
+					<li>
+						<a
+							class="rounded-r-md p-4 pl-16 pr-8 text-neutral-200 transition-colors hover:text-neutral-100"
+							class:!text-neutral-100={activeUrl === '/user/billing'}
+							class:bg-secondary-800={activeUrl === '/user/billing'}
+							href="/user/billing"
+						>
+							Billing
+						</a>
+					</li>
+				{:else}
+					<li>
+						<a
+							class="rounded-r-md p-4 pl-16 pr-8 text-neutral-200 transition-colors hover:text-neutral-100"
+							class:!text-neutral-100={activeUrl === '/user/subscribe'}
+							class:bg-secondary-800={activeUrl === '/user/subscribe'}
+							href="/user/subscribe"
+						>
+							Subscribe
+						</a>
+					</li>
+				{/if}
 				<li>
 					<a
 						class="rounded-r-md p-4 pl-16 pr-8 text-neutral-200 transition-colors hover:text-neutral-100"

@@ -116,13 +116,13 @@ export const siteConfig = pgTable('site_config', {
 });
 
 export const customer = pgTable('customer', {
-	braintreeCustomerId: text("braintree_customer_id").primaryKey(),
-	subscription: text('id').references(() => subscription.id, { onDelete: "cascade" })
+	braintreeCustomerId: text('braintree_customer_id').primaryKey(),
+	subscription: text('id').references(() => subscription.id, { onDelete: 'cascade' })
 });
 
 export const subscription = pgTable('subscription', {
 	id: text('id').primaryKey(),
 	maxConcurrentStreams: integer('max_concurrent_streams').notNull(),
 	maxConcurrentViewers: integer('max_concurrent_viewers').notNull(),
-	maxBitrateInKbps: integer('max_bitrate').notNull(),
+	maxBitrateInKbps: integer('max_bitrate').notNull()
 });

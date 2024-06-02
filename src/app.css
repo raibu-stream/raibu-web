@@ -69,7 +69,7 @@
 		}
 	}
 
-	.sonner-toast>div[data-icon] {
+	.sonner-toast > div[data-icon] {
 		@apply mt-1;
 	}
 

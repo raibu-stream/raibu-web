@@ -5,7 +5,7 @@ import type { Country } from '@shopify/address';
 
 export const EMAIL_VERIFICATION_VERIFY_TIMEOUT_DISCRIMINATOR = 'emailverifyverify';
 export const FRIENDLY_ERROR_MESSAGE =
-	"Oops. Something went wrong on our side. Our amazing and very beautiful engineers have been notified. But in the meantime, go ahead and try again.";
+	'Oops. Something went wrong on our side. Our amazing and very beautiful engineers have been notified. But in the meantime, go ahead and try again.';
 
 export const handleApiResponse = async (res: Response, onSuccess?: () => void) => {
 	if (res.statusText === 'OK') {

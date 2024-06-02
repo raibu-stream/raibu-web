@@ -4,7 +4,7 @@
 	import Select from './Select.svelte';
 	import SelectOption from './SelectOption.svelte';
 	import { type Country, buildOrderedFields, FieldName } from '@shopify/address';
-	import { get, type Writable } from 'svelte/store';
+	import { get } from 'svelte/store';
 	import FormError from './FormError.svelte';
 	import { slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';

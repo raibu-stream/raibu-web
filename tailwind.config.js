@@ -37,7 +37,8 @@ export default {
 				700: '#3e1f28'
 			},
 			danger: '#ED5155',
-			happy: '#7ef2cb',
+			pending: '#fcd34d',
+			happy: '#72deba',
 			transparent: '#0000'
 		}
 	},

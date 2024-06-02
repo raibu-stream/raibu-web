@@ -7,7 +7,7 @@
 	import type { Country } from '@shopify/address';
 	import { fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
-	import { getPricing, tierFromIndexs } from '$lib/tier';
+	import { tierFromIndexs } from '$lib/tier';
 
 	export let countries: Country[];
 

@@ -64,7 +64,7 @@
 <SvelteSeo title="Dashboard | Raibu" />
 
 <div class="my-10 w-full max-w-section-breakout">
-	<h2 class="text-left text-4xl font-bold tracking-tight">Account</h2>
+	<h2 class="text-left text-4xl font-bold tracking-tight">Dashboard</h2>
 </div>
 
 <section class="section mb-6 flex items-center gap-4">

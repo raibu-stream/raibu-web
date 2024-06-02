@@ -61,21 +61,24 @@ export const renderMjmlComponent = <Props extends Record<string, any>>(
 const stripSvelteClasses = (html: string) =>
 	html.replaceAll(/class="s-[\w-]+"/g, '').replaceAll(/data-svelte-h="[\w-]+"/g, '');
 
-
 export const sendPasswordResetAlert = async (recipient: string, ip: string) => {
-	const location = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=${RAIBU_IP_GEOLOCATION_API_KEY}&ip=${ip}&fields=geo,country_emoji`).then(async (res) => {
-		const location = await res.json();
-		if (location.message !== undefined) throw location.message;
+	const location = await fetch(
+		`https://api.ipgeolocation.io/ipgeo?apiKey=${RAIBU_IP_GEOLOCATION_API_KEY}&ip=${ip}&fields=geo,country_emoji`
+	)
+		.then(async (res) => {
+			const location = await res.json();
+			if (location.message !== undefined) throw location.message;
 
-		return `${location.country_name}${location.country_emoji !== '' ? ' ' + location.country_emoji : ''}${location.city !== '' ? ', ' + location.city : location.state_prov !== '' ? ', ' : ' '}${location.state_prov !== '' ? location.state_prov : ''}`;
-	}).catch(async (err) => {
-		await arbitraryHandleError(err);
+			return `${location.country_name}${location.country_emoji !== '' ? ' ' + location.country_emoji : ''}${location.city !== '' ? ', ' + location.city : location.state_prov !== '' ? ', ' : ' '}${location.state_prov !== '' ? location.state_prov : ''}`;
+		})
+		.catch(async (err) => {
+			await arbitraryHandleError(err);
 
-		return undefined;
-	});
+			return undefined;
+		});
 	const html = renderMjmlComponent(PasswordResetAlert, {
 		location
 	});
 
-	await sendEmail(html, "Raibu Password changed", recipient);
-}
+	await sendEmail(html, 'Raibu Password changed', recipient);
+};

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createSlider, melt } from '@melt-ui/svelte';
-	import { writable, type Writable } from 'svelte/store';
+	import { type Writable } from 'svelte/store';
 
 	let tickValues: (string | number)[];
 	let classNames = '';

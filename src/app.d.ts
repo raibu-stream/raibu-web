@@ -17,4 +17,4 @@ declare global {
 	const paypal: typeof paypalGlobal;
 }
 
-export { };
+export {};

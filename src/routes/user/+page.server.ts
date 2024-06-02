@@ -16,12 +16,14 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	let tier = undefined;
 	if (locals.user.customer !== null) {
-		tier = (await db.query.customer.findFirst({
-			where: eq(customer.braintreeCustomerId, locals.user.customer),
-			with: {
-				subscription: true
-			}
-		}))?.subscription as Tier
+		tier = (
+			await db.query.customer.findFirst({
+				where: eq(customer.braintreeCustomerId, locals.user.customer),
+				with: {
+					subscription: true
+				}
+			})
+		)?.subscription as Tier;
 	}
 
 	return {

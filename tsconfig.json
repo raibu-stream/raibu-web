@@ -11,8 +11,6 @@
 		"module": "ESNext",
 		"moduleResolution": "Node",
 		"strict": true,
-		"types": [
-			"vite-plugin-compile-time/client"
-		]
+		"types": ["vite-plugin-compile-time/client"]
 	}
 }

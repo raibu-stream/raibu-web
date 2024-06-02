@@ -58,7 +58,7 @@ declare module 'lucia' {
 	}
 }
 
-interface DatabaseSessionAttributes { }
+interface DatabaseSessionAttributes {}
 
 type DatabaseUserAttributes = Omit<InferSelectModel<typeof schema.user>, 'id'>;
 
@@ -135,7 +135,7 @@ export const verifyPassword = async (email: string, password: string) => {
 	}
 
 	return user;
-}
+};
 
 await createUser('contact@raibu.stream', RAIBU_ADMIN_PASS, {
 	isEmailVerified: true,

@@ -11,7 +11,7 @@
 
 <SvelteSeo title="Checkout | Raibu" />
 
-<div class="relative flex w-full grow justify-center overflow-visible">
+<div class="relative flex h-full w-full grow justify-center overflow-visible">
 	<section class="ml-auto w-full max-w-3xl">
 		<h2>Checkout</h2>
 		<div class="grid w-full grid-cols-1 grid-rows-1">

@@ -16,6 +16,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 		redirectTo,
 		email: locals.user?.id,
 		isAdmin: locals.user?.isAdmin ?? false,
+		isCustomer: typeof locals.user?.customer === 'string',
 		topAlert:
 			(await db.query.siteConfig.findFirst({ where: eq(siteConfig.id, topAlertId) }))?.value ??
 			undefined
