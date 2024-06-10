@@ -44,7 +44,7 @@
 	};
 </script>
 
-<Modal titleString="Reset Password" isOpen={open}>
+<Modal titleString="Reset Password" isOpen={open} maxWidthPx={450}>
 	<form class="col-start-1 row-start-1 px-1" on:submit|preventDefault={handleSubmit} novalidate>
 		<label for="password" use:melt={$meltLabel}>New password</label>
 		<div class="mb-12 mt-2">

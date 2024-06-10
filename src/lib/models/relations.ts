@@ -1,5 +1,12 @@
 import { relations } from 'drizzle-orm';
-import { customer, passwordResetToken, subscription, tooManyLoginsToken, user } from './schema';
+import {
+	billingAddress,
+	customer,
+	passwordResetToken,
+	subscription,
+	tooManyLoginsToken,
+	user
+} from './schema';
 
 export const tooManyLoginsTokenRelations = relations(tooManyLoginsToken, ({ one }) => ({
 	user: one(user, {
@@ -26,5 +33,9 @@ export const customerRelations = relations(customer, ({ one }) => ({
 	subscription: one(subscription, {
 		fields: [customer.subscription],
 		references: [subscription.id]
+	}),
+	billingAddress: one(billingAddress, {
+		fields: [customer.billingAddress],
+		references: [billingAddress.id]
 	})
 }));

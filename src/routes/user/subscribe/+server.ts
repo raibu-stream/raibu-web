@@ -3,25 +3,22 @@ import type { RequestHandler } from './$types';
 import { zTier, type Tier, getPricing } from '$lib/tier';
 import { fromZodError } from 'zod-validation-error';
 import { z } from 'zod';
-import AddressFormatter from '@shopify/address';
-import { address } from '$lib/utils';
 import { braintreeGateway } from '$lib/braintree';
-import type { CreditCardCreateRequest, Plan } from 'braintree';
-import type { User } from 'lucia';
+import type { Plan } from 'braintree';
 import { db } from '$lib/models/db';
 import {
 	customer as customerTable,
-	user as userTable,
-	subscription as subscriptionTable
+	subscription as subscriptionTable,
+	billingAddress,
 } from '$lib/models/schema';
-import { eq } from 'drizzle-orm';
+import { eq, type InferSelectModel } from 'drizzle-orm';
 
 const postInputSchema = z.object({
 	paymentMethodNonce: z.string(),
 	tier: zTier
 });
 
-export const POST: RequestHandler = async ({ locals, request, getClientAddress }) => {
+export const POST: RequestHandler = async ({ locals, request }) => {
 	if (locals.user === null) {
 		error(401, {
 			message: 'You are not logged in'
@@ -32,41 +29,42 @@ export const POST: RequestHandler = async ({ locals, request, getClientAddress }
 			message: "Your email's not verified"
 		});
 	}
-	if (locals.user.customer !== null) {
-		await db.transaction(async (tx) => {
-			const customer = await tx.query.customer.findFirst({
-				where: eq(customerTable.braintreeCustomerId, locals.user!.customer!)
-			});
-			if (customer?.subscription !== null) {
-				error(400, {
-					message: 'You are already subscribed'
-				});
-			}
 
-			await braintreeGateway.customer.delete(locals.user!.customer!).catch(() => {});
-			await tx.update(userTable).set({
-				customer: null
-			});
-			await tx
-				.delete(customerTable)
-				.where(eq(customerTable.braintreeCustomerId, locals.user!.customer!));
+	let address: InferSelectModel<typeof billingAddress>;
+	if (locals.user.customer === null) {
+		error(400, {
+			message: 'You must already be a customer'
 		});
+	} else {
+		const customer = await db.query.customer.findFirst({
+			where: eq(customerTable.braintreeCustomerId, locals.user!.customer!),
+			with: {
+				billingAddress: true
+			}
+		});
+		if (customer?.subscription !== null) {
+			error(400, {
+				message: 'You are already subscribed'
+			});
+		}
+
+		address = customer.billingAddress;
 	}
 
-	const addressFormatter = new AddressFormatter('en');
-	const zSchema = postInputSchema.extend({
-		address: address(await addressFormatter.getCountries())
-	});
-	const zodResult = zSchema.safeParse(await request.json());
+	const zodResult = postInputSchema.safeParse(await request.json());
 	if (!zodResult.success) {
 		error(400, fromZodError(zodResult.error).toString());
 	}
 	const requestData = zodResult.data;
 	const tier: Tier = requestData.tier;
 
-	const customer = await createCustomer(request, requestData, locals.user, getClientAddress);
+	const paymentMethod = await createPaymentMethod(
+		requestData.paymentMethodNonce,
+		address!,
+		locals.user.customer
+	);
 	const plan = await createPlan(tier);
-	const subscription = await createSubscription(plan.id, locals.user, customer);
+	const subscription = await createSubscription(plan.id, paymentMethod);
 
 	try {
 		await db.transaction(async (tx) => {
@@ -77,9 +75,12 @@ export const POST: RequestHandler = async ({ locals, request, getClientAddress }
 				maxBitrateInKbps: tier.maxBitrateInKbps
 			});
 
-			await tx.update(customerTable).set({
-				subscription: subscription.id
-			});
+			await tx
+				.update(customerTable)
+				.set({
+					subscription: subscription.id
+				})
+				.where(eq(customerTable.braintreeCustomerId, locals.user!.customer!));
 		});
 	} catch {
 		error(
@@ -93,50 +94,41 @@ export const POST: RequestHandler = async ({ locals, request, getClientAddress }
 	});
 };
 
-const createCustomer = async (
-	request: Request,
-	requestData: any,
-	user: User,
-	getClientAddress: () => string
+const createPaymentMethod = async (
+	paymentMethodNonce: string,
+	address: InferSelectModel<typeof billingAddress>,
+	customerId: string
 ) => {
-	const userAgent = request.headers.get('user-agent');
-
-	const createCustomerResult = await braintreeGateway.customer.create({
-		firstName: requestData.address.firstName,
-		lastName: requestData.address.lastName,
-		email: user.id,
-		paymentMethodNonce: requestData.paymentMethodNonce,
-		riskData: {
-			customerIp: getClientAddress(),
-			customerBrowser:
-				userAgent !== null ? (userAgent.length <= 255 ? userAgent : undefined) : undefined
+	const createPaymentMethodResult = await braintreeGateway.paymentMethod.create({
+		customerId,
+		paymentMethodNonce: paymentMethodNonce,
+		billingAddress: {
+			countryCodeAlpha2: address.country,
+			extendedAddress: address.address2 ?? undefined,
+			firstName: address.firstName,
+			lastName: address.lastName,
+			locality: address.city ?? undefined,
+			postalCode: address.postalCode ?? undefined,
+			region: address.zone ?? undefined,
+			streetAddress: address.address1
 		},
-		creditCard: {
-			billingAddress: {
-				countryCodeAlpha2: requestData.address.country,
-				extendedAddress: requestData.address.address2,
-				firstName: requestData.address.firstName,
-				lastName: requestData.address.lastName,
-				locality: requestData.address.city,
-				postalCode: requestData.address.postalCode,
-				region: requestData.address.zone,
-				streetAddress: requestData.address.address1
-			},
-			options: {
-				makeDefault: true,
-				verifyCard: true
-			}
-		} as CreditCardCreateRequest
+		options: {
+			makeDefault: true,
+			verifyCard: true
+		}
 	});
 
-	if (!createCustomerResult.success) {
-		if (createCustomerResult.errors.deepErrors().length !== 0) {
-			throw { reason: 'Validation error on creating customer', error: createCustomerResult.errors };
+	if (!createPaymentMethodResult.success) {
+		if (createPaymentMethodResult.errors.deepErrors().length !== 0) {
+			throw {
+				reason: 'Validation error on creating payment method',
+				error: createPaymentMethodResult.errors
+			};
 		}
 
 		if (
-			(createCustomerResult as any).verification?.status !== undefined &&
-			(createCustomerResult as any).verification.status !== 'verified'
+			(createPaymentMethodResult as any).verification?.status !== undefined &&
+			(createPaymentMethodResult as any).verification.status !== 'verified'
 		) {
 			error(
 				400,
@@ -144,35 +136,18 @@ const createCustomer = async (
 			);
 		}
 
-		throw { reason: 'Weird error creating customer', error: createCustomerResult };
+		throw { reason: 'Weird error creating payment method', error: createPaymentMethodResult };
 	}
 
-	if (
-		createCustomerResult.customer.paymentMethods === undefined ||
-		createCustomerResult.customer.paymentMethods[0] === undefined
-	) {
-		throw { reason: 'No payment methods on newly created customer', error: createCustomerResult };
-	}
-
-	await db.transaction(async (tx) => {
-		await tx.insert(customerTable).values({
-			braintreeCustomerId: createCustomerResult.customer.id
-		});
-		await tx.update(userTable).set({
-			customer: createCustomerResult.customer.id
-		});
-	});
-
-	return createCustomerResult.customer;
+	return createPaymentMethodResult.paymentMethod;
 };
 
 const createPlan = async (tier: Tier): Promise<Plan> => {
-	const pricing = getPricing(tier);
 	const createPlanResult = await (braintreeGateway.plan as any).create({
 		name: 'Raibu live stream service',
 		description: `${tier.maxConcurrentStreams} concurrent streams with ${tier.maxConcurrentViewers} total viewers @ ${tier.maxBitrateInKbps} kbps`,
 		neverExpires: true,
-		price: pricing.discountedTotal ?? pricing.total,
+		price: getPricing(tier).finalTotal,
 		billingFrequency: 1,
 		currencyIsoCode: 'USD'
 	});
@@ -184,9 +159,9 @@ const createPlan = async (tier: Tier): Promise<Plan> => {
 	return createPlanResult.plan;
 };
 
-const createSubscription = async (planId: string, user: User, customer: braintree.Customer) => {
+const createSubscription = async (planId: string, paymentMethod: braintree.PaymentMethod) => {
 	const createSubscriptionResult = await braintreeGateway.subscription.create({
-		paymentMethodToken: customer.paymentMethods![0]!.token,
+		paymentMethodToken: paymentMethod.token,
 		planId
 	});
 
@@ -218,4 +193,109 @@ const createSubscription = async (planId: string, user: User, customer: braintre
 	}
 
 	return createSubscriptionResult.subscription;
+};
+
+const patchInputSchema = z.object({
+	paymentMethodToken: z.string().optional(),
+	tier: zTier.optional()
+});
+
+export const PATCH: RequestHandler = async ({ locals, request }) => {
+	if (locals.user === null) {
+		error(401, {
+			message: 'You are not logged in'
+		});
+	}
+	if (!locals.user.isEmailVerified) {
+		error(401, {
+			message: "Your email's not verified"
+		});
+	}
+	if (locals.user.customer === null) {
+		error(400, {
+			message: 'You must already be a customer'
+		});
+	}
+
+	const customer = await db.query.customer.findFirst({
+		where: eq(customerTable.braintreeCustomerId, locals.user!.customer),
+		with: {
+			subscription: true
+		}
+	});
+
+	if (customer === undefined) {
+		try {
+			await braintreeGateway.customer.delete(locals.user!.customer!);
+		} finally {
+			error(400, {
+				message: 'You must already be a customer'
+			});
+		}
+	}
+
+	if (customer.subscription === null) {
+		error(400, {
+			message: 'You must already be subscribed'
+		});
+	}
+
+	const zodResult = patchInputSchema.safeParse(await request.json());
+	if (!zodResult.success) {
+		error(400, fromZodError(zodResult.error).toString());
+	}
+	const requestData = zodResult.data;
+
+	if (requestData.paymentMethodToken !== undefined) {
+		const res = await braintreeGateway.subscription.update(customer.subscription.id, {
+			paymentMethodToken: requestData.paymentMethodToken
+		});
+
+		if (!res.success) {
+			error(400, "An error occurred while updating the subscription");
+		}
+	}
+
+	if (requestData.tier !== undefined) {
+		const plan = await createPlan(requestData.tier);
+		const res = await braintreeGateway.subscription.update(customer.subscription.id, {
+			planId: plan.id,
+			price: plan.price,
+			options: {
+				prorateCharges: true
+			}
+		});
+
+		if (!res.success) {
+			error(400, "An error occurred while updating the subscription");
+		}
+		const subscription = res.subscription;
+
+		try {
+			await db.transaction(async (tx) => {
+				await tx.insert(subscriptionTable).values({
+					id: subscription.id,
+					maxConcurrentStreams: requestData.tier!.maxConcurrentStreams,
+					maxConcurrentViewers: requestData.tier!.maxConcurrentViewers,
+					maxBitrateInKbps: requestData.tier!.maxBitrateInKbps
+				});
+
+				await tx
+					.update(customerTable)
+					.set({
+						subscription: subscription.id
+					})
+					.where(eq(customerTable.braintreeCustomerId, locals.user!.customer!));
+			});
+		} catch {
+			error(
+				500,
+				"Your subscription was updated but something went wrong on our end. If you don't have access to your tier, please contact support."
+			);
+		}
+	}
+
+	return new Response(JSON.stringify(undefined), {
+		status: 200
+	});
 };

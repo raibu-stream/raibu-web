@@ -49,6 +49,7 @@ export const getPricing = (
 	bitrateCost: number;
 	discountedTotal: number | undefined;
 	total: number;
+	finalTotal: number;
 } => {
 	const preset = getPreset(tier);
 
@@ -89,12 +90,15 @@ export const getPricing = (
 
 	const total = bitrateCost + streamsCost + viewersCost;
 
+	const discountedTotal =
+		preset === undefined || preset === 'Party Starter' ? undefined : total * 0.9;
 	return {
 		streamsCost,
 		viewersCost,
 		bitrateCost,
-		discountedTotal: preset === undefined || preset === 'Party Starter' ? undefined : total * 0.9,
-		total
+		discountedTotal,
+		total,
+		finalTotal: discountedTotal ?? total
 	};
 };
 

@@ -12,7 +12,7 @@ import { eq } from 'drizzle-orm';
 import type { Tier } from '$lib/tier';
 import { CreditCard, PayPalAccount } from 'braintree';
 
-export const load: PageServerLoad = async ({ locals, url }) => {
+export const load: PageServerLoad = async ({ locals, url, getClientAddress }) => {
 	if (locals.user === null) {
 		redirect(302, createLoginRedirectURL(url));
 	}
@@ -41,84 +41,21 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		}
 	}
 
-	const tier = (async () => {
-		const customer = await db.query.customer.findFirst({
-			where: eq(customerTable.braintreeCustomerId, locals.user!.customer!),
-			with: {
-				subscription: true
-			}
-		});
-
-		if (customer === undefined) {
-			await braintreeGateway.customer.delete(locals.user!.customer!);
-			await db
-				.update(user)
-				.set({
-					customer: null
-				})
-				.where(eq(user.id, locals.user!.id!));
-
-			redirect(302, '/user/subscribe');
+	const address = (await db.query.customer.findFirst({
+		where: eq(customerTable.braintreeCustomerId, locals.user.customer),
+		with: {
+			billingAddress: true
 		}
-		if (customer.subscription === null) {
-			return undefined;
-		}
+	}))!.billingAddress;
 
-		let subscription;
-		try {
-			subscription = await braintreeGateway.subscription.find(customer.subscription.id);
-		} catch (err) {
-			if ((err as any).type === 'notFoundError') {
-				await db
-					.update(customerTable)
-					.set({
-						subscription: null
-					})
-					.where(eq(customerTable.braintreeCustomerId, customer.braintreeCustomerId));
-				await db
-					.delete(subscriptionTable)
-					.where(eq(subscriptionTable.id, customer.subscription.id));
-
-				return undefined;
-			} else {
-				throw err;
-			}
-		}
-
-		const paymentMethod = await braintreeGateway.paymentMethod.find(
-			subscription.paymentMethodToken
-		);
-
-		return {
-			token: subscription.id,
-			status: subscription.status,
-			paymentMethod: (paymentMethod instanceof PayPalAccount
-				? {
-					token: paymentMethod.token,
-					maskedEmail: paymentMethod.email.replace(
-						/^(.)(.*)(.@.*)$/,
-						(_, a, b, c) => a + b.replace(/./g, '*') + c
-					)
-				}
-				: paymentMethod instanceof CreditCard
-					? {
-						token: paymentMethod.token,
-						maskedNumber: paymentMethod.maskedNumber,
-						expiration: paymentMethod.expirationDate
-					}
-					: undefined)!,
-			balance: subscription.balance,
-			nextBillAmount: subscription.nextBillAmount,
-			nextBillingDate: subscription.nextBillingDate,
-			tier: customer.subscription as Tier
-		};
-	})();
+	const tier = getTier(locals);
 
 	const transactionStream = braintreeGateway.transaction.search((search) => {
 		search.customerId().is(locals.user!.customer!);
 	});
 
 	return {
+		email: locals.user.id,
 		transactions: transactionStream.reduce<
 			{
 				id: string;
@@ -169,6 +106,91 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 				})
 				: [])
 		],
-		subscription: tier
+		subscription: tier,
+		signupDate: locals.user.signupDate,
+		ip: getClientAddress(),
+		address: {
+			address2: address.address2 ?? undefined,
+			zone: address.zone ?? undefined,
+			city: address.city ?? undefined,
+			postalCode: address.postalCode ?? undefined,
+			firstName: address.firstName,
+			lastName: address.lastName,
+			address1: address.address1,
+			country: address.country
+		}
 	};
 };
+
+const getTier = async (locals: App.Locals) => {
+	const customer = await db.query.customer.findFirst({
+		where: eq(customerTable.braintreeCustomerId, locals.user!.customer!),
+		with: {
+			subscription: true
+		}
+	});
+
+	if (customer === undefined) {
+		await braintreeGateway.customer.delete(locals.user!.customer!);
+		await db
+			.update(user)
+			.set({
+				customer: null
+			})
+			.where(eq(user.id, locals.user!.id!));
+
+		redirect(302, '/user/subscribe');
+	}
+	if (customer.subscription === null) {
+		return undefined;
+	}
+
+	let subscription;
+	try {
+		subscription = await braintreeGateway.subscription.find(customer.subscription.id);
+	} catch (err) {
+		if ((err as any).type === 'notFoundError') {
+			await db
+				.update(customerTable)
+				.set({
+					subscription: null
+				})
+				.where(eq(customerTable.braintreeCustomerId, customer.braintreeCustomerId));
+			await db
+				.delete(subscriptionTable)
+				.where(eq(subscriptionTable.id, customer.subscription.id));
+
+			return undefined;
+		} else {
+			throw err;
+		}
+	}
+
+	const paymentMethod = await braintreeGateway.paymentMethod.find(
+		subscription.paymentMethodToken
+	);
+
+	return {
+		token: subscription.id,
+		status: subscription.status,
+		paymentMethod: (paymentMethod instanceof PayPalAccount
+			? {
+				token: paymentMethod.token,
+				maskedEmail: paymentMethod.email.replace(
+					/^(.)(.*)(.@.*)$/,
+					(_, a, b, c) => a + b.replace(/./g, '*') + c
+				)
+			}
+			: paymentMethod instanceof CreditCard
+				? {
+					token: paymentMethod.token,
+					maskedNumber: paymentMethod.maskedNumber,
+					expiration: paymentMethod.expirationDate
+				}
+				: undefined)!,
+		balance: subscription.balance,
+		nextBillAmount: subscription.nextBillAmount,
+		nextBillingDate: subscription.nextBillingDate,
+		tier: customer.subscription as Tier
+	};
+}

@@ -105,6 +105,7 @@
 <Modal
 	titleString={forgetPassword ? 'Reset your password' : 'Log in'}
 	isOpen={showLoginModal}
+	maxWidthPx={450}
 	bind:close
 >
 	{#if close !== undefined}

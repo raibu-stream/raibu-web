@@ -6,10 +6,11 @@ module.exports = {
 		'plugin:svelte/recommended',
 		'prettier',
 		'plugin:@typescript-eslint/recommended',
-		'plugin:tailwindcss/recommended'
+		'plugin:tailwindcss/recommended',
+		'plugin:drizzle/recommended'
 	],
 	parser: '@typescript-eslint/parser',
-	plugins: ['@typescript-eslint', 'prettier'],
+	plugins: ['@typescript-eslint', 'prettier', 'drizzle'],
 	parserOptions: {
 		sourceType: 'module',
 		ecmaVersion: 2020,
@@ -48,6 +49,7 @@ module.exports = {
 		'@typescript-eslint/no-explicit-any': 'off',
 		'svelte/no-unused-svelte-ignore': 'off',
 		'@typescript-eslint/no-floating-promises': 'error',
-		'tailwindcss/no-custom-classname': 'off'
+		'tailwindcss/no-custom-classname': 'off',
+		'drizzle/enforce-delete-with-where': ['error', { drizzleObjectName: ['db', 'tx'] }]
 	}
 };

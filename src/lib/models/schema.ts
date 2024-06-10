@@ -7,7 +7,9 @@ import {
 	text,
 	timestamp,
 	smallint,
-	integer
+	integer,
+	serial,
+	char
 } from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
@@ -117,7 +119,36 @@ export const siteConfig = pgTable('site_config', {
 
 export const customer = pgTable('customer', {
 	braintreeCustomerId: text('braintree_customer_id').primaryKey(),
-	subscription: text('id').references(() => subscription.id, { onDelete: 'cascade' })
+	subscription: text('subscription_id').references(() => subscription.id, { onDelete: 'cascade' }),
+	billingAddress: serial('address_id')
+		.references(() => billingAddress.id, { onDelete: 'cascade' })
+		.notNull()
+});
+
+export const billingAddress = pgTable('billing_address', {
+	id: serial('id').primaryKey(),
+	firstName: varchar('first_name', {
+		length: 255
+	}).notNull(),
+	lastName: varchar('last_name', {
+		length: 255
+	}).notNull(),
+	country: char('country', { length: 2 }).notNull(),
+	address1: varchar('address_1', {
+		length: 255
+	}).notNull(),
+	address2: varchar('address_2', {
+		length: 255
+	}),
+	city: varchar('city', {
+		length: 255
+	}),
+	zone: varchar('zone', {
+		length: 255
+	}),
+	postalCode: varchar('postal_code', {
+		length: 10
+	})
 });
 
 export const subscription = pgTable('subscription', {

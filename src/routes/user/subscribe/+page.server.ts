@@ -13,6 +13,7 @@ export const load: PageServerLoad = async ({ locals, url, getClientAddress }) =>
 
 	const addressFormatter = new AddressFormatter('en');
 	return {
+		email: locals.user.id,
 		countries: await addressFormatter.getCountries(),
 		signupDate: locals.user.signupDate,
 		ip: getClientAddress()

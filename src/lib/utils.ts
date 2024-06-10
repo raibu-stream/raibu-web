@@ -7,7 +7,10 @@ export const EMAIL_VERIFICATION_VERIFY_TIMEOUT_DISCRIMINATOR = 'emailverifyverif
 export const FRIENDLY_ERROR_MESSAGE =
 	'Oops. Something went wrong on our side. Our amazing and very beautiful engineers have been notified. But in the meantime, go ahead and try again.';
 
-export const handleApiResponse = async (res: Response, onSuccess?: () => void) => {
+export const handleApiResponse = async (
+	res: Response,
+	onSuccess?: () => void
+): Promise<string | undefined> => {
 	if (res.statusText === 'OK') {
 		if (onSuccess) onSuccess();
 	} else {

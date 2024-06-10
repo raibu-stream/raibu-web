@@ -7,11 +7,11 @@
 	export let titleString: string;
 	export let type: 'dialog' | 'alertdialog' = 'dialog';
 	export let defaultOpen = false;
-	export let maxWidthPx = 450;
+	export let maxWidthPx = 600;
 	export let isOpen: Writable<boolean> | undefined = undefined;
 
 	export const {
-		elements: { trigger, overlay, content, title, close },
+		elements: { trigger, overlay, content, title, close, description },
 		states: { open }
 	} = createDialog({
 		role: type,
@@ -51,7 +51,7 @@
 				</button>
 			</div>
 			<div class="grid grid-cols-1 grid-rows-1 overflow-hidden">
-				<slot close={$close} />
+				<slot close={$close} {open} description={$description} />
 			</div>
 		</section>
 	</aside>

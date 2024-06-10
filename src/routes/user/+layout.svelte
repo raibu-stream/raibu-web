@@ -56,7 +56,7 @@
 			</ul>
 		</nav>
 	</aside>
-	<div class="min-w-0 grow px-8 sm:pl-0">
+	<div class="min-w-0 grow px-8 max-[375px]:px-4 sm:pl-0">
 		<slot />
 	</div>
 </div>

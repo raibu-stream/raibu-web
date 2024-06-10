@@ -149,6 +149,7 @@ console.log('Connected to database');
 if (dev && false) {
 	await Promise.all(
 		Object.values(schema).map((table) => {
+			// eslint-disable-next-line drizzle/enforce-delete-with-where
 			return db.delete(table);
 		})
 	);

@@ -65,6 +65,7 @@
 		"d3-scale": "^4.0.2",
 		"dotenv": "^16.3.1",
 		"drizzle-orm": "^0.29.1",
+		"eslint-plugin-drizzle": "^0.2.3",
 		"fxa-common-password-list": "^0.0.4",
 		"html-to-text": "^9.0.5",
 		"layercake": "^8.0.2",
