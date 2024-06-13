@@ -25,6 +25,7 @@ export type BillingState = {
 		country: Writable<{ value: Country; label: string }>;
 		firstName: string;
 		lastName: string;
+		company: string;
 		city: string;
 		postalCode: string;
 		zone: Writable<{ value: string }>;

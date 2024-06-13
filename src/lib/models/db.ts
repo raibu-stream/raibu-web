@@ -1,5 +1,4 @@
 import { Lucia } from 'lucia';
-import { Argon2id } from 'oslo/password';
 import { dev } from '$app/environment';
 import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle';
 import { RAIBU_DB_URL, RAIBU_ADMIN_PASS } from '$env/static/private';
@@ -9,9 +8,10 @@ import postgres from 'postgres';
 import * as schema from './schema';
 import * as relations from './relations';
 import { ToadScheduler, SimpleIntervalJob, AsyncTask } from 'toad-scheduler';
-import { eq, lt, sql, type InferSelectModel } from 'drizzle-orm';
+import { lt, sql, type InferSelectModel } from 'drizzle-orm';
 import { faker } from '@faker-js/faker';
 import { arbitraryHandleError } from '../../hooks.server';
+import { createUser } from './user';
 
 // You should use npm run db-push in dev
 if (!dev) {
@@ -58,84 +58,9 @@ declare module 'lucia' {
 	}
 }
 
-interface DatabaseSessionAttributes {}
+interface DatabaseSessionAttributes { }
 
-type DatabaseUserAttributes = Omit<InferSelectModel<typeof schema.user>, 'id'>;
-
-export const updateUserPassword = async (email: string, password: string) => {
-	const hashedPassword = await new Argon2id().hash(password);
-	const condition = eq(schema.user.id, email);
-
-	return db.transaction(async (tx) => {
-		const user = await tx.query.user.findFirst({
-			where: condition
-		});
-
-		if (user === undefined) {
-			return 'User does not exist';
-		}
-
-		await db.update(schema.user).set({ hashedPassword }).where(condition);
-		await auth.invalidateUserSessions(user.id);
-	});
-};
-
-export const createUser = async (
-	email: string,
-	password: string,
-	attributes?: Partial<DatabaseUserAttributes>
-) => {
-	const hashedPassword = await new Argon2id().hash(password);
-
-	return db.transaction(async (tx) => {
-		const maybeUser = await tx.query.user.findFirst({
-			where: eq(schema.user.id, email)
-		});
-
-		if (maybeUser !== undefined) {
-			return;
-		}
-
-		return (
-			await tx
-				.insert(schema.user)
-				.values({
-					id: email,
-					hashedPassword,
-					...attributes
-				})
-				.returning()
-		)[0];
-	});
-};
-
-export const createSession = async (email: string) => {
-	const session = await auth.createSession(email, {});
-	return auth.createSessionCookie(session.id);
-};
-
-export const verifyPassword = async (email: string, password: string) => {
-	const user = await db.query.user.findFirst({
-		where: eq(schema.user.id, email)
-	});
-	if (user === undefined) {
-		// For security, we hash the password anyways so that our response times
-		// are the same with invalid username vs invalid password.
-		await new Argon2id().hash(password);
-		return 'User does not exist';
-	}
-
-	if (user.isLocked) {
-		return 'User is locked';
-	}
-
-	const isPasswordValid = await new Argon2id().verify(user.hashedPassword, password);
-	if (!isPasswordValid) {
-		return 'Password is invalid';
-	}
-
-	return user;
-};
+export type DatabaseUserAttributes = Omit<InferSelectModel<typeof schema.user>, 'id'>;
 
 await createUser('contact@raibu.stream', RAIBU_ADMIN_PASS, {
 	isEmailVerified: true,

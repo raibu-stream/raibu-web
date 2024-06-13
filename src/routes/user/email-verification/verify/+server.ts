@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { auth, createSession, db } from '$lib/models/db';
+import { auth, db } from '$lib/models/db';
 import { verifyEmailVerificationCode } from '$lib/models/emailVerificationCode';
 import type { RequestEvent, RequestHandler } from './$types';
 import { timeOut, user } from '$lib/models/schema';
@@ -8,6 +8,9 @@ import { EMAIL_VERIFICATION_VERIFY_TIMEOUT_DISCRIMINATOR } from '$lib/utils';
 import { isWithinExpirationDate } from 'oslo';
 import { z } from 'zod';
 import { fromZodError } from 'zod-validation-error';
+import { createSession, updateUserEmail } from '$lib/models/user';
+import { sendEmailUpdateAlert } from '$lib/email/email';
+import { arbitraryHandleError } from '../../../../hooks.server';
 
 const postInputSchema = z.object({
 	code: z.string().min(0)
@@ -31,12 +34,17 @@ export const POST: RequestHandler = async ({ request, locals }: RequestEvent) =>
 	}
 	const { code } = zodResult.data;
 
-	await verifyEmailVerificationCode(code, locals.user);
+	const maybeNewEmail = await verifyEmailVerificationCode(code, locals.user);
 
-	await db.update(user).set({ isEmailVerified: true }).where(eq(user.id, locals.user.id));
-	await auth.invalidateUserSessions(locals.user.id);
+	if (maybeNewEmail === null) {
+		await db.update(user).set({ isEmailVerified: true }).where(eq(user.id, locals.user.id));
+		await auth.invalidateUserSessions(locals.user.id);
+	} else {
+		await updateUserEmail(locals.user.id, maybeNewEmail);
+		sendEmailUpdateAlert(locals.user.id).catch(arbitraryHandleError);
+	}
 
-	const sessionCookie = await createSession(locals.user.id);
+	const sessionCookie = await createSession(maybeNewEmail ?? locals.user.id);
 
 	return new Response(undefined, {
 		status: 200,

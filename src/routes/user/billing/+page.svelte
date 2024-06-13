@@ -16,11 +16,12 @@
 	let trigger: any;
 
 	let currentTransactionsPage = writable(1);
+	let currentMethodsPage = writable(1);
 </script>
 
 <SvelteSeo title="Billing | Raibu" />
 
-<Modal titleString="Add a payment method"  bind:trigger let:open>
+<Modal titleString="Add a payment method" bind:trigger let:open>
 	<div class="flex justify-center">
 		<div>
 			<Payment
@@ -84,7 +85,7 @@
 		</div>
 
 		<ul class="mb-4 flex flex-col gap-4">
-			{#each data.paymentMethods as method (method.token)}
+			{#each data.paymentMethods.slice(3 * $currentMethodsPage - 3, 3 * $currentMethodsPage) as method (method.token)}
 				{#await data.subscription}
 					<li
 						class="w-full"
@@ -156,6 +157,30 @@
 				</p>
 			</button>
 		{/if}
+		{#await data.subscription}
+			<div class="mt-3 flex">
+				<div class="ml-auto">
+					<Pagination
+						total={data.paymentMethods.length}
+						perPage={3}
+						currentPage={currentMethodsPage}
+					/>
+				</div>
+			</div>
+		{:then subscription}
+			{@const foundMethod = data.paymentMethods.find(
+				(method) => subscription?.paymentMethod.token === method.token
+			)}
+			{@const total =
+				foundMethod === undefined ? data.paymentMethods.length : data.paymentMethods.length - 1}
+			{#if total !== 0}
+				<div class="mt-3 flex">
+					<div class="ml-auto">
+						<Pagination {total} perPage={3} currentPage={currentMethodsPage} />
+					</div>
+				</div>
+			{/if}
+		{/await}
 	</section>
 </div>
 

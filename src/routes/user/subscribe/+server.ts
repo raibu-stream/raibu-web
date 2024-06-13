@@ -107,6 +107,7 @@ const createPaymentMethod = async (
 			extendedAddress: address.address2 ?? undefined,
 			firstName: address.firstName,
 			lastName: address.lastName,
+			company: address.company ?? undefined,
 			locality: address.city ?? undefined,
 			postalCode: address.postalCode ?? undefined,
 			region: address.zone ?? undefined,
@@ -225,13 +226,9 @@ export const PATCH: RequestHandler = async ({ locals, request }) => {
 	});
 
 	if (customer === undefined) {
-		try {
-			await braintreeGateway.customer.delete(locals.user!.customer!);
-		} finally {
-			error(400, {
-				message: 'You must already be a customer'
-			});
-		}
+		error(400, {
+			message: 'You must already be a customer'
+		});
 	}
 
 	if (customer.subscription === null) {

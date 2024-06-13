@@ -21,7 +21,7 @@ export type EmailVerificationCode = InferSelectModel<typeof emailVerificationCod
  *
  * @returns The newly created or found code.
  */
-export const newEmailVerificationCode = async (user: User): Promise<EmailVerificationCode> => {
+export const newEmailVerificationCode = async (user: User, newEmail?: string): Promise<EmailVerificationCode> => {
 	const codes = await db.query.emailVerificationCode.findMany({
 		where: eq(emailVerificationCode.user, user.id)
 	});
@@ -33,7 +33,7 @@ export const newEmailVerificationCode = async (user: User): Promise<EmailVerific
 		});
 	}
 
-	if (code === undefined) {
+	if (code === undefined || code.newEmail !== newEmail) {
 		const randomCode = generateRandomString(6, alphabet('0-9'));
 		code = (
 			await db
@@ -41,6 +41,7 @@ export const newEmailVerificationCode = async (user: User): Promise<EmailVerific
 				.values({
 					code: randomCode,
 					user: user.id,
+					newEmail,
 					expires: createDate(new TimeSpan(30, 'm'))
 				})
 				.returning()
@@ -48,9 +49,10 @@ export const newEmailVerificationCode = async (user: User): Promise<EmailVerific
 	}
 
 	const emailHtml = renderMjmlComponent(VerifyEmail, {
-		verifyCode: code.code
+		verifyCode: code.code,
+		existing: newEmail === undefined ? false : true
 	});
-	await sendEmail(emailHtml, 'Your email verification code', user.id);
+	await sendEmail(emailHtml, 'Your email verification code', newEmail ?? user.id);
 
 	return code;
 };
@@ -79,4 +81,6 @@ export const verifyEmailVerificationCode = async (verifyMe: string, user: User) 
 		await incrementOrCreateTimeout(user.id + EMAIL_VERIFICATION_VERIFY_TIMEOUT_DISCRIMINATOR);
 		error(400, 'Code is expired');
 	}
+
+	return code.newEmail;
 };

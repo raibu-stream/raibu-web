@@ -79,14 +79,14 @@
 <SvelteSeo title="Verify Your Email | Raibu" />
 
 <div class="flex w-full grow items-center justify-center">
-	<div class="flex max-w-lg flex-col items-center gap-2 p-2">
+	<div class="flex w-full max-w-lg flex-col items-center gap-2 p-2">
 		<h2 class="text-xl font-semibold">Email verification</h2>
 		<p class="italic leading-6 tracking-tight text-neutral-200">
 			Please verify your email by entering the verification code sent to <span
 				class="font-semibold not-italic text-neutral-100">{data.email}</span
 			>.
 		</p>
-		<form on:submit|preventDefault={handleSubmit} class="my-5">
+		<form on:submit|preventDefault={handleSubmit} class="my-5 w-full max-w-lg">
 			<SegmentedInput bind:value={code} bind:isFull={isCodeReady} />
 			<button class="button button-invert mt-4 w-full text-lg" disabled={!isCodeReady}>
 				{#await verifyRequest}

@@ -4,7 +4,7 @@ import { fromZodError } from 'zod-validation-error';
 import { z } from 'zod';
 import { braintreeGateway } from '$lib/braintree';
 import { db } from '$lib/models/db';
-import { billingAddress, customer as customerTable, user as userTable } from '$lib/models/schema';
+import { billingAddress, customer as customerTable } from '$lib/models/schema';
 import { eq, type InferSelectModel } from 'drizzle-orm';
 import type { User } from 'lucia';
 
@@ -154,19 +154,9 @@ const getAddress = async (user: User) => {
 			});
 
 			if (customer === undefined) {
-				try {
-					await braintreeGateway.customer.delete(user.customer!);
-				} finally {
-					await tx.update(userTable).set({
-						customer: null
-					}).where(eq(userTable.id, user.id));
-					await tx
-						.delete(customerTable)
-						.where(eq(customerTable.braintreeCustomerId, user.customer!));
-					error(400, {
-						message: 'You must already be a customer'
-					});
-				}
+				error(400, {
+					message: 'You must already be a customer'
+				});
 			}
 
 			return customer.billingAddress;

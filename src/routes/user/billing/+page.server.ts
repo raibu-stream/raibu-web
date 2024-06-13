@@ -4,9 +4,7 @@ import { createLoginRedirectURL } from '$lib/utils';
 import { braintreeGateway } from '$lib/braintree';
 import { db } from '$lib/models/db';
 import {
-	user,
 	customer as customerTable,
-	subscription as subscriptionTable
 } from '$lib/models/schema';
 import { eq } from 'drizzle-orm';
 import type { Tier } from '$lib/tier';
@@ -23,23 +21,7 @@ export const load: PageServerLoad = async ({ locals, url, getClientAddress }) =>
 		redirect(302, '/user/subscribe');
 	}
 
-	let customer;
-	try {
-		customer = await braintreeGateway.customer.find(locals.user.customer);
-	} catch (err) {
-		if ((err as any).type === 'notFoundError') {
-			await db
-				.update(user)
-				.set({
-					customer: null
-				})
-				.where(eq(user.id, locals.user.id));
-
-			redirect(302, '/user/subscribe');
-		} else {
-			throw err;
-		}
-	}
+	const customer = await braintreeGateway.customer.find(locals.user.customer);
 
 	const address = (await db.query.customer.findFirst({
 		where: eq(customerTable.braintreeCustomerId, locals.user.customer),
@@ -131,40 +113,13 @@ const getTier = async (locals: App.Locals) => {
 	});
 
 	if (customer === undefined) {
-		await braintreeGateway.customer.delete(locals.user!.customer!);
-		await db
-			.update(user)
-			.set({
-				customer: null
-			})
-			.where(eq(user.id, locals.user!.id!));
-
 		redirect(302, '/user/subscribe');
 	}
 	if (customer.subscription === null) {
 		return undefined;
 	}
 
-	let subscription;
-	try {
-		subscription = await braintreeGateway.subscription.find(customer.subscription.id);
-	} catch (err) {
-		if ((err as any).type === 'notFoundError') {
-			await db
-				.update(customerTable)
-				.set({
-					subscription: null
-				})
-				.where(eq(customerTable.braintreeCustomerId, customer.braintreeCustomerId));
-			await db
-				.delete(subscriptionTable)
-				.where(eq(subscriptionTable.id, customer.subscription.id));
-
-			return undefined;
-		} else {
-			throw err;
-		}
-	}
+	const subscription = await braintreeGateway.subscription.find(customer.subscription.id);
 
 	const paymentMethod = await braintreeGateway.paymentMethod.find(
 		subscription.paymentMethodToken

@@ -1,8 +1,9 @@
-import { auth, createSession, db } from '$lib/models/db';
+import { auth, db } from '$lib/models/db';
 import { verifyTooManyLoginsToken } from '$lib/models/tooManyLoginsToken';
 import type { RequestEvent, RequestHandler } from './$types';
 import * as schema from '$lib/models/schema';
 import { eq } from 'drizzle-orm';
+import { createSession } from '$lib/models/user';
 
 export const GET: RequestHandler = async ({ params }: RequestEvent) => {
 	const token = params.token;

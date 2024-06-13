@@ -64,6 +64,11 @@ export const address = (countries: Country[]) => {
 				.string()
 				.min(1, 'This is required')
 				.max(255, 'Cannot be more than 255 characters'),
+			company: z
+				.string()
+				.min(1, 'This is required')
+				.max(255, 'Cannot be more than 255 characters')
+				.optional(),
 			country: z
 				.string()
 				.length(2)
@@ -98,6 +103,18 @@ export const address = (countries: Country[]) => {
 		.superRefine((address, ctx) => {
 			const country = countries.find((country) => country.code === address.country)!;
 
+			if (
+				(address.company === undefined && country.formatting.edit.includes('{company}')) ||
+				(address.company !== undefined && !country.formatting.edit.includes('{company}'))
+			)
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message:
+						address.company === undefined
+							? 'This is required'
+							: `Company can't be defined because ${country.name} doesn't use it for addressing`,
+					path: ['zone']
+				});
 			if (
 				(address.city === undefined && country.formatting.edit.includes('{city}')) ||
 				(address.city !== undefined && !country.formatting.edit.includes('{city}'))

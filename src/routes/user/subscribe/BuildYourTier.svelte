@@ -25,6 +25,7 @@
 				}),
 				firstName: '',
 				lastName: '',
+				company: '',
 				city: '',
 				postalCode: '',
 				zone: writable({ value: '' }),

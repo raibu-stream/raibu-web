@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { createSession, createUser, db } from '$lib/models/db';
+import { db } from '$lib/models/db';
 import { newEmailVerificationCode } from '$lib/models/emailVerificationCode';
 import { disableSignupId, email, password } from '$lib/utils.js';
 import type { RequestEvent, RequestHandler } from './$types';
@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { fromZodError } from 'zod-validation-error';
 import { siteConfig } from '$lib/models/schema';
 import { eq } from 'drizzle-orm';
+import { createSession, createUser, deleteUser } from '$lib/models/user';
 
 const postInputSchema = z.object({
 	email,
@@ -41,5 +42,19 @@ export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 			Location: '/',
 			'Set-Cookie': sessionCookie.serialize()
 		}
+	});
+};
+
+export const DELETE: RequestHandler = async ({ locals }) => {
+	if (locals.user === null) {
+		error(401, {
+			message: 'You are not logged in'
+		});
+	}
+
+	await deleteUser(locals.user.id);
+
+	return new Response(JSON.stringify(undefined), {
+		status: 200,
 	});
 };

@@ -1,12 +1,13 @@
 import { error, type RequestEvent } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { auth, createUser, db } from '$lib/models/db';
+import { auth, db } from '$lib/models/db';
 import { user } from '$lib/models/schema';
 import { eq } from 'drizzle-orm';
 import { newEmailVerificationCode } from '$lib/models/emailVerificationCode';
 import { z } from 'zod';
 import { fromZodError } from 'zod-validation-error';
 import { email, loginPassword } from '$lib/utils';
+import { createUser, deleteUser } from '$lib/models/user';
 
 const postInputSchema = z.object({
 	email: email,
@@ -87,7 +88,7 @@ export const DELETE: RequestHandler = async ({ locals, request }) => {
 	}
 	const { userId } = zodResult.data;
 
-	await db.delete(user).where(eq(user.id, userId));
+	await deleteUser(userId);
 
 	return new Response(JSON.stringify(undefined), {
 		status: 200

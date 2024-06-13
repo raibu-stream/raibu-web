@@ -1,12 +1,12 @@
 import { error } from '@sveltejs/kit';
 import { verifyPasswordResetToken } from '$lib/models/passwordResetToken';
-import { createSession, updateUserPassword, verifyPassword } from '$lib/models/db';
 import type { RequestEvent, RequestHandler } from './$types';
 import { z } from 'zod';
 import { loginPassword, password } from '$lib/utils';
 import { fromZodError } from 'zod-validation-error';
 import { sendPasswordResetAlert } from '$lib/email/email';
 import { arbitraryHandleError } from '../../../../hooks.server';
+import { createSession, updateUserPassword, verifyPassword } from '$lib/models/user';
 
 const postInputSchema = z.object({
 	newPassword: password,

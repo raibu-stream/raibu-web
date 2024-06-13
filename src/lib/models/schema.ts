@@ -19,7 +19,7 @@ export const user = pgTable('user', {
 	hashedPassword: varchar('hashed_password', {
 		length: 255
 	}).notNull(),
-	customer: text('customer').references(() => customer.braintreeCustomerId),
+	customer: text('customer').references(() => customer.braintreeCustomerId, { onDelete: "cascade" }),
 	isEmailVerified: boolean('is_email_verified').notNull().default(false),
 	isLocked: boolean('is_locked').notNull().default(false),
 	isAdmin: boolean('is_admin').notNull().default(false),
@@ -34,7 +34,7 @@ export const session = pgTable('user_session', {
 		length: 255
 	})
 		.notNull()
-		.references(() => user.id, { onDelete: 'cascade' }),
+		.references(() => user.id, { onDelete: 'cascade', onUpdate: "cascade" }),
 	expiresAt: timestamp('expires_at', {
 		withTimezone: true
 	}).notNull()
@@ -47,10 +47,13 @@ export const emailVerificationCode = pgTable(
 			length: 255
 		})
 			.notNull()
-			.references(() => user.id, { onDelete: 'cascade' }),
+			.references(() => user.id, { onDelete: 'cascade', onUpdate: "cascade" }),
 		code: varchar('code', {
 			length: 6
 		}).notNull(),
+		newEmail: varchar('new_email', {
+			length: 255
+		}),
 		expires: timestamp('expires').notNull()
 	},
 	(table) => {
@@ -65,7 +68,7 @@ export const passwordResetToken = pgTable('password_reset_token', {
 		length: 255
 	})
 		.notNull()
-		.references(() => user.id, { onDelete: 'cascade' }),
+		.references(() => user.id, { onDelete: 'cascade', onUpdate: "cascade" }),
 	token: varchar('token', {
 		length: 63
 	}).primaryKey(),
@@ -77,7 +80,7 @@ export const tooManyLoginsToken = pgTable('too_many_logins_token', {
 		length: 255
 	})
 		.notNull()
-		.references(() => user.id, { onDelete: 'cascade' }),
+		.references(() => user.id, { onDelete: 'cascade', onUpdate: "cascade" }),
 	token: varchar('token', {
 		length: 63
 	}).primaryKey(),
@@ -87,7 +90,7 @@ export const tooManyLoginsToken = pgTable('too_many_logins_token', {
 export const requestLog = pgTable('request_log', {
 	user: varchar('user', {
 		length: 255
-	}).references(() => user.id, { onDelete: 'set null' }),
+	}).references(() => user.id, { onDelete: 'set null', onUpdate: "cascade" }),
 	routeId: text('route_id').notNull(),
 	requestMethod: varchar('request_method', {
 		length: 8
@@ -133,6 +136,9 @@ export const billingAddress = pgTable('billing_address', {
 	lastName: varchar('last_name', {
 		length: 255
 	}).notNull(),
+	company: varchar('company', {
+		length: 255
+	}),
 	country: char('country', { length: 2 }).notNull(),
 	address1: varchar('address_1', {
 		length: 255

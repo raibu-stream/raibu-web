@@ -72,6 +72,7 @@ const createCustomer = async (
 	const createCustomerResult = await braintreeGateway.customer.create({
 		firstName: address.firstName,
 		lastName: address.lastName,
+		company: address.company,
 		email: user.id,
 		riskData: {
 			customerIp: getClientAddress(),

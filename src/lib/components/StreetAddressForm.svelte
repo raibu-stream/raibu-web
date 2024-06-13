@@ -19,13 +19,12 @@
 	$addressSaved.country.subscribe((value) => {
 		country = value;
 		layout = buildOrderedFields(value.value)
-			.map((line) =>
-				line.filter((field) => field !== 'phone' && field !== 'company' && field !== 'country')
-			)
+			.map((line) => line.filter((field) => field !== 'phone' && field !== 'country'))
 			.filter((line) => line.length !== 0);
 	});
 	let firstNameError: string | undefined = undefined;
 	let lastNameError: string | undefined = undefined;
+	let companyError: string | undefined = undefined;
 	let cityError: string | undefined = undefined;
 	let postalCodeError: string | undefined = undefined;
 	let zoneError: string | undefined = undefined;
@@ -48,6 +47,7 @@
 		let result = address(countries).safeParse({
 			firstName: $addressSaved.firstName,
 			lastName: $addressSaved.lastName,
+			company: $addressSaved.company,
 			country: get($addressSaved.country).value.code,
 			address1: $addressSaved.address1,
 			address2: $addressSaved.address2 === '' ? undefined : $addressSaved.address2,
@@ -72,6 +72,7 @@
 
 			firstNameError = errors.firstName === undefined ? errors.firstName : errors.firstName[0];
 			lastNameError = errors.lastName === undefined ? errors.lastName : errors.lastName[0];
+			companyError = errors.company === undefined ? errors.company : errors.company[0];
 			cityError = errors.city === undefined ? errors.city : errors.city[0];
 			postalCodeError = errors.postalCode === undefined ? errors.postalCode : errors.postalCode[0];
 			zoneError = errors.zone === undefined ? errors.zone : errors.zone[0];
@@ -145,6 +146,22 @@
 						/>
 						{#if lastNameError !== undefined}
 							<FormError class="mt-2">{lastNameError}</FormError>
+						{/if}
+					</div>
+				{:else if field === 'company'}
+					<label for="company" class="whitespace-nowrap" use:melt={$meltLabel}>
+						{country.value.labels.company} (optional)
+					</label>
+					<div class="mb-4 mt-2 w-full">
+						<input
+							class="input w-full max-w-none"
+							required
+							id="company"
+							autocomplete="billing organization"
+							bind:value={$addressSaved.company}
+						/>
+						{#if companyError !== undefined}
+							<FormError class="mt-2">{companyError}</FormError>
 						{/if}
 					</div>
 				{:else if field === 'city'}

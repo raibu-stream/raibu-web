@@ -13,6 +13,7 @@ import { error } from '@sveltejs/kit';
 import { FRIENDLY_ERROR_MESSAGE } from '$lib/utils';
 import PasswordResetAlert from './PasswordResetAlert.svelte';
 import { arbitraryHandleError } from '../../hooks.server';
+import EmailUpdateAlert from './EmailUpdateAlert.svelte';
 
 const mailer = createTransport({
 	host: RAIBU_EMAIL_HOST,
@@ -80,5 +81,11 @@ export const sendPasswordResetAlert = async (recipient: string, ip: string) => {
 		location
 	});
 
-	await sendEmail(html, 'Raibu Password changed', recipient);
+	await sendEmail(html, 'Raibu password changed', recipient);
+};
+
+export const sendEmailUpdateAlert = async (recipient: string) => {
+	const html = renderMjmlComponent(EmailUpdateAlert, {});
+
+	await sendEmail(html, 'Raibu email changed', recipient);
 };

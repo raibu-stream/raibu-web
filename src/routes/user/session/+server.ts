@@ -1,4 +1,4 @@
-import { auth, createSession, db, verifyPassword } from '$lib/models/db';
+import { auth, db } from '$lib/models/db';
 import { error } from '@sveltejs/kit';
 import { newTooManyLoginsToken } from '$lib/models/tooManyLoginsToken';
 import type { RequestEvent, RequestHandler } from './$types';
@@ -11,6 +11,7 @@ import { incrementOrCreateTimeout } from '$lib/models/timeout';
 import { z } from 'zod';
 import { fromZodError } from 'zod-validation-error';
 import { loginEmail, loginPassword } from '$lib/utils';
+import { createSession, verifyPassword } from '$lib/models/user';
 
 const postInputSchema = z.object({
 	email: loginEmail,

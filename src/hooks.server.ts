@@ -36,6 +36,10 @@ export const handle = async ({ event, resolve }) => {
 
 	if (event.route.id !== null) {
 		(async () => {
+			// FIXME: There's a problem here where if the `user` row is deleted between when we get
+			// it's representation up above and when we insert into the database here, it'll fail to
+			// insert because of a foreign key violation. In reality I want the `user` field to be set
+			// to `null` in that case, but idk how to do that.
 			try {
 				await db.insert(requestLog).values({
 					routeId: event.route.id!,
