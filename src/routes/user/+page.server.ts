@@ -18,16 +18,21 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	if (locals.user.customer !== null) {
 		tier = (
 			await db.query.customer.findFirst({
-				where: eq(customer.braintreeCustomerId, locals.user.customer),
+				where: eq(customer.stripeCustomerId, locals.user.customer),
 				with: {
-					subscription: true
+					subscription: {
+						with: {
+							product: true
+						}
+					}
 				}
 			})
-		)?.subscription as Tier;
+		)?.subscription?.product as Tier;
 	}
 
 	return {
 		email: locals.user.id,
-		tier
+		tier,
+		justPaid: url.searchParams.get('payment-success') === 'true'
 	};
 };

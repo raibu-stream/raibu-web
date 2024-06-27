@@ -30,7 +30,7 @@
 			{
 				loading: 'Loading...',
 				success: 'Updated!',
-				error: 'An error occurred.'
+				error: (err) => (typeof err === 'string' ? err : 'An unexpected error occured')
 			}
 		);
 	};
@@ -48,13 +48,13 @@
 				})
 				.then((res) => {
 					if (res !== undefined) {
-						toast.error(res);
+						throw res;
 					}
 				}),
 			{
 				loading: 'Loading...',
 				success: 'Deleted!',
-				error: 'An error occurred.'
+				error: (err) => (typeof err === 'string' ? err : 'An unexpected error occured')
 			}
 		);
 	};

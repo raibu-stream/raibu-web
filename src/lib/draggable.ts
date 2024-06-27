@@ -158,7 +158,7 @@ export const draggable: Action<
 		}
 		if (maybeDroppableOptions?.onDrop !== undefined) {
 			if (data.onDragSuccessfulDrop !== undefined) {
-				data.onDragSuccessfulDrop(node)
+				data.onDragSuccessfulDrop(node);
 			}
 			maybeDroppableOptions.onDrop(data.indentifier, node);
 		}

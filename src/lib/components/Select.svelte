@@ -9,10 +9,11 @@
 	export let placeholder: string;
 	export let required = false;
 	export let onChange: CreateSelectProps['onSelectedChange'] = undefined;
+	export let zIndex = 0;
 
 	const {
 		elements: { trigger, menu, option, label },
-		states: { open, selectedLabel },
+		states: { open, selected: selectedValue, selectedLabel },
 		helpers: { isSelected }
 	} = createSelect({
 		forceVisible: true,
@@ -27,13 +28,13 @@
 	});
 
 	let classNames = '';
-	export { trigger, open, classNames as class };
+	export { trigger, open, classNames as class, selectedValue };
 </script>
 
 <!-- svelte-ignore a11y-label-has-associated-control - $label contains the 'for' attribute -->
 <label use:melt={$label}>{inputLabel}</label>
 <button
-	class="input mt-2 flex min-w-48 items-center justify-between gap-1 whitespace-nowrap {classNames}"
+	class="input mt-2 flex min-w-40 items-center justify-between gap-1 whitespace-nowrap {classNames}"
 	use:melt={$trigger}
 >
 	<span class="truncate pr-4 text-left">{$selectedLabel || placeholder}</span>
@@ -42,6 +43,7 @@
 {#if $open}
 	<div
 		class="max-h-72 overflow-y-auto rounded-sm bg-secondary-700 p-1 text-neutral-100 shadow focus:!ring-0"
+		style:z-index={zIndex}
 		use:melt={$menu}
 		transition:slide={{ duration: 200, easing: quintOut }}
 	>

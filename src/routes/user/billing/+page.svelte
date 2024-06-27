@@ -5,49 +5,52 @@
 	import { melt } from '@melt-ui/svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import Payment from '$lib/components/Payment.svelte';
-	import { handleApiResponse } from '$lib/utils';
-	import { invalidateAll } from '$app/navigation';
 	import { draggable } from '$lib/draggable';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { writable } from 'svelte/store';
+	import { formatter } from '$lib/tier';
+	import Copyable from '$lib/components/Copyable.svelte';
+	import { handleApiResponse } from '$lib/utils';
 
 	export let data;
 
 	let trigger: any;
 
-	let currentTransactionsPage = writable(1);
+	let currentInvoicesPage = writable(1);
 	let currentMethodsPage = writable(1);
 </script>
 
 <SvelteSeo title="Billing | Raibu" />
 
-<Modal titleString="Add a payment method" bind:trigger let:open>
+<Modal
+	titleString="Add a payment method"
+	bind:trigger
+	defaultOpen={data.failedPaymentIntent !== undefined}
+	let:open
+>
 	<div class="flex justify-center">
-		<div>
-			<Payment
-				address={data.address}
-				email={data.email}
-				signupDate={data.signupDate}
-				ip={data.ip}
-				subscribe={async (nonce) => {
-					const maybeErr = await handleApiResponse(
-						await fetch('./billing/payment-method', {
-							method: 'post',
-							body: JSON.stringify({
-								paymentMethodNonce: nonce
-							})
-						})
-					);
-
-					if (maybeErr === undefined) {
-						invalidateAll();
-						open.set(false);
-					}
-
-					return maybeErr;
-				}}
-			/>
-		</div>
+		<Payment
+			clientSecret={data.failedPaymentIntent !== undefined
+				? data.failedPaymentIntent.clientSecret
+				: async () => {
+						return await fetch('/user/billing/payment-method', {
+							method: 'post'
+						}).then(async (res) => {
+							let maybeError = await handleApiResponse(res);
+							if (maybeError === undefined) {
+								return { clientSecret: await res.json() };
+							} else {
+								return { error: maybeError };
+							}
+						});
+					}}
+			returnUrl="/user/billing"
+			beforeNavigate={() => {
+				open.set(false);
+			}}
+			type="setup"
+			failed={data.failedPaymentIntent !== undefined}
+		/>
 	</div>
 </Modal>
 
@@ -62,17 +65,21 @@
 			<small class="text-neutral-200">The currently active subscription on your account</small>
 		</div>
 
-		{#await data.subscription}
+		{#await Promise.all([data.subscription, data.paymentMethods])}
 			<div class="flex w-full justify-center">
 				<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>
 				<span class="sr-only">Loading</span>
 			</div>
-		{:then subscription}
+		{:then [subscription, paymentMethods]}
 			{#if subscription !== undefined}
-				<Subscription {subscription} paymentMethods={data.paymentMethods} />
+				<Subscription {subscription} {paymentMethods} />
 			{:else}
 				<div class="flex w-full justify-center text-sm">
-					<p>You aren't subscribed. <a href="/user/subscribe">Let's change that.</a></p>
+					<p>
+						You aren't subscribed. <a href="/user/subscribe/byo" class="underline"
+							>Let's change that.</a
+						>
+					</p>
 				</div>
 			{/if}
 		{/await}
@@ -84,36 +91,22 @@
 			<small class="text-neutral-200">A list of payment methods connected to your account</small>
 		</div>
 
-		<ul class="mb-4 flex flex-col gap-4">
-			{#each data.paymentMethods.slice(3 * $currentMethodsPage - 3, 3 * $currentMethodsPage) as method (method.token)}
-				{#await data.subscription}
-					<li
-						class="w-full"
-						use:draggable={{
-							indentifier: method.token,
-							type: 'payment methods',
-							onDragStart: (node) => {
-								node.style.zIndex = '30';
-							},
-							onDragSettle: (node) => {
-								node.style.zIndex = '';
-							}
-						}}
-					>
-						<PaymentMethod {method} />
-					</li>
-				{:then subscription}
-					{#if subscription?.paymentMethod?.token !== method.token}
+		{#await data.paymentMethods}
+			<div class="flex w-full justify-center">
+				<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>
+				<span class="sr-only">Loading</span>
+			</div>
+		{:then paymentMethods}
+			<ul class="mb-4 flex flex-col gap-4">
+				{#each paymentMethods.slice(3 * $currentMethodsPage - 3, 3 * $currentMethodsPage) as method (method.id)}
+					{#await data.subscription}
 						<li
 							class="w-full"
 							use:draggable={{
-								indentifier: method.token,
+								indentifier: method.id,
 								type: 'payment methods',
 								onDragStart: (node) => {
 									node.style.zIndex = '30';
-								},
-								onDragSuccessfulDrop: (node) => {
-									node.style.visibility = 'hidden';
 								},
 								onDragSettle: (node) => {
 									node.style.zIndex = '';
@@ -122,10 +115,31 @@
 						>
 							<PaymentMethod {method} />
 						</li>
-					{/if}
-				{/await}
-			{/each}
-		</ul>
+					{:then subscription}
+						{#if subscription?.paymentMethod.id !== method.id}
+							<li
+								class="w-full"
+								use:draggable={{
+									indentifier: method.id,
+									type: 'payment methods',
+									onDragStart: (node) => {
+										node.style.zIndex = '30';
+									},
+									onDragSuccessfulDrop: (node) => {
+										node.style.visibility = 'hidden';
+									},
+									onDragSettle: (node) => {
+										node.style.zIndex = '';
+									}
+								}}
+							>
+								<PaymentMethod {method} />
+							</li>
+						{/if}
+					{/await}
+				{/each}
+			</ul>
+		{/await}
 		{#if trigger}
 			<button
 				class="group relative mb-4 flex h-20 w-full items-center justify-center rounded-[12px]"
@@ -157,30 +171,6 @@
 				</p>
 			</button>
 		{/if}
-		{#await data.subscription}
-			<div class="mt-3 flex">
-				<div class="ml-auto">
-					<Pagination
-						total={data.paymentMethods.length}
-						perPage={3}
-						currentPage={currentMethodsPage}
-					/>
-				</div>
-			</div>
-		{:then subscription}
-			{@const foundMethod = data.paymentMethods.find(
-				(method) => subscription?.paymentMethod.token === method.token
-			)}
-			{@const total =
-				foundMethod === undefined ? data.paymentMethods.length : data.paymentMethods.length - 1}
-			{#if total !== 0}
-				<div class="mt-3 flex">
-					<div class="ml-auto">
-						<Pagination {total} perPage={3} currentPage={currentMethodsPage} />
-					</div>
-				</div>
-			{/if}
-		{/await}
 	</section>
 </div>
 
@@ -190,58 +180,34 @@
 		<small class="text-neutral-200">A list of prior transactions on your account</small>
 	</div>
 
-	{#await data.transactions}
+	{#await data.invoices}
 		<div class="flex w-full justify-center">
 			<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>
 			<span class="sr-only">Loading</span>
 		</div>
-	{:then transactions}
-		{#if transactions.length !== 0}
+	{:then invoices}
+		{#if invoices.length !== 0}
 			<ul>
-				<span>please dear god get a designer to fix this</span>
-				{#each transactions.slice(7 * $currentTransactionsPage - 7, 7 * $currentTransactionsPage) as transaction}
-					<li class="w-full border-b border-neutral-200 p-2 pb-4">
-						<h4 class="mb-2 flex items-center justify-between gap-4 sm:justify-normal">
-							<span>
-								<span class="text-neutral-200">Transaction:</span>
-								<span class="select-all font-semibold">{transaction.id}</span>
-							</span>
-							{#if transaction.status === 'authorizing' || transaction.status === 'settlement_pending' || transaction.status === 'settling' || transaction.status === 'submitted_for_settlement'}
-								<div class="rounded-lg bg-pending p-1 text-xs text-neutral-900">
-									{transaction.status.charAt(0).toUpperCase() +
-										transaction.status.replaceAll('_', ' ').slice(1)}
+				{#each invoices.slice(7 * $currentInvoicesPage - 7, 7 * $currentInvoicesPage) as invoice}
+					<li
+						class="flex w-full items-center justify-between gap-4 border-b border-neutral-200 p-2 pb-4 sm:justify-normal"
+					>
+						<div class="flex flex-col gap-6 whitespace-nowrap text-sm sm:flex-row">
+							<div class="flex flex-1 justify-between gap-4 sm:block">
+								<div class="mb-1 text-neutral-200">ID</div>
+								<div class="flex gap-2">
+									<Copyable>
+										<div class="max-w-36 truncate">{invoice.id}</div>
+									</Copyable>
 								</div>
-							{:else if transaction.status === 'authorized' || transaction.status === 'settled' || transaction.status === 'settlement_confirmed'}
-								<div class="rounded-lg bg-happy p-1 text-xs text-neutral-900">
-									{transaction.status.charAt(0).toUpperCase() +
-										transaction.status.replaceAll('_', ' ').slice(1)}
-								</div>
-							{:else}
-								<div class="rounded-lg bg-danger p-1 text-xs">
-									{transaction.status.charAt(0).toUpperCase() +
-										transaction.status.replaceAll('_', ' ').slice(1)}
-								</div>
-							{/if}
-						</h4>
-						<div class="flex flex-col gap-2 text-sm sm:flex-row">
-							<div class="flex flex-1 justify-between gap-4 sm:block sm:basis-40">
-								{#if transaction.for !== undefined}
-									<h5 class="mb-1 text-neutral-200">For</h5>
-									<span
-										>Service between {new Date(
-											transaction.for.billingPeriodStartDate
-										).toLocaleDateString()} and
-										{new Date(transaction.for.billingPeriodEndDate).toLocaleDateString()}</span
-									>
-								{/if}
 							</div>
 							<div class="flex flex-1 justify-between gap-4 sm:block">
-								<h5 class="mb-1 text-neutral-200">Amount</h5>
-								<span>${transaction.amount}</span>
+								<div class="mb-1 text-neutral-200">Amount</div>
+								<span>{formatter.format(invoice.amount / 100)}</span>
 							</div>
 							<div class="flex flex-1 justify-between gap-4 sm:block">
-								<h5 class="mb-1 shrink-0 text-neutral-200">Paid at</h5>
-								<span>{new Date(transaction.date).toLocaleDateString()}</span>
+								<div class="mb-1 shrink-0 text-neutral-200">Paid at</div>
+								<span>{invoice.date.toLocaleDateString()}</span>
 							</div>
 						</div>
 					</li>
@@ -249,11 +215,7 @@
 			</ul>
 			<div class="mt-3 flex">
 				<div class="ml-auto">
-					<Pagination
-						total={transactions.length}
-						perPage={7}
-						currentPage={currentTransactionsPage}
-					/>
+					<Pagination total={invoices.length} perPage={7} currentPage={currentInvoicesPage} />
 				</div>
 			</div>
 		{:else}

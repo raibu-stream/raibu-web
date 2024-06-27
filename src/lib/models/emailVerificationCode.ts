@@ -21,7 +21,10 @@ export type EmailVerificationCode = InferSelectModel<typeof emailVerificationCod
  *
  * @returns The newly created or found code.
  */
-export const newEmailVerificationCode = async (user: User, newEmail?: string): Promise<EmailVerificationCode> => {
+export const newEmailVerificationCode = async (
+	user: User,
+	newEmail?: string
+): Promise<EmailVerificationCode> => {
 	const codes = await db.query.emailVerificationCode.findMany({
 		where: eq(emailVerificationCode.user, user.id)
 	});

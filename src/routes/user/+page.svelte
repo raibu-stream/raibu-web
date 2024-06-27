@@ -19,8 +19,18 @@
 	import { fly, slide } from 'svelte/transition';
 	import SegmentedInput from '$lib/components/SegmentedInput.svelte';
 	import type { Readable } from 'svelte/store';
+	import { browser } from '$app/environment';
 
 	export let data: PageServerData;
+
+	if (data.justPaid && browser) {
+		toast.success(
+			"Payment success! If you don't already see your subscription, please wait a few moments and refresh."
+		);
+		const url = new URL(window.location.toString());
+		url.searchParams.delete('payment-success');
+		history.replaceState({}, '', url);
+	}
 
 	let resetOldPassword = '';
 	let resetNewPassword = '';
@@ -216,6 +226,16 @@
 		<small class="text-neutral-200">Here you can change your account information</small>
 	</div>
 	<div class="text-sm">
+		<button class="flex w-full justify-between p-6 text-left hover:bg-neutral-300">
+			<div class="flex w-full md:w-2/3">
+				<span class="flex-1 basis-1/2 text-neutral-200">Name</span>
+				<span class="hidden flex-1 basis-1/2 md:inline">-</span>
+			</div>
+			<span>
+				<i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+				<span class="sr-only">Edit</span>
+			</span>
+		</button>
 		{#if $changeEmailTrigger}
 			<button
 				class="flex w-full justify-between p-6 text-left hover:bg-neutral-300"
@@ -223,9 +243,9 @@
 			>
 				<div class="flex w-full md:w-2/3">
 					<span class="flex-1 basis-1/2 text-neutral-200">Email</span>
-					<span class="flex-1 basis-1/2">{data.email}</span>
+					<span class="hidden flex-1 basis-1/2 md:inline">{data.email}</span>
 				</div>
-				<span class="hidden md:inline">
+				<span>
 					<i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
 					<span class="sr-only">Edit</span>
 				</span>
@@ -238,14 +258,24 @@
 			>
 				<div class="flex w-full md:w-2/3">
 					<span class="flex-1 basis-1/2 text-neutral-200">Password</span>
-					<span class="flex-1 basis-1/2">************</span>
+					<span class="hidden flex-1 basis-1/2 md:inline">************</span>
 				</div>
-				<span class="hidden md:inline">
+				<span>
 					<i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
 					<span class="sr-only">Edit</span>
 				</span>
 			</button>
 		{/if}
+		<button class="flex w-full justify-between p-6 text-left hover:bg-neutral-300">
+			<div class="flex w-full md:w-2/3">
+				<span class="flex-1 basis-1/2 text-neutral-200">Billing address</span>
+				<span class="hidden flex-1 basis-1/2 md:inline">-</span>
+			</div>
+			<span>
+				<i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+				<span class="sr-only">Edit</span>
+			</span>
+		</button>
 	</div>
 </section>
 
@@ -289,12 +319,7 @@
 	</div>
 </Modal>
 
-<Modal
-	titleString="Change password"
-	let:close
-	maxWidthPx={450}
-	bind:trigger={changePasswordTrigger}
->
+<Modal titleString="Change password" maxWidthPx={450} bind:trigger={changePasswordTrigger}>
 	<form on:submit|preventDefault={handleResetPasswordSubmit} novalidate class="flex flex-col px-1">
 		<div class="mb-8">
 			<div class="mb-6">

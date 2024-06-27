@@ -12,6 +12,7 @@ import { lt, sql, type InferSelectModel } from 'drizzle-orm';
 import { faker } from '@faker-js/faker';
 import { arbitraryHandleError } from '../../hooks.server';
 import { createUser } from './user';
+import AddressFormatter from '@shopify/address';
 
 // You should use npm run db-push in dev
 if (!dev) {
@@ -58,7 +59,7 @@ declare module 'lucia' {
 	}
 }
 
-interface DatabaseSessionAttributes { }
+interface DatabaseSessionAttributes {}
 
 export type DatabaseUserAttributes = Omit<InferSelectModel<typeof schema.user>, 'id'>;
 
@@ -99,5 +100,16 @@ const ttlTask = new AsyncTask('db ttl', async () => {
 		auth.deleteExpiredSessions()
 	]).catch(arbitraryHandleError);
 });
+const addressFormatterCacheInvalidatorTask = new AsyncTask(
+	'address formatter cache invalidator',
+	async () => {
+		AddressFormatter.resetCache();
+	}
+);
 const ttlJob = new SimpleIntervalJob({ minutes: 1 }, ttlTask);
+const addressFormatterCacheInvalidatorJob = new SimpleIntervalJob(
+	{ hours: 12 },
+	addressFormatterCacheInvalidatorTask
+);
 scheduler.addSimpleIntervalJob(ttlJob);
+scheduler.addSimpleIntervalJob(addressFormatterCacheInvalidatorJob);

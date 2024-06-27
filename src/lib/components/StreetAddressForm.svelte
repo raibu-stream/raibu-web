@@ -4,27 +4,40 @@
 	import Select from './Select.svelte';
 	import SelectOption from './SelectOption.svelte';
 	import { type Country, buildOrderedFields, FieldName } from '@shopify/address';
-	import { get } from 'svelte/store';
+	import { get, writable } from 'svelte/store';
 	import FormError from './FormError.svelte';
 	import { slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import { onMount } from 'svelte';
-	import type { BillingState } from '../../stores';
 
 	export let countries: Country[];
-	export let addressSaved: BillingState['address'];
+	export let addressSaved = writable({
+		country: writable({
+			value: countries.find((country) => country.code === 'US')!,
+			label: 'United States'
+		}),
+		name: '',
+		city: '',
+		postalCode: '',
+		zone: writable({ value: '' }),
+		address1: '',
+		address2: ''
+	});
 
 	let layout: FieldName[][];
 	let country: { value: any; label?: string };
 	$addressSaved.country.subscribe((value) => {
 		country = value;
 		layout = buildOrderedFields(value.value)
-			.map((line) => line.filter((field) => field !== 'phone' && field !== 'country'))
+			.map((line) =>
+				line.filter(
+					(field) =>
+						field !== 'phone' && field !== 'country' && field !== 'lastName' && field !== 'company'
+				)
+			)
 			.filter((line) => line.length !== 0);
 	});
-	let firstNameError: string | undefined = undefined;
-	let lastNameError: string | undefined = undefined;
-	let companyError: string | undefined = undefined;
+	let nameError: string | undefined = undefined;
 	let cityError: string | undefined = undefined;
 	let postalCodeError: string | undefined = undefined;
 	let zoneError: string | undefined = undefined;
@@ -32,8 +45,7 @@
 	let address2Error: string | undefined = undefined;
 
 	const resetErrors = () => {
-		firstNameError = undefined;
-		lastNameError = undefined;
+		nameError = undefined;
 		cityError = undefined;
 		postalCodeError = undefined;
 		zoneError = undefined;
@@ -45,9 +57,7 @@
 		resetErrors();
 
 		let result = address(countries).safeParse({
-			firstName: $addressSaved.firstName,
-			lastName: $addressSaved.lastName,
-			company: $addressSaved.company,
+			name: $addressSaved.name,
 			country: get($addressSaved.country).value.code,
 			address1: $addressSaved.address1,
 			address2: $addressSaved.address2 === '' ? undefined : $addressSaved.address2,
@@ -70,9 +80,7 @@
 		if (!result.success) {
 			let errors = result.error.flatten().fieldErrors;
 
-			firstNameError = errors.firstName === undefined ? errors.firstName : errors.firstName[0];
-			lastNameError = errors.lastName === undefined ? errors.lastName : errors.lastName[0];
-			companyError = errors.company === undefined ? errors.company : errors.company[0];
+			nameError = errors.name === undefined ? errors.name : errors.name[0];
 			cityError = errors.city === undefined ? errors.city : errors.city[0];
 			postalCodeError = errors.postalCode === undefined ? errors.postalCode : errors.postalCode[0];
 			zoneError = errors.zone === undefined ? errors.zone : errors.zone[0];
@@ -101,6 +109,7 @@
 	required
 	placeholder="Select a country"
 	selected={$addressSaved.country}
+	zIndex={50}
 	let:option
 	let:isSelected
 >
@@ -117,51 +126,17 @@
 		{#each line as field (field)}
 			<div class="min-w-0 flex-1" transition:slide={{ axis: 'x', duration: 250, easing: quintOut }}>
 				{#if field === 'firstName'}
-					<label for="first-name" class="whitespace-nowrap" use:melt={$meltLabel}>
-						{country.value.labels.firstName}
-					</label>
+					<label for="name" class="whitespace-nowrap" use:melt={$meltLabel}> Full name </label>
 					<div class="mb-4 mt-2 w-full">
 						<input
 							class="input w-full max-w-none"
 							required
-							id="first-name"
-							autocomplete="billing given-name"
-							bind:value={$addressSaved.firstName}
+							id="name"
+							autocomplete="billing name"
+							bind:value={$addressSaved.name}
 						/>
-						{#if firstNameError !== undefined}
-							<FormError class="mt-2">{firstNameError}</FormError>
-						{/if}
-					</div>
-				{:else if field === 'lastName'}
-					<label for="last-name" class="whitespace-nowrap" use:melt={$meltLabel}>
-						{country.value.labels.lastName}
-					</label>
-					<div class="mb-4 mt-2 w-full">
-						<input
-							class="input w-full max-w-none"
-							required
-							id="last-name"
-							autocomplete="billing family-name"
-							bind:value={$addressSaved.lastName}
-						/>
-						{#if lastNameError !== undefined}
-							<FormError class="mt-2">{lastNameError}</FormError>
-						{/if}
-					</div>
-				{:else if field === 'company'}
-					<label for="company" class="whitespace-nowrap" use:melt={$meltLabel}>
-						{country.value.labels.company} (optional)
-					</label>
-					<div class="mb-4 mt-2 w-full">
-						<input
-							class="input w-full max-w-none"
-							required
-							id="company"
-							autocomplete="billing organization"
-							bind:value={$addressSaved.company}
-						/>
-						{#if companyError !== undefined}
-							<FormError class="mt-2">{companyError}</FormError>
+						{#if nameError !== undefined}
+							<FormError class="mt-2">{nameError}</FormError>
 						{/if}
 					</div>
 				{:else if field === 'city'}
@@ -202,6 +177,7 @@
 						inputLabel={country.value.labels.zone}
 						selected={$addressSaved.zone}
 						required
+						zIndex={50}
 						placeholder="Select 
 								{'aeiou'.includes(country.value.labels.zone[0].toLocaleLowerCase()) ? 'an' : 'a'} 
 								{country.value.labels.zone.toLocaleLowerCase()}"
@@ -232,7 +208,7 @@
 						{/if}
 					</div>
 				{:else if field === 'address2'}
-					<label for="address2" class="whitespace-nowrap" use:melt={$meltLabel}>
+					<label for="address2" use:melt={$meltLabel}>
 						{country.value.optionalLabels.address2}
 					</label>
 					<div class="mb-4 mt-2 w-full">

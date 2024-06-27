@@ -12,6 +12,7 @@
 	import SvelteSeo from 'svelte-seo';
 	import { showLoginModal } from '../stores';
 	import { writable } from 'svelte/store';
+	import '@stripe/stripe-js';
 
 	export let data: LayoutServerData;
 

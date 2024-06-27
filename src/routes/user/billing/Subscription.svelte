@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getPreset, type Tier } from '$lib/tier';
+	import { getPreset } from '$lib/tier';
 	import { createDropdownMenu, melt } from '@melt-ui/svelte';
 	import PaymentMethod from './PaymentMethod.svelte';
 	import Dropdown from '$lib/components/Dropdown.svelte';
@@ -10,31 +10,14 @@
 	import { toast } from 'svelte-sonner';
 	import Modal from '$lib/components/Modal.svelte';
 	import { writable } from 'svelte/store';
+	import type { PageData } from './$types';
+	import Copyable from '$lib/components/Copyable.svelte';
 
-	type PaymentMethod =
-		| {
-				token: string;
-				maskedEmail: string;
-				maskedNumber?: undefined;
-				expiration?: undefined;
-		  }
-		| {
-				token: string;
-				maskedNumber: string;
-				expiration: string | undefined;
-				maskedEmail?: undefined;
-		  };
+	type PaymentMethods = Awaited<PageData['paymentMethods']>;
+	type PaymentMethod = Awaited<PageData['paymentMethods']>[0];
 
-	export let subscription: {
-		token: string;
-		status: 'Active' | 'Canceled' | 'Expired' | 'Past Due' | 'Pending';
-		paymentMethod: PaymentMethod;
-		balance: string;
-		nextBillAmount: string;
-		nextBillingDate: string;
-		tier: Tier;
-	};
-	export let paymentMethods: PaymentMethod[];
+	export let subscription: NonNullable<Awaited<PageData['subscription']>>;
+	export let paymentMethods: PaymentMethods;
 
 	let consideringMethod: undefined | PaymentMethod;
 	let isConfirmationModalOpen = writable(false);
@@ -65,17 +48,17 @@
 						Custom tier
 					{/if}
 				</span>
-				{#if subscription.status === 'Pending' || subscription.status === 'Past Due'}
-					<div class="rounded-lg bg-pending p-1 text-xs text-neutral-900">
-						{subscription.status}
+				{#if subscription.status === 'past_due' || subscription.status === 'paused' || subscription.status === 'incomplete' || subscription.status === 'unpaid'}
+					<div class="rounded-lg bg-pending p-1 text-xs capitalize text-neutral-900">
+						{subscription.status.replaceAll('_', ' ')}
 					</div>
-				{:else if subscription.status === 'Active'}
-					<div class="rounded-lg bg-happy p-1 text-xs text-neutral-900">
-						{subscription.status}
+				{:else if subscription.status === 'active' || subscription.status === 'trialing'}
+					<div class="rounded-lg bg-happy p-1 text-xs capitalize text-neutral-900">
+						{subscription.status.replaceAll('_', ' ')}
 					</div>
 				{:else}
-					<div class=" rounded-lg bg-danger p-1 text-xs">
-						{subscription.status}
+					<div class="rounded-lg bg-danger p-1 text-xs capitalize text-neutral-900">
+						{subscription.status.replaceAll('_', ' ')}
 					</div>
 				{/if}
 			</h4>
@@ -104,7 +87,7 @@
 				isConfirmationModalOpen.set(true);
 			},
 			onConsider: (token) => {
-				const maybePaymentMethod = paymentMethods.find((method) => method.token === token);
+				const maybePaymentMethod = paymentMethods.find((method) => method.id === token);
 				if (maybePaymentMethod !== undefined) {
 					consideringMethod = maybePaymentMethod;
 				}
@@ -124,8 +107,11 @@
 		{/if}
 		<PaymentMethod method={consideringMethod ?? subscription.paymentMethod} inUse />
 	</div>
-	<small class="mt-3 block text-xs text-neutral-200">
-		ID: <span class="select-all">{subscription.token}</span>
+	<small class="mt-3 flex gap-2 text-xs text-neutral-200">
+		ID:
+		<Copyable>
+			<div class="max-w-24 truncate">{subscription.token}</div>
+		</Copyable>
 	</small>
 </div>
 

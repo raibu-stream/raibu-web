@@ -55,6 +55,6 @@ export const DELETE: RequestHandler = async ({ locals }) => {
 	await deleteUser(locals.user.id);
 
 	return new Response(JSON.stringify(undefined), {
-		status: 200,
+		status: 200
 	});
 };

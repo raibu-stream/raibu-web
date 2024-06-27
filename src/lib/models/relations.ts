@@ -1,8 +1,8 @@
 import { relations } from 'drizzle-orm';
 import {
-	billingAddress,
 	customer,
 	passwordResetToken,
+	product,
 	subscription,
 	tooManyLoginsToken,
 	user
@@ -25,7 +25,7 @@ export const passwordResetTokenRelations = relations(passwordResetToken, ({ one 
 export const userRelations = relations(user, ({ one }) => ({
 	customer: one(customer, {
 		fields: [user.customer],
-		references: [customer.braintreeCustomerId]
+		references: [customer.stripeCustomerId]
 	})
 }));
 
@@ -33,9 +33,12 @@ export const customerRelations = relations(customer, ({ one }) => ({
 	subscription: one(subscription, {
 		fields: [customer.subscription],
 		references: [subscription.id]
-	}),
-	billingAddress: one(billingAddress, {
-		fields: [customer.billingAddress],
-		references: [billingAddress.id]
+	})
+}));
+
+export const subscriptionRelations = relations(subscription, ({ one }) => ({
+	product: one(product, {
+		fields: [subscription.product],
+		references: [product.id]
 	})
 }));

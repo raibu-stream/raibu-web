@@ -97,7 +97,7 @@
 			{/if}
 		</div>
 		<div class="mb-10 flex items-center gap-3">
-			<Checkbox class="size-6" bind:isChecked={shouldSendVerificationEmail} />
+			<Checkbox bind:isChecked={shouldSendVerificationEmail} />
 			<label for="password" class="text-sm" use:melt={$meltLabel}>Send verification email</label>
 		</div>
 		<button class="button w-full max-w-md">

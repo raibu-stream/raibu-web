@@ -3,17 +3,24 @@
 
 	let classNames = '';
 
+	export let checked: boolean = false;
+
 	const {
 		elements: { root, input },
 		helpers: { isChecked }
-	} = createCheckbox({});
+	} = createCheckbox({
+		defaultChecked: checked
+	});
 
 	export { isChecked, classNames as class };
 </script>
 
-<button class="input size-7 p-0 text-lg focus:!outline-none {classNames}" use:melt={$root}>
+<button
+	class="input flex size-6 items-center justify-center p-0 text-lg focus:!outline-none {classNames}"
+	use:melt={$root}
+>
 	{#if $isChecked}
-		<i class="fa-solid fa-check" aria-hidden="true"></i>
+		<i class="fa-solid fa-check text-sm" aria-hidden="true"></i>
 	{/if}
 	<input use:melt={$input} />
 </button>

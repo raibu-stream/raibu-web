@@ -1,18 +1,16 @@
 <script lang="ts">
 	import StreetAddressForm from '$lib/components/StreetAddressForm.svelte';
-	import type { Country } from '@shopify/address';
-	import { checkoutState, type BillingState } from '../../../stores';
 	import { fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
-	import type { Tier } from '$lib/tier';
+	import { tierToQueryParameters } from '$lib/tier';
 	import { handleApiResponse } from '$lib/utils';
 	import { z } from 'zod';
 	import { address as zAddress } from '$lib/utils';
 	import FormError from '$lib/components/FormError.svelte';
+	import { goto } from '$app/navigation';
+	import SvelteSeo from 'svelte-seo';
 
-	export let countries: Country[];
-	export let address: BillingState['address'];
-	export let tier: Tier;
+	export let data;
 
 	let apiError: undefined | string;
 	let createCustomerRequest: Promise<unknown> | undefined;
@@ -25,26 +23,28 @@
 			return;
 		}
 
-		createCustomerRequest = fetch('./customer', {
+		createCustomerRequest = fetch('/user/customer', {
 			method: 'post',
 			body: JSON.stringify(maybeAddress)
 		})
 			.then(handleApiResponse)
-			.then((res) => {
+			.then(async (res) => {
 				if (res !== undefined) {
 					apiError = res;
 				} else {
-					checkoutState.set({ stage: 'Payment', tier, address: maybeAddress });
+					await goto(`/user/subscribe/payment?${tierToQueryParameters(data.tier)}`);
 				}
 			});
 	};
 </script>
 
+<SvelteSeo title="Billing | Raibu" />
+
 <div class="col-start-1 row-start-1" transition:fade={{ duration: 700, easing: quintOut }}>
 	<h3>Billing</h3>
 
 	<form on:submit|preventDefault={onSubmit} novalidate class="w-full max-w-2xl px-2 text-left">
-		<StreetAddressForm {countries} addressSaved={address} bind:getAddress />
+		<StreetAddressForm countries={data.countries} bind:getAddress />
 		<button class="button">
 			{#await createCustomerRequest}
 				<i class="fa-solid fa-circle-notch animate-spin" aria-hidden="true"></i>

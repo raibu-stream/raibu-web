@@ -35,9 +35,9 @@
 					<li>
 						<a
 							class="rounded-r-md p-4 pl-16 pr-8 text-neutral-200 transition-colors hover:text-neutral-100"
-							class:!text-neutral-100={activeUrl === '/user/subscribe'}
-							class:bg-secondary-800={activeUrl === '/user/subscribe'}
-							href="/user/subscribe"
+							class:!text-neutral-100={activeUrl.startsWith('/user/subscribe')}
+							class:bg-secondary-800={activeUrl.startsWith('/user/subscribe')}
+							href="/user/subscribe/byo"
 						>
 							Subscribe
 						</a>

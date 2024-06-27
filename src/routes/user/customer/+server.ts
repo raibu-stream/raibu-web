@@ -3,16 +3,13 @@ import type { RequestHandler } from './$types';
 import { fromZodError } from 'zod-validation-error';
 import AddressFormatter from '@shopify/address';
 import { address as zAddress } from '$lib/utils';
-import { braintreeGateway } from '$lib/braintree';
 import type { User } from 'lucia';
 import { db } from '$lib/models/db';
-import {
-	customer as customerTable,
-	user as userTable,
-	billingAddress as addressTable
-} from '$lib/models/schema';
+import { customer as customerTable, user as userTable } from '$lib/models/schema';
 import { eq } from 'drizzle-orm';
 import type { z } from 'zod';
+import { stripeClient } from '$lib/stripe';
+import { deleteCustomerOnUser } from '$lib/models/user';
 
 export const POST: RequestHandler = async ({ locals, request, getClientAddress }) => {
 	if (locals.user === null) {
@@ -27,7 +24,7 @@ export const POST: RequestHandler = async ({ locals, request, getClientAddress }
 	}
 	if (locals.user.customer !== null) {
 		const customer = await db.query.customer.findFirst({
-			where: eq(customerTable.braintreeCustomerId, locals.user!.customer!)
+			where: eq(customerTable.stripeCustomerId, locals.user!.customer!)
 		});
 		if (customer?.subscription !== null) {
 			error(400, {
@@ -35,16 +32,7 @@ export const POST: RequestHandler = async ({ locals, request, getClientAddress }
 			});
 		}
 
-		try {
-			await braintreeGateway.customer.delete(locals.user!.customer!);
-		} finally {
-			await db.update(userTable).set({
-				customer: null
-			}).where(eq(userTable.id, locals.user!.id));
-			await db
-				.delete(customerTable)
-				.where(eq(customerTable.braintreeCustomerId, locals.user!.customer!));
-		}
+		await deleteCustomerOnUser({ ...locals.user, customer: locals.user.customer! });
 	}
 
 	const addressFormatter = new AddressFormatter('en');
@@ -54,7 +42,7 @@ export const POST: RequestHandler = async ({ locals, request, getClientAddress }
 	}
 	const address = zodResult.data;
 
-	await createCustomer(request, address, locals.user, getClientAddress);
+	await createCustomer(address, locals.user, getClientAddress);
 
 	return new Response(JSON.stringify(undefined), {
 		status: 200
@@ -62,53 +50,37 @@ export const POST: RequestHandler = async ({ locals, request, getClientAddress }
 };
 
 const createCustomer = async (
-	request: Request,
 	address: z.infer<ReturnType<typeof zAddress>>,
 	user: User,
 	getClientAddress: () => string
 ) => {
-	const userAgent = request.headers.get('user-agent');
-
-	const createCustomerResult = await braintreeGateway.customer.create({
-		firstName: address.firstName,
-		lastName: address.lastName,
-		company: address.company,
+	const customer = await stripeClient.customers.create({
+		name: address.name,
+		address: {
+			line1: address.address1,
+			line2: address.address2,
+			country: address.country,
+			city: address.city,
+			postal_code: address.postalCode,
+			state: address.zone
+		},
 		email: user.id,
-		riskData: {
-			customerIp: getClientAddress(),
-			customerBrowser:
-				userAgent !== null ? (userAgent.length <= 255 ? userAgent : undefined) : undefined
+		tax: {
+			ip_address: getClientAddress()
 		}
 	});
-
-	if (!createCustomerResult.success) {
-		if (createCustomerResult.errors.deepErrors().length !== 0) {
-			throw { reason: 'Validation error on creating customer', error: createCustomerResult.errors };
-		}
-
-		if (
-			(createCustomerResult as any).verification?.status !== undefined &&
-			(createCustomerResult as any).verification.status !== 'verified'
-		) {
-			error(
-				400,
-				'There was a problem processing your payment information; please double check your payment information and try again'
-			);
-		}
-
-		throw { reason: 'Weird error creating customer', error: createCustomerResult };
-	}
 
 	await db.transaction(async (tx) => {
-		const billingAddress = (await tx.insert(addressTable).values(address).returning())[0];
 		await tx.insert(customerTable).values({
-			braintreeCustomerId: createCustomerResult.customer.id,
-			billingAddress: billingAddress.id
+			stripeCustomerId: customer.id
 		});
-		await tx.update(userTable).set({
-			customer: createCustomerResult.customer.id
-		}).where(eq(userTable.id, user.id));
+		await tx
+			.update(userTable)
+			.set({
+				customer: customer.id
+			})
+			.where(eq(userTable.id, user.id));
 	});
 
-	return createCustomerResult.customer;
+	return customer;
 };

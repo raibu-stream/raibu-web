@@ -103,8 +103,8 @@ export const getPricing = (
 };
 
 export const tierFromIndexs = (
-	maxStreamsIndex: number,
 	maxViewersIndex: number,
+	maxStreamsIndex: number,
 	maxBitrateIndex: number
 ): Tier => {
 	return {
@@ -141,6 +141,10 @@ export const tierFromIndexs = (
 									? 800
 									: (NaN as 80 | 125 | 200 | 300 | 500 | 800)
 	};
+};
+
+export const tierToQueryParameters = (tier: Tier) => {
+	return `maxConcurrentViewers=${tier.maxConcurrentViewers}&maxConcurrentStreams=${tier.maxConcurrentStreams}&maxBitrateInKbps=${tier.maxBitrateInKbps}`;
 };
 
 export const formatter = new Intl.NumberFormat('en-US', {

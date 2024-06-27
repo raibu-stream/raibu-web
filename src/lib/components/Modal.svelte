@@ -27,11 +27,11 @@
 	>
 		<div
 			use:melt={$overlay}
-			class="fixed inset-0 bg-primary-400 bg-opacity-25"
+			class="fixed inset-0 bg-primary-200 bg-opacity-35 brightness-[6%] saturate-200"
 			transition:fade={{ duration: 150 }}
 		/>
 		<section
-			class="z-10 w-full border border-neutral-300 bg-secondary-800 p-6 text-left shadow-lg section:rounded"
+			class="z-10 w-full bg-secondary-800 p-6 text-left shadow-lg section:rounded"
 			style:max-width="{maxWidthPx}px"
 			use:melt={$content}
 		>

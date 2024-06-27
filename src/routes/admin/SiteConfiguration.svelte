@@ -51,7 +51,7 @@
 			{
 				loading: 'Loading...',
 				success: 'Updated!',
-				error: 'An error occurred.'
+				error: (err) => (typeof err === 'string' ? err : 'An unexpected error occured')
 			}
 		);
 	};

@@ -86,7 +86,7 @@ export const PUT: RequestHandler = async ({ locals, request }) => {
 	}
 	const { email, password } = zodResult.data;
 
-	const isPasswordValid = await verifyPassword(locals.user.id, password)
+	const isPasswordValid = await verifyPassword(locals.user.id, password);
 	if (typeof isPasswordValid === 'string') {
 		error(400, 'Password is invalid');
 	}
@@ -94,9 +94,11 @@ export const PUT: RequestHandler = async ({ locals, request }) => {
 	if (email === locals.user.id) {
 		error(400, 'The new email must not be the same as your current email.');
 	}
-	if (await db.query.user.findFirst({
-		where: eq(user.id, email)
-	}) !== undefined) {
+	if (
+		(await db.query.user.findFirst({
+			where: eq(user.id, email)
+		})) !== undefined
+	) {
 		error(400, 'This email is already in use');
 	}
 

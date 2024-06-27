@@ -1,16 +1,14 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { createLoginRedirectURL } from '$lib/utils';
-import { braintreeGateway } from '$lib/braintree';
+import { assert, createLoginRedirectURL } from '$lib/utils';
 import { db } from '$lib/models/db';
-import {
-	customer as customerTable,
-} from '$lib/models/schema';
+import { customer as customerTable } from '$lib/models/schema';
 import { eq } from 'drizzle-orm';
+import { getPaymentIntentStatus, stripeClient } from '$lib/stripe';
+import type Stripe from 'stripe';
 import type { Tier } from '$lib/tier';
-import { CreditCard, PayPalAccount } from 'braintree';
 
-export const load: PageServerLoad = async ({ locals, url, getClientAddress }) => {
+export const load: PageServerLoad = async ({ locals, url }) => {
 	if (locals.user === null) {
 		redirect(302, createLoginRedirectURL(url));
 	}
@@ -18,134 +16,114 @@ export const load: PageServerLoad = async ({ locals, url, getClientAddress }) =>
 		redirect(302, createLoginRedirectURL(url, '/user/email-verification'));
 	}
 	if (locals.user.customer === null) {
-		redirect(302, '/user/subscribe');
+		redirect(302, '/user/subscribe/byo');
 	}
 
-	const customer = await braintreeGateway.customer.find(locals.user.customer);
+	const invoices = stripeClient.invoices
+		.list({
+			status: 'paid',
+			customer: locals.user.customer
+		})
+		.then((invoices) => {
+			return invoices.data.map((invoice) => {
+				assert(invoice.effective_at !== null);
+				return {
+					id: invoice.id,
+					date: new Date(invoice.effective_at * 1000),
+					amount: invoice.total,
+					status: invoice.status
+				};
+			});
+		});
+	const paymentMethods = stripeClient.customers
+		.listPaymentMethods(locals.user.customer)
+		.then((methods) => {
+			return methods.data.map(formatPaymentMethod);
+		});
+	const subscription = getSubscription(locals.user.customer);
 
-	const address = (await db.query.customer.findFirst({
-		where: eq(customerTable.braintreeCustomerId, locals.user.customer),
-		with: {
-			billingAddress: true
+	const maybePaymentIntentId = url.searchParams.get('payment_intent');
+	const maybePaymentIntentClientSecret = url.searchParams.get('setup_intent_client_secret');
+	let failedPaymentIntent;
+	if (maybePaymentIntentId !== null && maybePaymentIntentClientSecret !== null) {
+		const status = await getPaymentIntentStatus(maybePaymentIntentId);
+
+		if (status === 'failed') {
+			failedPaymentIntent = {
+				clientSecret: maybePaymentIntentClientSecret
+			};
 		}
-	}))!.billingAddress;
-
-	const tier = getTier(locals);
-
-	const transactionStream = braintreeGateway.transaction.search((search) => {
-		search.customerId().is(locals.user!.customer!);
-	});
+	}
 
 	return {
-		email: locals.user.id,
-		transactions: transactionStream.reduce<
-			{
-				id: string;
-				date: string;
-				amount: string;
-				for?: {
-					billingPeriodEndDate: Date;
-					billingPeriodStartDate: Date;
-				};
-				status: braintree.TransactionStatus;
-			}[]
-		>((transactions, transaction: braintree.Transaction) => {
-			transactions.push({
-				id: transaction.id,
-				date: transaction.createdAt,
-				amount: transaction.amount,
-				for:
-					transaction.subscription !== undefined
-						? {
-							billingPeriodEndDate: transaction.subscription.billingPeriodEndDate,
-							billingPeriodStartDate: transaction.subscription.billingPeriodStartDate
-						}
-						: undefined,
-				status: transaction.status
-			});
-
-			return transactions;
-		}, []),
-		paymentMethods: [
-			...(customer.paypalAccounts !== undefined
-				? customer.paypalAccounts.map((account) => {
-					return {
-						token: account.token,
-						maskedEmail: account.email.replace(
-							/^(.)(.*)(.@.*)$/,
-							(_, a, b, c) => a + b.replace(/./g, '*') + c
-						)
-					};
-				})
-				: []),
-			...(customer.creditCards !== undefined
-				? customer.creditCards.map((card) => {
-					return {
-						token: card.token,
-						maskedNumber: card.maskedNumber,
-						expiration: card.expirationDate
-					};
-				})
-				: [])
-		],
-		subscription: tier,
-		signupDate: locals.user.signupDate,
-		ip: getClientAddress(),
-		address: {
-			address2: address.address2 ?? undefined,
-			zone: address.zone ?? undefined,
-			city: address.city ?? undefined,
-			postalCode: address.postalCode ?? undefined,
-			firstName: address.firstName,
-			lastName: address.lastName,
-			address1: address.address1,
-			country: address.country
-		}
+		invoices,
+		paymentMethods,
+		subscription,
+		failedPaymentIntent
 	};
 };
 
-const getTier = async (locals: App.Locals) => {
+const getSubscription = async (customerId: string) => {
 	const customer = await db.query.customer.findFirst({
-		where: eq(customerTable.braintreeCustomerId, locals.user!.customer!),
+		where: eq(customerTable.stripeCustomerId, customerId),
 		with: {
-			subscription: true
+			subscription: {
+				with: {
+					product: true
+				}
+			}
 		}
 	});
 
 	if (customer === undefined) {
-		redirect(302, '/user/subscribe');
+		redirect(302, '/user/subscribe/byo');
 	}
 	if (customer.subscription === null) {
 		return undefined;
 	}
 
-	const subscription = await braintreeGateway.subscription.find(customer.subscription.id);
-
-	const paymentMethod = await braintreeGateway.paymentMethod.find(
-		subscription.paymentMethodToken
+	const subscription = await stripeClient.subscriptions.retrieve(customer.subscription.id, {
+		expand: ['default_payment_method']
+	});
+	assert(
+		subscription.default_payment_method !== null &&
+			typeof subscription.default_payment_method !== 'string'
 	);
 
 	return {
 		token: subscription.id,
 		status: subscription.status,
-		paymentMethod: (paymentMethod instanceof PayPalAccount
-			? {
-				token: paymentMethod.token,
-				maskedEmail: paymentMethod.email.replace(
-					/^(.)(.*)(.@.*)$/,
-					(_, a, b, c) => a + b.replace(/./g, '*') + c
-				)
-			}
-			: paymentMethod instanceof CreditCard
-				? {
-					token: paymentMethod.token,
-					maskedNumber: paymentMethod.maskedNumber,
-					expiration: paymentMethod.expirationDate
-				}
-				: undefined)!,
-		balance: subscription.balance,
-		nextBillAmount: subscription.nextBillAmount,
-		nextBillingDate: subscription.nextBillingDate,
-		tier: customer.subscription as Tier
+		paymentMethod: formatPaymentMethod(subscription.default_payment_method),
+		nextBillAmount: (subscription as any).plan.amount,
+		nextBillingDate: new Date(subscription.current_period_end * 1000),
+		tier: customer.subscription.product as Tier
 	};
-}
+};
+
+const formatPaymentMethod = (method: Stripe.PaymentMethod) => {
+	assert(method.type === 'card' || method.type === 'paypal' || method.type === 'sepa_debit');
+
+	if (method.type === 'card') {
+		return {
+			id: method.id,
+			type: 'card',
+			last4: method.card!.last4,
+			expiration: `${method.card!.exp_month}/${method.card!.exp_year}`
+		};
+	} else if (method.type === 'paypal') {
+		return {
+			id: method.id,
+			type: 'paypal',
+			maskedEmail: method.paypal!.payer_email!.replace(
+				/^(.)(.*)(.@.*)$/,
+				(_, a, b, c) => a + b.replace(/./g, '*') + c
+			)
+		};
+	} else {
+		return {
+			id: method.id,
+			type: 'sepa_debit',
+			last4: method.sepa_debit!.last4
+		};
+	}
+};

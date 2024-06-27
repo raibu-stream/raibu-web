@@ -5,33 +5,17 @@
 	import { handleApiResponse } from '$lib/utils';
 	import { createDropdownMenu, melt } from '@melt-ui/svelte';
 	import { toast } from 'svelte-sonner';
+	import type { PageData } from './$types';
+	import Copyable from '$lib/components/Copyable.svelte';
 
-	export let method:
-		| {
-				token: string;
-				maskedEmail: string;
-		  }
-		| {
-				token: string;
-				maskedNumber: string;
-				expiration: string | undefined;
-		  };
+	export let method: Awaited<PageData['paymentMethods']>[0];
 	export let inUse: boolean = false;
-
-	const isPaypal = (
-		method: any
-	): method is {
-		token: string;
-		maskedEmail: string;
-	} => {
-		return method.maskedEmail !== undefined;
-	};
 
 	const deleteMethod = () => {
 		toast.promise(
 			fetch('./billing/payment-method', {
 				method: 'DELETE',
-				body: JSON.stringify({ paymentMethodToken: method.token })
+				body: JSON.stringify({ paymentMethodId: method.id })
 			})
 				.then(async (res) => {
 					return handleApiResponse(res, async () => {
@@ -40,13 +24,13 @@
 				})
 				.then((res) => {
 					if (res !== undefined) {
-						toast.error(res);
+						throw res;
 					}
 				}),
 			{
 				loading: 'Loading...',
 				success: 'Deleted!',
-				error: 'An error occurred.'
+				error: (err) => (typeof err === 'string' ? err : 'An unexpected error occured')
 			}
 		);
 	};
@@ -55,7 +39,7 @@
 		toast.promise(
 			fetch('./subscribe', {
 				method: 'PATCH',
-				body: JSON.stringify({ paymentMethodToken: method.token })
+				body: JSON.stringify({ paymentMethodId: method.id })
 			})
 				.then(async (res) => {
 					return handleApiResponse(res, async () => {
@@ -64,13 +48,13 @@
 				})
 				.then((res) => {
 					if (res !== undefined) {
-						toast.error(res);
+						throw res;
 					}
 				}),
 			{
 				loading: 'Loading...',
 				success: 'Deleted!',
-				error: 'An error occurred.'
+				error: (err) => (typeof err === 'string' ? err : 'An unexpected error occured')
 			}
 		);
 	};
@@ -81,46 +65,47 @@
 </script>
 
 <div class="w-full rounded bg-secondary-700 p-4 shadow-md">
-	{#if !isPaypal(method)}
-		<div class="flex items-start justify-between">
-			<h4 class="mb-2 flex min-w-0 items-center gap-3">
+	<div class="flex items-start justify-between">
+		<h4 class="mb-2 flex min-w-0 items-center gap-3">
+			{#if method.type === 'card'}
 				<i class="fa-solid fa-credit-card text-lg" aria-hidden="true"></i>
 				<span class="sr-only">credit card</span>
-				<span class="min-w-0 truncate">{method.maskedNumber}</span>
-			</h4>
-			{#if !inUse}
-				<button class="pl-4 pr-1" use:melt={$trigger}>
-					<i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
-					<span class="sr-only">actions</span>
-				</button>
+			{:else if method.type === 'paypal'}
+				<i class="fa-brands fa-paypal text-xl" aria-hidden="true"></i>
+				<span class="sr-only">paypal</span>
+			{:else if method.type === 'sepa_debit'}
+				<i class="fa-solid fa-building-columns text-lg" aria-hidden="true"></i>
+				<span class="sr-only">sepa debit</span>
 			{/if}
-		</div>
+			<span class="min-w-0 truncate">
+				{#if method.type === 'card'}
+					************{method.last4}
+				{:else if method.type === 'paypal'}
+					{method.maskedEmail}
+				{:else if method.type === 'sepa_debit'}
+					**** **** **** **** **{method.last4?.slice(0, 2)} {method.last4?.slice(3)}
+				{/if}
+			</span>
+		</h4>
+		{#if !inUse}
+			<button class="pl-4 pr-1" use:melt={$trigger}>
+				<i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+				<span class="sr-only">actions</span>
+			</button>
+		{/if}
+	</div>
 
-		<div class="flex gap-2 text-xs text-neutral-200">
-			<div class="border-r-2 pr-2">ID <span class="select-all">{method.token}</span></div>
-			{#if method.expiration !== undefined}
-				<div>Expires {method.expiration}</div>
-			{/if}
+	<div class="flex gap-2 text-xs text-neutral-200">
+		<div class="flex gap-2">
+			ID:
+			<Copyable>
+				<div class="max-w-24 truncate">{method.id}</div>
+			</Copyable>
 		</div>
-	{:else}
-		<div class="flex items-start justify-between">
-			<h4 class="mb-2 flex min-w-0 items-center gap-3">
-				<i class="fa-solid fa-cc-paypal text-lg" aria-hidden="true"></i>
-				<span class="sr-only">paypal account</span>
-				<span class="min-w-0 truncate">{method.maskedEmail}</span>
-			</h4>
-			{#if !inUse}
-				<button class="pl-4 pr-1" use:melt={$trigger}>
-					<i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
-					<span class="sr-only">actions</span>
-				</button>
-			{/if}
-		</div>
-
-		<div class="text-xs text-neutral-200">
-			ID <span class="select-all">{method.token}</span>
-		</div>
-	{/if}
+		{#if method.type === 'card'}
+			<div class="border-l-2 pl-2">Expires {method.expiration}</div>
+		{/if}
+	</div>
 </div>
 
 <Dropdown {menu}>

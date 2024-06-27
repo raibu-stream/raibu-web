@@ -9,10 +9,10 @@ export const FRIENDLY_ERROR_MESSAGE =
 
 export const handleApiResponse = async (
 	res: Response,
-	onSuccess?: () => void
+	onSuccess?: (res: Response) => void
 ): Promise<string | undefined> => {
 	if (res.statusText === 'OK') {
-		if (onSuccess) onSuccess();
+		if (onSuccess) onSuccess(res);
 	} else {
 		let data;
 		try {
@@ -56,19 +56,7 @@ export const address = (countries: Country[]) => {
 
 	return z
 		.object({
-			firstName: z
-				.string()
-				.min(1, 'This is required')
-				.max(255, 'Cannot be more than 255 characters'),
-			lastName: z
-				.string()
-				.min(1, 'This is required')
-				.max(255, 'Cannot be more than 255 characters'),
-			company: z
-				.string()
-				.min(1, 'This is required')
-				.max(255, 'Cannot be more than 255 characters')
-				.optional(),
+			name: z.string().min(1, 'This is required').max(5000, 'Cannot be more than 5000 characters'),
 			country: z
 				.string()
 				.length(2)
@@ -76,21 +64,21 @@ export const address = (countries: Country[]) => {
 			address1: z
 				.string()
 				.min(1, 'This is required')
-				.max(255, 'Cannot be more than 255 characters'),
+				.max(5000, 'Cannot be more than 5000 characters'),
 			address2: z
 				.string()
 				.min(1, 'This is required')
-				.max(255, 'Cannot be more than 255 characters')
+				.max(5000, 'Cannot be more than 5000 characters')
 				.optional(),
 			city: z
 				.string()
 				.min(1, 'This is required')
-				.max(255, 'Cannot be more than 255 characters')
+				.max(5000, 'Cannot be more than 5000 characters')
 				.optional(),
 			zone: z
 				.string()
 				.min(1, 'This is required')
-				.max(255, 'Cannot be more than 255 characters')
+				.max(5000, 'Cannot be more than 5000 characters')
 				.optional(),
 			postalCode: z
 				.string()
@@ -103,18 +91,6 @@ export const address = (countries: Country[]) => {
 		.superRefine((address, ctx) => {
 			const country = countries.find((country) => country.code === address.country)!;
 
-			if (
-				(address.company === undefined && country.formatting.edit.includes('{company}')) ||
-				(address.company !== undefined && !country.formatting.edit.includes('{company}'))
-			)
-				ctx.addIssue({
-					code: z.ZodIssueCode.custom,
-					message:
-						address.company === undefined
-							? 'This is required'
-							: `Company can't be defined because ${country.name} doesn't use it for addressing`,
-					path: ['zone']
-				});
 			if (
 				(address.city === undefined && country.formatting.edit.includes('{city}')) ||
 				(address.city !== undefined && !country.formatting.edit.includes('{city}'))
@@ -153,6 +129,12 @@ export const address = (countries: Country[]) => {
 				});
 		});
 };
+
+export function assert(condition: boolean, errorMessage?: string): asserts condition {
+	if (!condition) {
+		throw new Error(errorMessage);
+	}
+}
 
 export const createLoginRedirectURL = (url: URL, to: string = '/?login=true') => {
 	const path = encodeURIComponent(url.pathname + url.search);
